@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Signing in…</title>
+    <link rel="stylesheet" href="/_shared/tokens.css">
+    <link rel="stylesheet" href="/_shared/base.css">
+  </head>
+  <body>
+    <!--
+      This is the ONLY path protected by Cloudflare Access. Loading it means the
+      user authenticated, which sets the domain-wide CF_Authorization cookie.
+      We then bounce back to wherever they came from (?next, same-origin only).
+    -->
+    <p style="padding: 48px 22px; color: var(--bantay-muted)">Signing you in…</p>
+    <script>
+      const next = new URLSearchParams(location.search).get("next");
+      location.replace(next && next.startsWith("/") && !next.startsWith("//") ? next : "/");
+    </script>
+  </body>
+</html>

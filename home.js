@@ -30,11 +30,10 @@ async function renderFiles() {
   try {
     items = await listAllAssets();
   } catch (err) {
-    filesEl.innerHTML = `<p class="note">${
+    filesEl.innerHTML =
       err.message === "Not signed in"
-        ? "Sign in to see your files."
-        : "Your files aren't available here (run the full dev server or deploy)."
-    }</p>`;
+        ? `<p class="note">Sign in to see your saved files. <a href="/signin?next=%2F">Sign in →</a></p>`
+        : `<p class="note">Your files aren't available here (run the full dev server or deploy).</p>`;
     return;
   }
 

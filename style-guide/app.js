@@ -1,5 +1,5 @@
 import { getAssetParam, loadTokenSet, setAssetParam } from "/_shared/util.js";
-import { listAssets, getAsset, saveAsset } from "/_shared/api.js";
+import { listAssets, getAsset, saveAsset, goSignIn } from "/_shared/api.js";
 
 const TOOL = "style-guide";
 const STORAGE_KEY = "bantay-style-guide-state";
@@ -197,6 +197,11 @@ saveGuide.addEventListener("click", async () => {
     showStatus(`Saved "${slug}"`);
     await refreshMyGuides(slug);
   } catch (error) {
+    if (error.message === "Not signed in") {
+      showStatus("Signing in to save…");
+      goSignIn();
+      return;
+    }
     showStatus(error.message);
   }
 });

@@ -22,6 +22,7 @@ helpers/
 │   ├── app.js
 │   ├── styles.css
 │   └── examples/         # shipped diagrams loaded via ?f=<name>
+├── signin/               # the ONLY Access-protected path (sets the cookie)
 ├── _headers              # Cloudflare cache/security headers
 └── _redirects            # Cloudflare routing (clean URLs are automatic)
 ```
@@ -63,8 +64,19 @@ tool — including itself — consumes.
 
 ## Saving to an account (Functions + KV + Access)
 
+The site and tools are **public**; only *saving* requires login. The model:
+
+- `/api/*` is **not** gated at the edge, so requests always reach the Function,
+  which returns a clean **401** when there's no valid session (no cross-origin
+  login redirect to break `fetch`).
+- `/signin` is the **only** Access-protected path. Visiting it authenticates the
+  user and sets the domain-wide `CF_Authorization` cookie, then bounces back
+  (`?next=`, same-origin only).
+- The middleware reads that cookie on `/api` requests and verifies the JWT.
+- Clients call `goSignIn()` (or link to `/signin?next=…`) when they hit a 401.
+
 Tools load statically from Pages, then read/write saved files through
-`/api/*` **Pages Functions** bound to **KV**, gated by **Cloudflare Access**.
+`/api/*` **Pages Functions** bound to **KV**.
 
 ```
 functions/api/
@@ -90,9 +102,10 @@ and pass your tool name first, e.g. `saveAsset("mermaid", slug, data)`.
 1. **KV namespace:** `npx wrangler kv namespace create GUIDES`, then paste the
    id into `wrangler.toml`.
 2. **Cloudflare Access:** Zero Trust → Access → Applications → add a self-hosted
-   app for `tools.bantay.co`. Add a policy listing collaborator emails (or a
+   app whose path is **`tools.bantay.co/signin`** (NOT the whole domain — the
+   site stays public). Add a policy listing collaborator emails (or a
    Google/GitHub IdP). Copy the **Application Audience (AUD) Tag** and your team
-   domain into `wrangler.toml` `[vars]`.
+   domain into `wrangler.toml` `[vars]` (`ACCESS_AUD`, `ACCESS_TEAM_DOMAIN`).
 3. **Deploy** (push to the connected repo, or `npx wrangler pages deploy .`).
 
 ## Local dev

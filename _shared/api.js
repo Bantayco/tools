@@ -4,6 +4,13 @@
 
 const enc = encodeURIComponent;
 
+// Send the browser through the Access-protected /signin page, then back here.
+// Defaults to the current path only (drops query, so ?new etc. don't replay).
+export function goSignIn(next = location.pathname) {
+  const safe = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  location.href = `/signin?next=${enc(safe)}`;
+}
+
 async function req(path, options) {
   const res = await fetch(path, options);
   if (res.status === 401) throw new Error("Not signed in");

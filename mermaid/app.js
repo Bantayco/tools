@@ -1,6 +1,6 @@
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
 import { getAssetParam, setAssetParam } from "/_shared/util.js";
-import { listAssets, getAsset, saveAsset } from "/_shared/api.js";
+import { listAssets, getAsset, saveAsset, goSignIn } from "/_shared/api.js";
 
 const TOOL = "mermaid";
 const STORAGE_KEY = "bantay-mermaid-source";
@@ -133,6 +133,11 @@ async function saveCurrent() {
     showStatus(`Saved "${slug}"`);
     await refreshMyDiagrams(slug);
   } catch (err) {
+    if (err.message === "Not signed in") {
+      showStatus("Signing in to save…");
+      goSignIn();
+      return;
+    }
     showStatus(err.message);
   }
 }
