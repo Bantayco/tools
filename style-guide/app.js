@@ -67,6 +67,7 @@ const cssOutput = document.querySelector("#cssOutput");
 const copySkill = document.querySelector("#copySkill");
 const downloadSkill = document.querySelector("#downloadSkill");
 const resetGuide = document.querySelector("#resetGuide");
+const guideName = document.querySelector("#guideName");
 const myGuides = document.querySelector("#myGuides");
 const copyCurrent = document.querySelector("#copyCurrent");
 const downloadCurrent = document.querySelector("#downloadCurrent");
@@ -106,7 +107,7 @@ let activeTab = "preview";
 const store = createStore({
   tool: TOOL,
   draftKey: STORAGE_KEY,
-  getTitle: () => controls.brandName.value,
+  getTitle: () => guideName.value,
   getPayload: () => getState(),
   onStatus: showStatus,
   onSaved: () => store.init().then(fillSwitcher),
@@ -119,10 +120,11 @@ const params = new URLSearchParams(location.search);
 if (!params.has("new") && store.loadLocal()) {
   const draft = store.loadLocal();
   applyState({ ...defaults, ...draft });
-  store.setSlug(draft.slug || slugify(controls.brandName.value));
+  guideName.value = draft.title || "";
+  if (draft.slug) store.setSlug(draft.slug);
 } else {
   applyState(defaults);
-  store.setSlug(slugify(controls.brandName.value));
+  guideName.value = "";
 }
 render();
 boot();
@@ -146,12 +148,13 @@ async function boot() {
 async function openSaved(slug) {
   const set = await getAsset(TOOL, slug);
   applyState({ ...defaults, ...set });
+  guideName.value = set.title || slug;
   store.setSlug(slug);
   store.saveLocal();
   render();
   setAssetParam(null, "f");
   myGuides.value = slug;
-  showStatus(`Loaded "${set.title || set.brandName || slug}"`);
+  showStatus(`Loaded "${set.title || slug}"`);
 }
 
 // If the URL carries ?f=<name>, load that saved set from /_shared/tokens/.
@@ -161,7 +164,8 @@ async function loadFromAssetParam() {
   try {
     const set = await loadTokenSet(name);
     applyState({ ...defaults, ...set });
-    store.setSlug(slugify(controls.brandName.value));
+    guideName.value = name;
+    store.setSlug(slugify(name));
     store.saveLocal();
     render();
     showStatus(`Loaded "${name}"`);
@@ -213,6 +217,10 @@ myGuides.addEventListener("change", async () => {
   }
 });
 
+// The guide name is the document title — typing autosaves, committing renames.
+guideName.addEventListener("input", () => store.change());
+guideName.addEventListener("change", () => store.rename());
+
 // Populate the "open a saved guide" switcher. Empty when signed out.
 function fillSwitcher(items) {
   const current = store.slug;
@@ -247,8 +255,6 @@ function bindControls() {
       store.change();
     });
   });
-  // The brand name is the doc title — committing it renames the saved guide.
-  controls.brandName.addEventListener("change", () => store.rename());
 }
 
 function applyState(state) {

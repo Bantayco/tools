@@ -127,6 +127,10 @@ p {
   gap: 8px;
 }
 
+.top-actions input {
+  width: 150px;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(292px, 360px) minmax(0, 1fr);
