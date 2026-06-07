@@ -10,6 +10,15 @@
       .wrap { max-width: 820px; margin: 0 auto; padding: 56px 22px 80px; }
       header h1 { font-size: 32px; }
       header p { margin-top: 8px; color: var(--bantay-muted); }
+      .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+      .auth-link { color: var(--bantay-primary); text-decoration: none; font-size: 14px; }
+      .auth-link:hover { text-decoration: underline; }
+      .signin-btn {
+        display: inline-block; padding: 10px 16px; border-radius: var(--bantay-radius);
+        background: var(--bantay-primary); color: var(--bantay-surface);
+        text-decoration: none; font-weight: 600;
+      }
+      .signin-btn:hover { opacity: 0.92; }
       h2 {
         margin: 40px 0 14px;
         font-size: 15px;
@@ -47,9 +56,12 @@
   </head>
   <body>
     <div class="wrap">
-      <header>
-        <h1>Bantay Tools</h1>
-        <p>Your files, and a place to start new ones.</p>
+      <header class="topbar">
+        <div>
+          <h1>Bantay Tools</h1>
+          <p>Your files, and a place to start new ones.</p>
+        </div>
+        <div id="auth" class="auth"></div>
       </header>
 
       <h2>Start something new</h2>

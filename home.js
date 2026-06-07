@@ -9,6 +9,16 @@ const TOOLS = {
 
 const newTools = document.querySelector("#newTools");
 const filesEl = document.querySelector("#files");
+const authEl = document.querySelector("#auth");
+
+const SIGN_IN = "/signin?next=%2F";
+const SIGN_OUT = "/cdn-cgi/access/logout"; // Cloudflare Access — clears the session cookie
+
+function setAuth(signedIn) {
+  authEl.innerHTML = signedIn
+    ? `<a class="auth-link" href="${SIGN_OUT}">Sign out</a>`
+    : `<a class="auth-link" href="${SIGN_IN}">Sign in</a>`;
+}
 
 renderNewCards();
 renderFiles();
@@ -30,12 +40,18 @@ async function renderFiles() {
   try {
     items = await listAllAssets();
   } catch (err) {
-    filesEl.innerHTML =
-      err.message === "Not signed in"
-        ? `<p class="note">Sign in to see your saved files. <a href="/signin?next=%2F">Sign in →</a></p>`
-        : `<p class="note">Your files aren't available here (run the full dev server or deploy).</p>`;
+    if (err.message === "Not signed in") {
+      setAuth(false);
+      filesEl.innerHTML =
+        `<p class="note">Sign in to see your saved files.</p>` +
+        `<a class="signin-btn" href="${SIGN_IN}">Sign in</a>`;
+    } else {
+      filesEl.innerHTML = `<p class="note">Your files aren't available here (run the full dev server or deploy).</p>`;
+    }
     return;
   }
+
+  setAuth(true);
 
   if (!items.length) {
     filesEl.innerHTML = `<p class="note">No files yet — start one above.</p>`;
