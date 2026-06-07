@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mermaid Studio</title>
+    <link rel="stylesheet" href="/_shared/tokens.css">
+    <link rel="stylesheet" href="/_shared/base.css">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <h1>Mermaid Studio</h1>
+          <p id="status" class="status" aria-live="polite">Ready</p>
+        </div>
+        <div class="top-actions" aria-label="Diagram actions">
+          <input id="diagramName" type="text" placeholder="diagram name" autocomplete="off" aria-label="Diagram name">
+          <select id="myDiagrams" aria-label="My saved diagrams" title="My saved diagrams">
+            <option value="">My diagrams…</option>
+          </select>
+          <button id="saveDiagram" type="button" title="Save to your account">Save</button>
+          <button id="copySource" type="button" title="Copy Mermaid source">Copy</button>
+          <button id="downloadMmd" type="button" title="Download .mmd">.mmd</button>
+          <button id="exportSvg" type="button" class="primary" title="Export rendered SVG">SVG</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <section class="pane" aria-label="Mermaid source editor">
+          <div class="pane-head"><h2>Source</h2></div>
+          <textarea id="editor" class="editor" spellcheck="false" autocomplete="off"
+            aria-label="Mermaid source"></textarea>
+        </section>
+
+        <section class="pane" aria-label="Diagram preview">
+          <div class="pane-head">
+            <h2>Preview</h2>
+            <p id="error" class="error" role="alert"></p>
+          </div>
+          <div class="preview-wrap">
+            <div id="preview" class="preview"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

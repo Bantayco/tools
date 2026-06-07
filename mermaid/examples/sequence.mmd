@@ -1,0 +1,15 @@
+sequenceDiagram
+  actor U as User
+  participant T as Tool (static)
+  participant F as Pages Function
+  participant K as KV
+
+  U->>T: open /mermaid/
+  T->>F: GET /api/assets
+  F->>K: list prefix user:
+  K-->>F: [slugs + metadata]
+  F-->>T: my diagrams
+  U->>T: Save
+  T->>F: PUT /api/assets/:slug
+  F->>K: put user:slug
+  F-->>T: { ok: true }

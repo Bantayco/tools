@@ -1,0 +1,10 @@
+# Cloudflare Pages redirects. https://developers.cloudflare.com/pages/configuration/redirects/
+#
+# Clean URLs (/style-guide -> /style-guide/index.html) work automatically,
+# so nothing is required here yet.
+#
+# If a tool ever switches from ?f= to path-based assets
+# (e.g. /style-guide/bantay loading a set client-side), add an SPA fallback
+# so unknown subpaths serve the tool shell instead of 404ing:
+#
+#   /style-guide/*  /style-guide/index.html  200

@@ -1,0 +1,13 @@
+{
+  "name": "bantay-tools",
+  "private": true,
+  "description": "Static micro-apps for tools.bantay.co",
+  "scripts": {
+    "dev": "wrangler pages dev . --kv GUIDES --port 8788",
+    "static": "python3 -m http.server 8000",
+    "deploy": "wrangler pages deploy ."
+  },
+  "devDependencies": {
+    "wrangler": "^3"
+  }
+}

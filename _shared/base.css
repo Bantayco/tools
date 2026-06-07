@@ -1,0 +1,79 @@
+/* ============================================================
+ * Bantay shared base — minimal reset + element defaults wired to
+ * the design tokens. New tools link this AFTER tokens.css:
+ *     <link rel="stylesheet" href="/_shared/tokens.css">
+ *     <link rel="stylesheet" href="/_shared/base.css">
+ *     <link rel="stylesheet" href="./styles.css">  <!-- tool-specific -->
+ *
+ * Keep this small and generic. Anything tool-specific belongs in
+ * the tool's own styles.css, not here.
+ * ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  min-width: 320px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bantay-background);
+  color: var(--bantay-ink);
+  font-family: var(--bantay-body-font);
+  font-size: var(--bantay-base-size);
+  line-height: var(--bantay-line-height);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--bantay-display-font);
+  font-weight: var(--bantay-headline-weight);
+  line-height: 1.15;
+}
+
+a {
+  color: var(--bantay-primary);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--bantay-muted) 32%, transparent);
+  border-radius: var(--bantay-radius);
+  background: var(--bantay-surface);
+  color: var(--bantay-ink);
+  cursor: pointer;
+}
+
+button.primary {
+  border-color: var(--bantay-primary);
+  background: var(--bantay-primary);
+  color: var(--bantay-surface);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--bantay-primary) 28%, transparent);
+  outline-offset: 2px;
+}

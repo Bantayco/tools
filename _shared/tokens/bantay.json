@@ -1,0 +1,20 @@
+{
+  "brandName": "Bantay",
+  "skillName": "bantay-brand",
+  "voice": "Calm, direct, protective",
+  "displayFont": "Inter",
+  "bodyFont": "Inter",
+  "baseSize": 16,
+  "lineHeight": 1.55,
+  "headlineWeight": 750,
+  "headlineScale": 1.26,
+  "ink": "#142026",
+  "muted": "#61717d",
+  "background": "#f5f7f8",
+  "surface": "#ffffff",
+  "primary": "#0f766e",
+  "accent": "#d97706",
+  "radius": 8,
+  "spacing": 10,
+  "buttonStyle": "solid"
+}

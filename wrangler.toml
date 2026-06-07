@@ -1,0 +1,26 @@
+# Cloudflare Pages configuration.
+# Docs: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+name = "helpers"
+pages_build_output_dir = "."
+compatibility_date = "2025-06-01"
+
+# KV namespace bound into every Function as env.GUIDES.
+# Create it once, then paste the id here:
+#   npx wrangler kv namespace create GUIDES
+[[kv_namespaces]]
+binding = "GUIDES"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Non-secret config for verifying the Cloudflare Access JWT.
+# ACCESS_AUD is the "Application Audience (AUD) Tag" from your Access app.
+[vars]
+ACCESS_TEAM_DOMAIN = "https://REPLACE_TEAM.cloudflareaccess.com"
+ACCESS_AUD = "REPLACE_WITH_APPLICATION_AUDIENCE_TAG"
+
+# --- Local dev ---------------------------------------------------------------
+# `wrangler pages dev` has no Access in front, so the middleware reads DEV_USER
+# to act as a fixed identity. Put it in .dev.vars (gitignored, auto-loaded):
+#   echo 'DEV_USER=dev@local' > .dev.vars
+#   npx wrangler pages dev . --kv GUIDES
+# Pages only supports `preview`/`production` named environments — there is no
+# [env.dev], which is why DEV_USER lives in .dev.vars rather than here.

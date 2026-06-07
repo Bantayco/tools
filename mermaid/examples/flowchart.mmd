@@ -1,0 +1,9 @@
+flowchart LR
+  U[User] --> P[tools.bantay.co]
+  P --> S{Static or API?}
+  S -- "/tool/" --> Pages[Cloudflare Pages]
+  S -- "/api/*" --> Fn[Pages Function]
+  Fn --> Access[Cloudflare Access]
+  Access --> KV[(KV: user:slug)]
+  KV --> Fn
+  Fn --> U

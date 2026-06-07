@@ -1,0 +1,7 @@
+# Local dev secrets / state
+.dev.vars
+.wrangler/
+node_modules/
+
+# OS
+.DS_Store

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bantay Style Guide Studio</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <h1>Bantay Style Guide Studio</h1>
+          <p id="status" class="status" aria-live="polite">Ready</p>
+        </div>
+        <div class="top-actions" aria-label="Style guide actions">
+          <select id="myGuides" aria-label="My saved guides" title="My saved guides">
+            <option value="">My guides…</option>
+          </select>
+          <button id="saveGuide" type="button" title="Save to your account" aria-label="Save to your account">Save</button>
+          <button id="resetGuide" type="button" title="Restore defaults" aria-label="Restore defaults">Reset</button>
+          <button id="copySkill" type="button" title="Copy skill markdown" aria-label="Copy skill markdown">Copy Skill</button>
+          <button id="downloadSkill" type="button" class="primary" title="Download skill markdown" aria-label="Download skill markdown">Download Skill</button>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Style guide editor">
+        <aside class="controls" aria-label="Style guide controls">
+          <section class="control-section">
+            <div class="section-head">
+              <h2>Brand</h2>
+            </div>
+            <label>
+              Brand name
+              <input id="brandName" type="text" autocomplete="off">
+            </label>
+            <label>
+              Skill name
+              <input id="skillName" type="text" autocomplete="off" inputmode="latin">
+            </label>
+            <label>
+              Voice
+              <select id="voice">
+                <option>Calm, direct, protective</option>
+                <option>Warm, practical, human</option>
+                <option>Precise, restrained, operational</option>
+                <option>Bold, simple, confident</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="control-section">
+            <div class="section-head">
+              <h2>Typography</h2>
+            </div>
+            <label>
+              Display font
+              <select id="displayFont"></select>
+            </label>
+            <label>
+              Body font
+              <select id="bodyFont"></select>
+            </label>
+            <div class="grid-2">
+              <label>
+                Base size
+                <input id="baseSize" type="number" min="14" max="22" step="1">
+              </label>
+              <label>
+                Line height
+                <input id="lineHeight" type="number" min="1.2" max="1.9" step="0.05">
+              </label>
+            </div>
+            <label>
+              Headline weight
+              <input id="headlineWeight" type="range" min="500" max="900" step="50">
+              <output id="headlineWeightValue"></output>
+            </label>
+            <label>
+              Headline scale
+              <input id="headlineScale" type="range" min="1.12" max="1.42" step="0.01">
+              <output id="headlineScaleValue"></output>
+            </label>
+          </section>
+
+          <section class="control-section">
+            <div class="section-head">
+              <h2>Color</h2>
+            </div>
+            <div class="grid-2">
+              <label>
+                Ink
+                <input id="ink" type="color">
+              </label>
+              <label>
+                Muted
+                <input id="muted" type="color">
+              </label>
+              <label>
+                Background
+                <input id="background" type="color">
+              </label>
+              <label>
+                Surface
+                <input id="surface" type="color">
+              </label>
+              <label>
+                Primary
+                <input id="primary" type="color">
+              </label>
+              <label>
+                Accent
+                <input id="accent" type="color">
+              </label>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <div class="section-head">
+              <h2>Interface</h2>
+            </div>
+            <div class="grid-2">
+              <label>
+                Radius
+                <input id="radius" type="number" min="0" max="16" step="1">
+              </label>
+              <label>
+                Spacing
+                <input id="spacing" type="number" min="4" max="16" step="1">
+              </label>
+            </div>
+            <label>
+              Button style
+              <select id="buttonStyle">
+                <option value="solid">Solid</option>
+                <option value="outline">Outline</option>
+                <option value="quiet">Quiet</option>
+              </select>
+            </label>
+          </section>
+        </aside>
+
+        <section class="preview-area" aria-label="Live style guide preview">
+          <div class="preview-toolbar">
+            <div class="tabs" role="tablist" aria-label="Preview output">
+              <button id="tabPreview" type="button" class="active" role="tab" aria-selected="true">Preview</button>
+              <button id="tabSkill" type="button" role="tab" aria-selected="false">Skill</button>
+              <button id="tabTokens" type="button" role="tab" aria-selected="false">Tokens</button>
+              <button id="tabCss" type="button" role="tab" aria-selected="false">CSS</button>
+            </div>
+            <div class="export-actions">
+              <button id="copyCurrent" type="button">Copy</button>
+              <button id="downloadCurrent" type="button">Download</button>
+            </div>
+          </div>
+
+          <section id="previewPanel" class="panel visible" aria-label="Rendered style guide">
+            <article id="brandPreview" class="brand-preview">
+              <div class="sample-nav">
+                <strong>Bantay</strong>
+                <nav aria-label="Sample navigation">
+                  <a href="#">Overview</a>
+                  <a href="#">Tools</a>
+                  <a href="#">Settings</a>
+                </nav>
+              </div>
+              <section class="sample-hero">
+                <p class="eyebrow">Brand system</p>
+                <h2>Build protective tools with a calm, unmistakable Bantay voice.</h2>
+                <p class="lede">Use this guide to keep typography, interface rhythm, color, and product copy consistent across every internal helper and customer-facing tool.</p>
+                <div class="sample-actions">
+                  <button type="button" class="sample-primary">Create workflow</button>
+                  <button type="button" class="sample-secondary">Review guide</button>
+                </div>
+              </section>
+              <section class="sample-grid">
+                <div class="sample-card">
+                  <span class="metric">A1</span>
+                  <h3>Headlines</h3>
+                  <p>Short, concrete, and oriented around the user action. Avoid slogan-heavy phrasing inside tools.</p>
+                </div>
+                <div class="sample-card">
+                  <span class="metric">B2</span>
+                  <h3>Interface</h3>
+                  <p>Controls should feel durable and easy to scan. Use restraint before decoration.</p>
+                </div>
+                <div class="sample-card">
+                  <span class="metric">C3</span>
+                  <h3>Color</h3>
+                  <p>Primary color signals commitment. Accent color supports notices, highlights, and states.</p>
+                </div>
+              </section>
+            </article>
+          </section>
+
+          <section id="skillPanel" class="panel code-panel" aria-label="Generated skill markdown">
+            <pre><code id="skillOutput"></code></pre>
+          </section>
+          <section id="tokensPanel" class="panel code-panel" aria-label="Generated design tokens">
+            <pre><code id="tokensOutput"></code></pre>
+          </section>
+          <section id="cssPanel" class="panel code-panel" aria-label="Generated CSS variables">
+            <pre><code id="cssOutput"></code></pre>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
