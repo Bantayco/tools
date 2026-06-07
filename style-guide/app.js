@@ -65,6 +65,11 @@ const skillOutput = document.querySelector("#skillOutput");
 const tokensOutput = document.querySelector("#tokensOutput");
 const cssOutput = document.querySelector("#cssOutput");
 const resetGuide = document.querySelector("#resetGuide");
+const resetModal = document.querySelector("#resetModal");
+const resetTargetEl = document.querySelector("#resetTarget");
+const resetConfirm = document.querySelector("#resetConfirm");
+const resetConfirmBtn = document.querySelector("#resetConfirmBtn");
+const resetCancel = document.querySelector("#resetCancel");
 const guideName = document.querySelector("#guideName");
 const myGuides = document.querySelector("#myGuides");
 const copyCurrent = document.querySelector("#copyCurrent");
@@ -195,12 +200,42 @@ downloadCurrent.addEventListener("click", () => {
   downloadText(current.filename, current.output.textContent, current.type);
 });
 
-resetGuide.addEventListener("click", () => {
+// Reset is destructive (autosave overwrites the current guide), so require the
+// user to type the file name to confirm.
+resetGuide.addEventListener("click", openResetModal);
+resetCancel.addEventListener("click", closeResetModal);
+resetModal.addEventListener("click", (event) => {
+  if (event.target === resetModal) closeResetModal();
+});
+resetConfirm.addEventListener("input", () => {
+  resetConfirmBtn.disabled = resetConfirm.value.trim() !== resetTarget();
+});
+resetConfirmBtn.addEventListener("click", () => {
   applyState(defaults);
   render();
   store.change();
-  showStatus("Defaults restored");
+  closeResetModal();
+  showStatus("Reset to defaults");
 });
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !resetModal.hidden) closeResetModal();
+});
+
+function resetTarget() {
+  return guideName.value.trim() || "untitled";
+}
+
+function openResetModal() {
+  resetTargetEl.textContent = resetTarget();
+  resetConfirm.value = "";
+  resetConfirmBtn.disabled = true;
+  resetModal.hidden = false;
+  resetConfirm.focus();
+}
+
+function closeResetModal() {
+  resetModal.hidden = true;
+}
 
 myGuides.addEventListener("change", async () => {
   const slug = myGuides.value;

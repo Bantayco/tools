@@ -18,7 +18,6 @@
           <select id="myGuides" aria-label="My saved guides" title="My saved guides">
             <option value="">My guides…</option>
           </select>
-          <button id="resetGuide" type="button" title="Restore defaults" aria-label="Restore defaults">Reset</button>
         </div>
       </header>
 
@@ -27,6 +26,7 @@
           <section class="control-section">
             <div class="section-head">
               <h2>Brand</h2>
+              <button id="resetGuide" type="button" class="section-action" title="Reset this guide to defaults">Reset</button>
             </div>
             <label>
               Brand name
@@ -203,6 +203,21 @@
         </section>
       </section>
     </main>
+
+    <div id="resetModal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+        <h2 id="resetTitle">Reset this guide?</h2>
+        <p>This restores every setting to its default and overwrites the current guide. It can't be undone.</p>
+        <label>
+          Type <strong id="resetTarget"></strong> to confirm
+          <input id="resetConfirm" type="text" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="modal-actions">
+          <button id="resetCancel" type="button">Cancel</button>
+          <button id="resetConfirmBtn" type="button" class="danger" disabled>Reset</button>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="./app.js"></script>
   </body>
