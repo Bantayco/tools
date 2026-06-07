@@ -1,3 +1,4 @@
+// cache-bust: served with no-long-cache headers (see /_headers)
 import { listAllAssets } from "/_shared/api.js";
 
 // Single source of truth for the tools on the dashboard. Add a tool here and it

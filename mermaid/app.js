@@ -1,3 +1,4 @@
+// cache-bust: served with no-long-cache headers (see /_headers)
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
 import { getAssetParam, setAssetParam } from "/_shared/util.js";
 import { getAsset } from "/_shared/api.js";
