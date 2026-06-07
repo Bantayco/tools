@@ -33,7 +33,7 @@ helpers/
 - **Real static assets** = real paths, linked directly (best caching).
 - **`?f=<name>`** = load a *shipped* asset (a preset/example committed to the
   repo), e.g. `…/mermaid?f=flowchart`. Sanitized/whitelisted before fetching.
-- **`?id=<slug>`** = open one of *your saved* files (from KV) by slug, e.g.
+- **`?id=<slug>`** = open one of *your saved* files (from D1) by slug, e.g.
   `…/mermaid?id=onboarding`. This is what the dashboard links to.
 - **`?new`** = start a fresh file (ignore localStorage and load defaults).
 - Precedence on load: `?id` > `?f` > localStorage/default.
@@ -62,7 +62,7 @@ Export/save a set's JSON → `_shared/tokens/<name>.json` (what the editor
 reloads via `?f=`). The style guide thus produces the very tokens every
 tool — including itself — consumes.
 
-## Saving to an account (Functions + KV + Access)
+## Saving to an account (Functions + D1 + Access)
 
 The site and tools are **public**; only *saving* requires login. The model:
 
@@ -76,7 +76,8 @@ The site and tools are **public**; only *saving* requires login. The model:
 - Clients call `goSignIn()` (or link to `/signin?next=…`) when they hit a 401.
 
 Tools load statically from Pages, then read/write saved files through
-`/api/*` **Pages Functions** bound to **KV**.
+`/api/*` **Pages Functions** bound to **D1** (SQLite — strongly consistent, so a
+save shows up immediately in lists; KV's eventual consistency made them lag).
 
 ### Autosave (shared across tools)
 
@@ -84,7 +85,7 @@ There is no Save button. `_shared/autosave.js` gives every tool one consistent
 behaviour:
 
 - Edits **autosave** automatically (debounced ~1s).
-- **Signed in** → saves to your account (KV); **signed out** → saves to
+- **Signed in** → saves to your account (D1); **signed out** → saves to
   `localStorage` only, so you can always keep working and lose nothing.
 - A fresh doc autosaves under `untitled`; setting/changing the **title** renames
   the saved doc to follow it (old key removed).
@@ -114,18 +115,19 @@ functions/api/
         └── [slug].js  # GET/PUT/DELETE /api/assets/:tool/:slug
 ```
 
-KV keys are namespaced `"<userId>:<tool>:<slug>"`, so collaborators never see
-each other's saves, and tools never see each other's (a mermaid diagram and a
-style guide can share a slug without colliding). This is account separation, not
-encryption — the operator can still read KV.
+Rows are keyed by `(user_id, tool, slug)` (the composite primary key), so
+collaborators never see each other's saves, and tools never see each other's (a
+mermaid diagram and a style guide can share a slug without colliding). This is
+account separation, not encryption — the operator can still read the database.
 
 Client side: `import { listAssets, getAsset, saveAsset } from "/_shared/api.js"`
 and pass your tool name first, e.g. `saveAsset("mermaid", slug, data)`.
 
 ### One-time setup (dashboard / CLI — not in this repo)
 
-1. **KV namespace:** `npx wrangler kv namespace create GUIDES`, then paste the
-   id into `wrangler.toml`.
+1. **D1 database:** `npx wrangler d1 create tools`, paste the `database_id` into
+   `wrangler.toml`, then apply the schema:
+   `npx wrangler d1 execute tools --remote --file=./schema.sql`.
 2. **Cloudflare Access:** Zero Trust → Access → Applications → add a self-hosted
    app whose path is **`tools.bantay.co/signin`** (NOT the whole domain — the
    site stays public). Add a policy listing collaborator emails (or a
@@ -143,16 +145,17 @@ npm run static            # python3 -m http.server 8000
 # http://localhost:8000/style-guide/?f=bantay
 ```
 
-**Full system** — Functions + KV, faithfully, via Miniflare. Access can't run
+**Full system** — Functions + D1, faithfully, via Miniflare. Access can't run
 locally, so the middleware reads `DEV_USER` from `.dev.vars` to act as a fixed
 signed-in user:
 
 ```sh
-npm install               # gets wrangler
-echo 'DEV_USER=dev@local' > .dev.vars   # already created; gitignored
-npm run dev               # wrangler pages dev . --kv GUIDES --port 8788
-# http://localhost:8788/style-guide/  → Save + "My guides" now work
+npm install                                            # gets wrangler
+echo 'DEV_USER=dev@local' > .dev.vars                  # already created; gitignored
+npx wrangler d1 execute tools --local --file=./schema.sql   # once, sets up local DB
+npm run dev                                            # wrangler pages dev . --port 8788
+# http://localhost:8788/style-guide/  → autosave + "My guides" now work
 ```
 
-Local KV persists under `.wrangler/`. Change `DEV_USER` to a different value to
-verify account separation (saves land under a new `<userId>:` prefix).
+Local D1 persists under `.wrangler/`. Change `DEV_USER` to a different value to
+verify account separation (saves land under a different `user_id`).

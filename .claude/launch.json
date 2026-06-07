@@ -10,7 +10,7 @@
     {
       "name": "full",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["wrangler", "pages", "dev", ".", "--kv", "GUIDES", "--port", "8788", "--ip", "127.0.0.1"],
+      "runtimeArgs": ["wrangler", "pages", "dev", ".", "--port", "8788", "--ip", "127.0.0.1"],
       "port": 8788
     }
   ]

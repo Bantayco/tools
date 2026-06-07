@@ -4,12 +4,14 @@ name = "tools"
 pages_build_output_dir = "."
 compatibility_date = "2025-06-01"
 
-# KV namespace bound into every Function as env.GUIDES.
-# Create it once, then paste the id here:
-#   npx wrangler kv namespace create GUIDES
-[[kv_namespaces]]
-binding = "GUIDES"
-id = "a05046a9fc644a379e71dc81fc44ba76"
+# D1 database bound into every Function as env.DB (strongly consistent).
+# Create it once, then paste the database_id here, and apply schema.sql:
+#   npx wrangler d1 create tools
+#   npx wrangler d1 execute tools --remote --file=./schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "tools"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
 
 # Non-secret config for verifying the Cloudflare Access JWT.
 # ACCESS_AUD is the "Application Audience (AUD) Tag" from your Access app.
@@ -21,6 +23,7 @@ ACCESS_AUD = "3ca7f219a065a95753c362e747a4e2fe77c4a1e36a5d4a25f3929db4b628ed2c"
 # `wrangler pages dev` has no Access in front, so the middleware reads DEV_USER
 # to act as a fixed identity. Put it in .dev.vars (gitignored, auto-loaded):
 #   echo 'DEV_USER=dev@local' > .dev.vars
-#   npx wrangler pages dev . --kv GUIDES
+#   npx wrangler d1 execute tools --local --file=./schema.sql   # once
+#   npx wrangler pages dev . --port 8788                        # binding from this file
 # Pages only supports `preview`/`production` named environments — there is no
 # [env.dev], which is why DEV_USER lives in .dev.vars rather than here.
