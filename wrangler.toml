@@ -11,7 +11,7 @@ compatibility_date = "2025-06-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "tools"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "90ffc73d-c980-49b7-ac37-c4b610833c58"
 
 # Non-secret config for verifying the Cloudflare Access JWT.
 # ACCESS_AUD is the "Application Audience (AUD) Tag" from your Access app.
