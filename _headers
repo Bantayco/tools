@@ -1,18 +1,15 @@
 # Cloudflare Pages headers. https://developers.cloudflare.com/pages/configuration/headers/
+#
+# IMPORTANT: Pages ignores Cache-Control set here for static assets — it forces
+# `max-age=14400` (4h) on JS/CSS and `max-age=0` on HTML, regardless of this
+# file. That 4h JS cache desyncs with fresh HTML after a deploy (old cached
+# app.js vs new index.html), which can crash a tool on load.
+#
+# The fix lives at the ZONE level (bantay.co), not here — a Transform Rule
+# (Modify Response Header) for host `tools.bantay.co` that sets:
+#   Cache-Control: public, max-age=0, must-revalidate
+# ETags make that cheap (304s) and keep JS in lockstep with HTML.
 
-# Saved token sets change often — never serve a stale copy.
-/_shared/tokens/*
-  Cache-Control: no-cache
-
-# Shared CSS/JS: revalidate so design-system edits propagate quickly.
-/_shared/*
-  Cache-Control: public, max-age=0, must-revalidate
-
-# Revalidate everything (HTML + the unversioned app.js/styles.css the tools
-# reference). ETags make this cheap (304s), and it prevents a stale cached
-# app.js from desyncing with fresh HTML after a deploy. Don't use a long
-# max-age here unless assets are content-hashed.
 /*
-  Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
