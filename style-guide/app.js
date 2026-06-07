@@ -64,8 +64,6 @@ const brandPreview = document.querySelector("#brandPreview");
 const skillOutput = document.querySelector("#skillOutput");
 const tokensOutput = document.querySelector("#tokensOutput");
 const cssOutput = document.querySelector("#cssOutput");
-const copySkill = document.querySelector("#copySkill");
-const downloadSkill = document.querySelector("#downloadSkill");
 const resetGuide = document.querySelector("#resetGuide");
 const guideName = document.querySelector("#guideName");
 const myGuides = document.querySelector("#myGuides");
@@ -178,9 +176,6 @@ async function loadFromAssetParam() {
 Object.entries(tabs).forEach(([name, tab]) => {
   tab.button.addEventListener("click", () => setActiveTab(name));
 });
-
-copySkill.addEventListener("click", () => copyText(skillOutput.textContent, "Skill copied"));
-downloadSkill.addEventListener("click", () => downloadText("SKILL.md", skillOutput.textContent, "text/markdown"));
 
 copyCurrent.addEventListener("click", () => {
   const current = currentExport();
