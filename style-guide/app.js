@@ -1,5 +1,6 @@
 import { getAssetParam, loadTokenSet, setAssetParam } from "/_shared/util.js";
-import { listAssets, getAsset, saveAsset, goSignIn } from "/_shared/api.js";
+import { getAsset } from "/_shared/api.js";
+import { createStore } from "/_shared/autosave.js";
 
 const TOOL = "style-guide";
 const STORAGE_KEY = "bantay-style-guide-state";
@@ -66,7 +67,6 @@ const cssOutput = document.querySelector("#cssOutput");
 const copySkill = document.querySelector("#copySkill");
 const downloadSkill = document.querySelector("#downloadSkill");
 const resetGuide = document.querySelector("#resetGuide");
-const saveGuide = document.querySelector("#saveGuide");
 const myGuides = document.querySelector("#myGuides");
 const copyCurrent = document.querySelector("#copyCurrent");
 const downloadCurrent = document.querySelector("#downloadCurrent");
@@ -103,22 +103,33 @@ const tabs = {
 
 let activeTab = "preview";
 
+const store = createStore({
+  tool: TOOL,
+  draftKey: STORAGE_KEY,
+  getTitle: () => controls.brandName.value,
+  getPayload: () => getState(),
+  onStatus: showStatus,
+  onSaved: () => store.init().then(fillSwitcher),
+});
+
 setupFontOptions();
 bindControls();
 
 const params = new URLSearchParams(location.search);
-if (params.has("new")) {
-  applyState(defaults);
-  saveState();
+if (!params.has("new") && store.loadLocal()) {
+  const draft = store.loadLocal();
+  applyState({ ...defaults, ...draft });
+  store.setSlug(draft.slug || slugify(controls.brandName.value));
 } else {
-  loadState();
+  applyState(defaults);
+  store.setSlug(slugify(controls.brandName.value));
 }
 render();
-initFromParams();
-refreshMyGuides();
+boot();
 
-// Precedence: ?id=<slug> (a saved guide) > ?f=<name> (a shipped preset).
-async function initFromParams() {
+async function boot() {
+  fillSwitcher(await store.init());
+  // Precedence: ?id=<slug> (a saved guide) > ?f=<name> (a shipped preset).
   const id = params.get("id");
   if (id) {
     try {
@@ -126,19 +137,21 @@ async function initFromParams() {
     } catch (error) {
       showStatus(error.message);
     }
-    return;
+  } else {
+    await loadFromAssetParam();
   }
-  await loadFromAssetParam();
 }
 
-// Load one of the user's saved guides (from KV) by slug.
+// Load one of the user's saved guides (from KV) and make it the autosave target.
 async function openSaved(slug) {
   const set = await getAsset(TOOL, slug);
   applyState({ ...defaults, ...set });
-  saveState();
+  store.setSlug(slug);
+  store.saveLocal();
   render();
   setAssetParam(null, "f");
-  showStatus(`Loaded "${slug}"`);
+  myGuides.value = slug;
+  showStatus(`Loaded "${set.title || set.brandName || slug}"`);
 }
 
 // If the URL carries ?f=<name>, load that saved set from /_shared/tokens/.
@@ -148,7 +161,8 @@ async function loadFromAssetParam() {
   try {
     const set = await loadTokenSet(name);
     applyState({ ...defaults, ...set });
-    saveState();
+    store.setSlug(slugify(controls.brandName.value));
+    store.saveLocal();
     render();
     showStatus(`Loaded "${name}"`);
   } catch (error) {
@@ -184,26 +198,9 @@ downloadCurrent.addEventListener("click", () => {
 
 resetGuide.addEventListener("click", () => {
   applyState(defaults);
-  saveState();
   render();
+  store.change();
   showStatus("Defaults restored");
-});
-
-saveGuide.addEventListener("click", async () => {
-  const state = getState();
-  const slug = state.skillName; // already slugified
-  try {
-    await saveAsset(TOOL, slug, state);
-    showStatus(`Saved "${slug}"`);
-    await refreshMyGuides(slug);
-  } catch (error) {
-    if (error.message === "Not signed in") {
-      showStatus("Signing in to save…");
-      goSignIn();
-      return;
-    }
-    showStatus(error.message);
-  }
 });
 
 myGuides.addEventListener("change", async () => {
@@ -216,23 +213,18 @@ myGuides.addEventListener("change", async () => {
   }
 });
 
-// Populate the "My guides" dropdown. Best-effort: stays quiet if the user
-// isn't signed in or the API isn't available (e.g. pure static preview).
-async function refreshMyGuides(selected = "") {
-  try {
-    const items = await listAssets(TOOL);
-    myGuides.innerHTML =
-      '<option value="">My guides…</option>' +
-      items
-        .map(
-          (it) =>
-            `<option value="${escapeHtml(it.slug)}">${escapeHtml(it.title || it.slug)}</option>`
-        )
-        .join("");
-    if (selected) myGuides.value = selected;
-  } catch {
-    // No account / API — leave the placeholder as-is.
-  }
+// Populate the "open a saved guide" switcher. Empty when signed out.
+function fillSwitcher(items) {
+  const current = store.slug;
+  myGuides.innerHTML =
+    '<option value="">My guides…</option>' +
+    items
+      .map(
+        (it) =>
+          `<option value="${escapeHtml(it.slug)}">${escapeHtml(it.title || it.slug)}</option>`
+      )
+      .join("");
+  if (items.some((it) => it.slug === current)) myGuides.value = current;
 }
 
 function setupFontOptions() {
@@ -251,19 +243,12 @@ function bindControls() {
       if (id === "brandName") {
         controls.skillName.value = slugify(controls.brandName.value || defaults.brandName);
       }
-      saveState();
       render();
+      store.change();
     });
   });
-}
-
-function loadState() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    applyState({ ...defaults, ...stored });
-  } catch {
-    applyState(defaults);
-  }
+  // The brand name is the doc title — committing it renames the saved guide.
+  controls.brandName.addEventListener("change", () => store.rename());
 }
 
 function applyState(state) {
@@ -295,10 +280,6 @@ function getState() {
   };
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(getState()));
-}
-
 function render() {
   const state = getState();
   controls.skillName.value = state.skillName;
@@ -325,7 +306,6 @@ function render() {
   skillOutput.textContent = buildSkill(state);
   tokensOutput.textContent = JSON.stringify(buildTokens(state), null, 2);
   cssOutput.textContent = buildCss(state);
-  showStatus("Style guide updated");
 }
 
 function setActiveTab(name) {

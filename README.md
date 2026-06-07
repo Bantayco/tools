@@ -78,6 +78,31 @@ The site and tools are **public**; only *saving* requires login. The model:
 Tools load statically from Pages, then read/write saved files through
 `/api/*` **Pages Functions** bound to **KV**.
 
+### Autosave (shared across tools)
+
+There is no Save button. `_shared/autosave.js` gives every tool one consistent
+behaviour:
+
+- Edits **autosave** automatically (debounced ~1s).
+- **Signed in** → saves to your account (KV); **signed out** → saves to
+  `localStorage` only, so you can always keep working and lose nothing.
+- A fresh doc autosaves under `untitled`; setting/changing the **title** renames
+  the saved doc to follow it (old key removed).
+
+A tool wires it up by describing its state:
+
+```js
+const store = createStore({
+  tool: "mermaid",
+  draftKey: "bantay-mermaid-draft",
+  getTitle: () => nameInput.value,      // drives the slug; rename on its `change`
+  getPayload: () => ({ source: editor.value }),
+  onStatus: showStatus,
+});
+editor.addEventListener("input", () => store.change());        // autosave
+nameInput.addEventListener("change", () => store.rename());    // rename on commit
+```
+
 ```
 functions/api/
 ├── _lib.js            # json(), slug sanitize, Access JWT verification
