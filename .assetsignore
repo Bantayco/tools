@@ -1,0 +1,8 @@
+# Repo/meta files that live at the root but shouldn't be served publicly.
+# (Pages already excludes functions/, wrangler.toml, node_modules, and .git.)
+README.md
+package.json
+package-lock.json
+.claude
+.dev.vars
+.assetsignore

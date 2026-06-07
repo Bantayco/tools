@@ -1,6 +1,6 @@
 # Cloudflare Pages configuration.
 # Docs: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
-name = "helpers"
+name = "tools"
 pages_build_output_dir = "."
 compatibility_date = "2025-06-01"
 
