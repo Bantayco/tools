@@ -25,13 +25,40 @@ const fontStacks = {
   "Playfair Display": '"Playfair Display", Georgia, "Times New Roman", serif',
   "PT Serif": '"PT Serif", Georgia, "Times New Roman", serif',
   Bitter: 'Bitter, Georgia, "Times New Roman", serif',
-  Spectral: 'Spectral, Georgia, "Times New Roman", serif'
+  Spectral: 'Spectral, Georgia, "Times New Roman", serif',
+  // Display
+  "Space Grotesk": '"Space Grotesk", ui-sans-serif, system-ui, sans-serif',
+  Sora: 'Sora, ui-sans-serif, system-ui, sans-serif',
+  Syne: 'Syne, ui-sans-serif, system-ui, sans-serif',
+  Oswald: 'Oswald, ui-sans-serif, system-ui, sans-serif',
+  "Bebas Neue": '"Bebas Neue", ui-sans-serif, system-ui, sans-serif',
+  Anton: 'Anton, ui-sans-serif, system-ui, sans-serif',
+  "Abril Fatface": '"Abril Fatface", Georgia, "Times New Roman", serif',
+  "DM Serif Display": '"DM Serif Display", Georgia, "Times New Roman", serif',
+  // Monospace
+  "JetBrains Mono": '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  "IBM Plex Mono": '"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  "Space Mono": '"Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  "Source Code Pro": '"Source Code Pro", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  "Fira Code": '"Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  "Roboto Mono": '"Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  Inconsolata: 'Inconsolata, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  "DM Mono": '"DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  "System Mono": 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace'
 };
 
-// Serif families (for grouping the font pickers).
+// Font categories (for grouping the font pickers).
 const serifFonts = new Set([
   "Georgia", "Times New Roman", "Source Serif 4", "IBM Plex Serif",
   "Lora", "Merriweather", "Playfair Display", "PT Serif", "Bitter", "Spectral"
+]);
+const displayFonts = new Set([
+  "Space Grotesk", "Sora", "Syne", "Oswald", "Bebas Neue", "Anton",
+  "Abril Fatface", "DM Serif Display"
+]);
+const monoFonts = new Set([
+  "JetBrains Mono", "IBM Plex Mono", "Space Mono", "Source Code Pro",
+  "Fira Code", "Roboto Mono", "Inconsolata", "DM Mono", "System Mono"
 ]);
 
 const defaults = {
@@ -285,9 +312,16 @@ function fillSwitcher(items) {
 
 function setupFontOptions() {
   const opt = (font) => `<option value="${escapeHtml(font)}">${escapeHtml(font)}</option>`;
-  const sans = Object.keys(fontStacks).filter((f) => !serifFonts.has(f)).map(opt).join("");
-  const serif = Object.keys(fontStacks).filter((f) => serifFonts.has(f)).map(opt).join("");
-  const html = `<optgroup label="Sans-serif">${sans}</optgroup><optgroup label="Serif">${serif}</optgroup>`;
+  const inGroup = (set) => Object.keys(fontStacks).filter((f) => set.has(f)).map(opt).join("");
+  const sans = Object.keys(fontStacks)
+    .filter((f) => !serifFonts.has(f) && !displayFonts.has(f) && !monoFonts.has(f))
+    .map(opt)
+    .join("");
+  const html =
+    `<optgroup label="Sans-serif">${sans}</optgroup>` +
+    `<optgroup label="Serif">${inGroup(serifFonts)}</optgroup>` +
+    `<optgroup label="Display">${inGroup(displayFonts)}</optgroup>` +
+    `<optgroup label="Monospace">${inGroup(monoFonts)}</optgroup>`;
 
   document.querySelector("#displayFont").innerHTML = html;
   document.querySelector("#bodyFont").innerHTML = html;
