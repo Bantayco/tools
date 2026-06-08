@@ -7,15 +7,32 @@ const TOOL = "style-guide";
 const STORAGE_KEY = "bantay-style-guide-state";
 
 const fontStacks = {
+  // Sans-serif
   Inter: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   "Avenir Next": '"Avenir Next", Avenir, ui-sans-serif, system-ui, sans-serif',
   "SF Pro": '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
   "Source Sans": '"Source Sans 3", "Source Sans Pro", ui-sans-serif, system-ui, sans-serif',
-  Georgia: 'Georgia, "Times New Roman", serif',
   "IBM Plex Sans": '"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif',
   "Public Sans": '"Public Sans", ui-sans-serif, system-ui, sans-serif',
-  "Work Sans": '"Work Sans", ui-sans-serif, system-ui, sans-serif'
+  "Work Sans": '"Work Sans", ui-sans-serif, system-ui, sans-serif',
+  // Serif
+  Georgia: 'Georgia, "Times New Roman", serif',
+  "Times New Roman": '"Times New Roman", Times, serif',
+  "Source Serif 4": '"Source Serif 4", Georgia, "Times New Roman", serif',
+  "IBM Plex Serif": '"IBM Plex Serif", Georgia, "Times New Roman", serif',
+  Lora: 'Lora, Georgia, "Times New Roman", serif',
+  Merriweather: 'Merriweather, Georgia, "Times New Roman", serif',
+  "Playfair Display": '"Playfair Display", Georgia, "Times New Roman", serif',
+  "PT Serif": '"PT Serif", Georgia, "Times New Roman", serif',
+  Bitter: 'Bitter, Georgia, "Times New Roman", serif',
+  Spectral: 'Spectral, Georgia, "Times New Roman", serif'
 };
+
+// Serif families (for grouping the font pickers).
+const serifFonts = new Set([
+  "Georgia", "Times New Roman", "Source Serif 4", "IBM Plex Serif",
+  "Lora", "Merriweather", "Playfair Display", "PT Serif", "Bitter", "Spectral"
+]);
 
 const defaults = {
   brandName: "Bantay",
@@ -267,12 +284,13 @@ function fillSwitcher(items) {
 }
 
 function setupFontOptions() {
-  const options = Object.keys(fontStacks)
-    .map((font) => `<option value="${escapeHtml(font)}">${escapeHtml(font)}</option>`)
-    .join("");
+  const opt = (font) => `<option value="${escapeHtml(font)}">${escapeHtml(font)}</option>`;
+  const sans = Object.keys(fontStacks).filter((f) => !serifFonts.has(f)).map(opt).join("");
+  const serif = Object.keys(fontStacks).filter((f) => serifFonts.has(f)).map(opt).join("");
+  const html = `<optgroup label="Sans-serif">${sans}</optgroup><optgroup label="Serif">${serif}</optgroup>`;
 
-  document.querySelector("#displayFont").innerHTML = options;
-  document.querySelector("#bodyFont").innerHTML = options;
+  document.querySelector("#displayFont").innerHTML = html;
+  document.querySelector("#bodyFont").innerHTML = html;
 }
 
 function bindControls() {
