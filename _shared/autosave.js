@@ -2,16 +2,16 @@
 //
 // Behaviour:
 //  - Edits autosave automatically (debounced). No Save button.
-//  - Signed in  -> saves to your account (KV) under a slug derived from the title.
-//  - Signed out -> saves to localStorage only; you can still work, nothing is lost.
-//  - A fresh doc autosaves under a default slug ("untitled"); when you set/change
-//    the title, the saved doc is renamed to follow it (old key removed).
+//  - Signed in  -> saves to your account (D1). Signed out -> localStorage only.
+//  - A fresh doc autosaves under "untitled"; setting/changing the title renames
+//    the saved doc to follow it (new row written, old row deleted).
 //
-// A tool wires itself up by describing how to read/serialise its state:
-//   createStore({ tool, draftKey, getTitle, getPayload, onStatus, onSaved })
+// All remote writes are SERIALIZED through one chain so a debounced content
+// save and a rename can never overlap — otherwise an in-flight save of the old
+// slug could land after the rename deletes it and re-create it (a duplicate).
 import { listAssets, saveAsset, deleteAsset } from "/_shared/api.js";
 
-const DEBOUNCE_MS = 1000; // also keeps us under KV's ~1 write/sec per key
+const DEBOUNCE_MS = 1000;
 const DEFAULT_SLUG = "untitled";
 
 export function slugify(value) {
@@ -27,8 +27,15 @@ export function createStore({ tool, draftKey, getTitle, getPayload, onStatus, on
   let slug = DEFAULT_SLUG;
   let signedIn = false;
   let timer = null;
-  let saving = false; // a KV write is in flight
-  let pending = false; // another change arrived mid-write
+
+  // Single write queue: every saveAsset/deleteAsset runs strictly in order, so
+  // a rename's delete of the old slug always happens AFTER any earlier save of
+  // it, and nothing saves the old slug afterward.
+  let chain = Promise.resolve();
+  function serialize(task) {
+    chain = chain.then(task, task); // keep going even if a prior task threw
+    return chain;
+  }
 
   const status = (m) => onStatus && onStatus(m);
 
@@ -52,32 +59,26 @@ export function createStore({ tool, draftKey, getTitle, getPayload, onStatus, on
     }
   }
 
-  // Autosave content under the CURRENT slug (no rename). Coalesces concurrent writes.
-  async function commit() {
+  // Autosave content under the CURRENT slug.
+  function commit() {
     saveLocal();
-    if (!signedIn) return status("Saved locally");
-    if (saving) {
-      pending = true;
-      return;
+    if (!signedIn) {
+      status("Saved locally");
+      return chain;
     }
-    saving = true;
-    try {
-      await saveAsset(tool, slug, snapshot());
-      status("Saved");
-    } catch (err) {
-      if (err.message === "Not signed in") {
-        signedIn = false;
-        status("Saved locally");
-      } else {
-        status(err.message || "Save failed");
+    return serialize(async () => {
+      try {
+        await saveAsset(tool, slug, snapshot());
+        status("Saved");
+      } catch (err) {
+        if (err.message === "Not signed in") {
+          signedIn = false;
+          status("Saved locally");
+        } else {
+          status(err.message || "Save failed");
+        }
       }
-    } finally {
-      saving = false;
-      if (pending) {
-        pending = false;
-        commit();
-      }
-    }
+    });
   }
 
   // Debounced trigger — call on every edit.
@@ -88,32 +89,40 @@ export function createStore({ tool, draftKey, getTitle, getPayload, onStatus, on
   }
 
   // Rename the saved doc to follow the title. Call on title commit (blur/change).
-  async function rename() {
+  function rename() {
+    clearTimeout(timer); // drop any pending content-save aimed at the old slug
     const next = slugify(getTitle()) || DEFAULT_SLUG;
     if (next === slug) return commit();
+
     const prev = slug;
     slug = next;
     saveLocal();
-    if (!signedIn) return status("Saved locally");
-    try {
-      await saveAsset(tool, slug, snapshot());
-      if (prev && prev !== slug) {
-        try {
-          await deleteAsset(tool, prev);
-        } catch {
-          /* old key may not exist yet — fine */
+    if (!signedIn) {
+      status("Saved locally");
+      return chain;
+    }
+    status("Saving…");
+    return serialize(async () => {
+      try {
+        await saveAsset(tool, next, snapshot());
+        if (prev && prev !== next) {
+          try {
+            await deleteAsset(tool, prev);
+          } catch {
+            /* old row may not exist yet — fine */
+          }
+        }
+        status("Saved");
+        onSaved && onSaved();
+      } catch (err) {
+        if (err.message === "Not signed in") {
+          signedIn = false;
+          status("Saved locally");
+        } else {
+          status(err.message || "Save failed");
         }
       }
-      status("Saved");
-      onSaved && onSaved();
-    } catch (err) {
-      if (err.message === "Not signed in") {
-        signedIn = false;
-        status("Saved locally");
-      } else {
-        status(err.message || "Save failed");
-      }
-    }
+    });
   }
 
   // Probe auth and return the user's saved items (empty array if signed out).
