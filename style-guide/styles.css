@@ -115,7 +115,7 @@ p {
 .topbar h1 {
   font-size: 21px;
   line-height: 1.15;
-  font-weight: 760;
+  font-weight: var(--bantay-headline-weight);
   letter-spacing: 0;
 }
 
