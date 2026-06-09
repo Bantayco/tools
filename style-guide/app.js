@@ -114,7 +114,13 @@ const defaults = {
   accent: "#d97706",
   radius: 8,
   spacing: 10,
-  buttonStyle: "solid"
+  buttonStyle: "solid",
+  success: "#0f766e",
+  emphasis: "#c0573f",
+  cat1: "#2f6f95",
+  cat2: "#b3701c",
+  cat3: "#2f7d52",
+  cat4: "#8a4f8a"
 };
 
 const controls = {};
@@ -136,7 +142,13 @@ const controlIds = [
   "accent",
   "radius",
   "spacing",
-  "buttonStyle"
+  "buttonStyle",
+  "success",
+  "emphasis",
+  "cat1",
+  "cat2",
+  "cat3",
+  "cat4"
 ];
 
 const status = document.querySelector("#status");
@@ -145,7 +157,10 @@ const skillOutput = document.querySelector("#skillOutput");
 const tokensOutput = document.querySelector("#tokensOutput");
 const cssOutput = document.querySelector("#cssOutput");
 const sharedCssOutput = document.querySelector("#sharedCssOutput");
+const extendedCssOutput = document.querySelector("#extendedCssOutput");
 const bantayJsonOutput = document.querySelector("#bantayJsonOutput");
+const copyExtendedCss = document.querySelector("#copyExtendedCss");
+const downloadExtendedCss = document.querySelector("#downloadExtendedCss");
 const copySharedCss = document.querySelector("#copySharedCss");
 const downloadSharedCss = document.querySelector("#downloadSharedCss");
 const copyBantayJson = document.querySelector("#copyBantayJson");
@@ -293,6 +308,8 @@ downloadCurrent.addEventListener("click", () => {
 // Publish tab — each shared file copies/downloads on its own.
 copySharedCss.addEventListener("click", () => copyText(sharedCssOutput.textContent, "tokens.css copied"));
 downloadSharedCss.addEventListener("click", () => downloadText("tokens.css", sharedCssOutput.textContent, "text/css"));
+copyExtendedCss.addEventListener("click", () => copyText(extendedCssOutput.textContent, "tokens-extended.css copied"));
+downloadExtendedCss.addEventListener("click", () => downloadText("tokens-extended.css", extendedCssOutput.textContent, "text/css"));
 copyBantayJson.addEventListener("click", () => copyText(bantayJsonOutput.textContent, "bantay.json copied"));
 downloadBantayJson.addEventListener("click", () => downloadText("bantay.json", bantayJsonOutput.textContent, "application/json"));
 
@@ -416,7 +433,13 @@ function getState() {
     accent: controls.accent.value,
     radius: Number(controls.radius.value),
     spacing: Number(controls.spacing.value),
-    buttonStyle: controls.buttonStyle.value
+    buttonStyle: controls.buttonStyle.value,
+    success: controls.success.value,
+    emphasis: controls.emphasis.value,
+    cat1: controls.cat1.value,
+    cat2: controls.cat2.value,
+    cat3: controls.cat3.value,
+    cat4: controls.cat4.value
   };
 }
 
@@ -447,6 +470,7 @@ function render() {
   tokensOutput.textContent = JSON.stringify(buildTokens(state), null, 2);
   cssOutput.textContent = buildCss(state);
   sharedCssOutput.textContent = buildSharedCss(state);
+  extendedCssOutput.textContent = buildExtendedCss(state);
   bantayJsonOutput.textContent = JSON.stringify(state, null, 2);
 }
 
@@ -641,6 +665,32 @@ ${buildFontImport(state)}:root {
   --bantay-line-height: ${state.lineHeight};
   --bantay-headline-weight: ${state.headlineWeight};
   --bantay-headline-scale: ${state.headlineScale};
+}`;
+}
+
+// Extended tokens — paste into _shared/tokens-extended.css. The neutrals/mono
+// are static (the neutrals derive from the brand); the colors are editable here.
+function buildExtendedCss(state) {
+  return `/* Bantay extended tokens — paste into _shared/tokens-extended.css. */
+:root {
+  /* Neutrals — derived from the brand */
+  --bantay-line:        color-mix(in srgb, var(--bantay-muted) 20%, transparent);
+  --bantay-line-strong: color-mix(in srgb, var(--bantay-muted) 42%, transparent);
+  --bantay-ink-faint:   color-mix(in srgb, var(--bantay-muted) 60%, var(--bantay-background));
+  --bantay-surface-2:   color-mix(in srgb, var(--bantay-muted) 8%, var(--bantay-surface));
+
+  /* Type — platform monospace (no web load) */
+  --bantay-mono-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  /* Status / emphasis */
+  --bantay-success: ${state.success};
+  --bantay-emphasis: ${state.emphasis};
+
+  /* Categorical palette */
+  --bantay-cat-1: ${state.cat1};
+  --bantay-cat-2: ${state.cat2};
+  --bantay-cat-3: ${state.cat3};
+  --bantay-cat-4: ${state.cat4};
 }`;
 }
 

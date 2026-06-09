@@ -141,6 +141,39 @@
               </select>
             </label>
           </section>
+
+          <section class="control-section">
+            <div class="section-head">
+              <h2>Palette</h2>
+            </div>
+            <p class="section-hint">Extended tokens — published to <code>tokens-extended.css</code>.</p>
+            <div class="grid-2">
+              <label>
+                Success
+                <input id="success" type="color">
+              </label>
+              <label>
+                Emphasis
+                <input id="emphasis" type="color">
+              </label>
+              <label>
+                Category 1
+                <input id="cat1" type="color">
+              </label>
+              <label>
+                Category 2
+                <input id="cat2" type="color">
+              </label>
+              <label>
+                Category 3
+                <input id="cat3" type="color">
+              </label>
+              <label>
+                Category 4
+                <input id="cat4" type="color">
+              </label>
+            </div>
+          </section>
         </aside>
 
         <section class="preview-area" aria-label="Live style guide preview">
@@ -217,6 +250,16 @@
                 </span>
               </div>
               <pre><code id="sharedCssOutput"></code></pre>
+            </div>
+            <div class="publish-file">
+              <div class="publish-file-head">
+                <code>_shared/tokens-extended.css</code>
+                <span class="publish-actions">
+                  <button id="copyExtendedCss" type="button">Copy</button>
+                  <button id="downloadExtendedCss" type="button">Download</button>
+                </span>
+              </div>
+              <pre><code id="extendedCssOutput"></code></pre>
             </div>
             <div class="publish-file">
               <div class="publish-file-head">
