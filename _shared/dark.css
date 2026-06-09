@@ -9,37 +9,61 @@
  * explicit theme is set. Only the BASE tokens are overridden — the derived
  * neutrals (line, ink-faint, surface-2, line-strong) recompute automatically
  * because they're color-mix()es of these.
+ *
+ * The dark palette lives ONCE in --_dark-* below (the single source of truth;
+ * edit colors there only). The two triggers — explicit toggle and system
+ * default — just re-point the live --bantay-* tokens at it. They can't be
+ * merged into one rule: following the OS needs an @media query, which can't
+ * share a declaration block with the [data-theme="dark"] selector. But because
+ * both only reference --_dark-*, the values can never drift between them.
  * ============================================================ */
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bantay-background: #11131a;
-  --bantay-surface:    #1a1e27;
-  --bantay-ink:        #e8e6dd;
-  --bantay-muted:      #9aa298;
-  --bantay-primary:    #34b3a2;
-  --bantay-accent:     #d8a07a;
-  --bantay-success:    #5fa37a;
-  --bantay-emphasis:   #e08a76;
-  --bantay-cat-1:      #6fb1d6;
-  --bantay-cat-2:      #e0a35f;
-  --bantay-cat-3:      #8ccf97;
-  --bantay-cat-4:      #c98ec9;
+:root {
+  --_dark-background: #11131a;
+  --_dark-surface:    #1a1e27;
+  --_dark-ink:        #e8e6dd;
+  --_dark-muted:      #9aa298;
+  --_dark-primary:    #34b3a2;
+  --_dark-accent:     #d8a07a;
+  --_dark-success:    #5fa37a;
+  --_dark-emphasis:   #e08a76;
+  --_dark-cat-1:      #6fb1d6;
+  --_dark-cat-2:      #e0a35f;
+  --_dark-cat-3:      #8ccf97;
+  --_dark-cat-4:      #c98ec9;
 }
 
+/* Explicit toggle. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bantay-background: var(--_dark-background);
+  --bantay-surface:    var(--_dark-surface);
+  --bantay-ink:        var(--_dark-ink);
+  --bantay-muted:      var(--_dark-muted);
+  --bantay-primary:    var(--_dark-primary);
+  --bantay-accent:     var(--_dark-accent);
+  --bantay-success:    var(--_dark-success);
+  --bantay-emphasis:   var(--_dark-emphasis);
+  --bantay-cat-1:      var(--_dark-cat-1);
+  --bantay-cat-2:      var(--_dark-cat-2);
+  --bantay-cat-3:      var(--_dark-cat-3);
+  --bantay-cat-4:      var(--_dark-cat-4);
+}
+
+/* System default: follow the OS unless an explicit theme is chosen. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not([data-theme="dark"]) {
     color-scheme: dark;
-    --bantay-background: #11131a;
-    --bantay-surface:    #1a1e27;
-    --bantay-ink:        #e8e6dd;
-    --bantay-muted:      #9aa298;
-    --bantay-primary:    #34b3a2;
-    --bantay-accent:     #d8a07a;
-    --bantay-success:    #5fa37a;
-    --bantay-emphasis:   #e08a76;
-    --bantay-cat-1:      #6fb1d6;
-    --bantay-cat-2:      #e0a35f;
-    --bantay-cat-3:      #8ccf97;
-    --bantay-cat-4:      #c98ec9;
+    --bantay-background: var(--_dark-background);
+    --bantay-surface:    var(--_dark-surface);
+    --bantay-ink:        var(--_dark-ink);
+    --bantay-muted:      var(--_dark-muted);
+    --bantay-primary:    var(--_dark-primary);
+    --bantay-accent:     var(--_dark-accent);
+    --bantay-success:    var(--_dark-success);
+    --bantay-emphasis:   var(--_dark-emphasis);
+    --bantay-cat-1:      var(--_dark-cat-1);
+    --bantay-cat-2:      var(--_dark-cat-2);
+    --bantay-cat-3:      var(--_dark-cat-3);
+    --bantay-cat-4:      var(--_dark-cat-4);
   }
 }
