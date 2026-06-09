@@ -116,6 +116,7 @@ const defaults = {
   spacing: 10,
   buttonStyle: "solid",
   buttonWeight: 600,
+  buttonBorder: 1,
   success: "#0f766e",
   emphasis: "#c0573f",
   cat1: "#2f6f95",
@@ -164,6 +165,7 @@ const controlIds = [
   "spacing",
   "buttonStyle",
   "buttonWeight",
+  "buttonBorder",
   "success",
   "emphasis",
   "cat1",
@@ -587,6 +589,7 @@ function getState() {
     spacing: Number(controls.spacing.value),
     buttonStyle: controls.buttonStyle.value,
     buttonWeight: Number(controls.buttonWeight.value),
+    buttonBorder: Number(controls.buttonBorder.value),
     success: controls.success.value,
     emphasis: controls.emphasis.value,
     cat1: controls.cat1.value,
@@ -637,6 +640,7 @@ function render() {
   document.documentElement.style.setProperty("--brand-headline-weight", state.headlineWeight);
   document.documentElement.style.setProperty("--brand-headline-scale", state.headlineScale);
   document.documentElement.style.setProperty("--brand-button-weight", state.buttonWeight);
+  document.documentElement.style.setProperty("--brand-button-border", `${state.buttonBorder}px`);
   brandPreview.dataset.buttonStyle = state.buttonStyle;
 
   // Dark palette: authored when overriding, else derived from the light palette.
@@ -740,7 +744,8 @@ function buildTokens(state) {
       radius: `${state.radius}px`,
       spacing: `${state.spacing}px`,
       buttonStyle: state.buttonStyle,
-      buttonWeight: state.buttonWeight
+      buttonWeight: state.buttonWeight,
+      buttonBorder: `${state.buttonBorder}px`
     }
   };
 }
@@ -795,6 +800,7 @@ Use this skill whenever work should look, sound, or behave like a ${state.brandN
 - Spacing unit: ${tokens.interface.spacing}.
 - Button style: ${state.buttonStyle}.
 - Button text weight: ${state.buttonWeight}.
+- Button border width: ${state.buttonBorder}px.
 - Prefer practical, information-dense layouts for tools. Avoid decorative cards, oversized marketing composition, and gradients unless the specific artifact requires them.
 - Make controls predictable: buttons for commands, selects for option sets, toggles for binary settings, sliders or inputs for numeric settings, and tabs for alternate views.
 - Text must fit within controls and cards on mobile and desktop.
@@ -827,6 +833,7 @@ function buildCss(state) {
   --${state.skillName}-radius: ${state.radius}px;
   --${state.skillName}-spacing: ${state.spacing}px;
   --${state.skillName}-button-weight: ${state.buttonWeight};
+  --${state.skillName}-button-border: ${state.buttonBorder}px;
   --${state.skillName}-body-font: ${fontStacks[state.bodyFont]};
   --${state.skillName}-display-font: ${fontStacks[state.displayFont]};
   --${state.skillName}-base-size: ${state.baseSize}px;
@@ -863,6 +870,7 @@ ${buildFontImport(state)}:root {
   --bantay-radius: ${state.radius}px;
   --bantay-spacing: ${state.spacing}px;
   --bantay-button-weight: ${state.buttonWeight};
+  --bantay-button-border: ${state.buttonBorder}px;
 
   --bantay-body-font: ${fontStacks[state.bodyFont]};
   --bantay-display-font: ${fontStacks[state.displayFont]};

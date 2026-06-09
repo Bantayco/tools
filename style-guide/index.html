@@ -14,7 +14,9 @@
     <link rel="stylesheet" href="/_shared/tokens.css">
     <link rel="stylesheet" href="/_shared/tokens-extended.css">
     <link rel="stylesheet" href="/_shared/dark.css">
-    <link rel="stylesheet" href="./styles.css">
+    <!-- ?v= cache-bust: bump on every styles.css / app.js change so an open
+         tab picks up fresh assets on reload (the modules use the same token). -->
+    <link rel="stylesheet" href="./styles.css?v=20260609a">
   </head>
   <body>
     <main class="app">
@@ -147,9 +149,13 @@
               </select>
             </label>
             <label>
-              Button weight
+              Button text weight
               <input id="buttonWeight" type="range" min="400" max="800" step="50">
               <output id="buttonWeightValue"></output>
+            </label>
+            <label>
+              Button border width
+              <input id="buttonBorder" type="number" min="0" max="4" step="0.5">
             </label>
           </section>
 
@@ -480,6 +486,6 @@
       </div>
     </div>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=20260609a"></script>
   </body>
 </html>
