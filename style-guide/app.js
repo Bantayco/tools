@@ -227,8 +227,7 @@ const headlineScaleValue = document.querySelector("#headlineScaleValue");
 const buttonWeightValue = document.querySelector("#buttonWeightValue");
 const schemeToggle = document.querySelector("#schemeToggle");
 const fullPage = document.querySelector("#fullPage");
-const fullControls = document.querySelector("#fullControls");
-const exitFull = document.querySelector("#exitFull");
+const fullHint = document.querySelector("#fullHint");
 
 const tabs = {
   preview: {
@@ -342,6 +341,7 @@ async function loadFromAssetParam() {
 Object.entries(tabs).forEach(([name, tab]) => {
   tab.button.addEventListener("click", () => setActiveTab(name));
 });
+setActiveTab(activeTab); // initialize per-tab action visibility
 
 // Preview light/dark toggle. A view preference (local only), and only the
 // preview pane is affected — the editor chrome follows the dashboard theme.
@@ -354,19 +354,18 @@ document.addEventListener("click", (event) => {
   if (btn) setScheme(btn.dataset.schemeSet);
 });
 
-// Full-page preview — hide all chrome, show only the preview.
+// Full-page preview — hide all chrome, show only the preview. Exit with Esc.
 fullPage.addEventListener("click", enterFullPage);
-exitFull.addEventListener("click", exitFullPage);
 
 function enterFullPage() {
   setActiveTab("preview");
   appEl.classList.add("fullpreview");
-  fullControls.hidden = false;
+  fullHint.hidden = false;
 }
 
 function exitFullPage() {
   appEl.classList.remove("fullpreview");
-  fullControls.hidden = true;
+  fullHint.hidden = true;
 }
 
 // Toggling the per-guide dark override. The currently-shown (derived) values
@@ -706,8 +705,13 @@ function setActiveTab(name) {
     tab.panel.classList.toggle("visible", isActive);
   });
 
-  // The light/dark toggle only applies to the rendered preview.
-  schemeToggle.hidden = name !== "preview";
+  // Show only the actions relevant to the active tab, so the toolbar fits.
+  const isPreview = name === "preview";
+  const isCode = name === "skill" || name === "tokens" || name === "css";
+  schemeToggle.hidden = !isPreview;
+  fullPage.hidden = !isPreview;
+  copyCurrent.hidden = !isCode;
+  downloadCurrent.hidden = !isCode;
 }
 
 function currentExport() {
