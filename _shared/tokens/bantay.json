@@ -3,7 +3,7 @@
   "skillName": "bantay-brand",
   "voice": "Calm, direct, protective",
   "displayFont": "Bitter",
-  "bodyFont": "Bitter",
+  "bodyFont": "System Mono",
   "baseSize": 13,
   "lineHeight": 1.55,
   "headlineWeight": 500,
@@ -16,5 +16,11 @@
   "accent": "#1e1c1a",
   "radius": 5,
   "spacing": 10,
-  "buttonStyle": "quiet"
+  "buttonStyle": "quiet",
+  "success": "#0f766e",
+  "emphasis": "#c0573f",
+  "cat1": "#2f6f95",
+  "cat2": "#b3701c",
+  "cat3": "#2f7d52",
+  "cat4": "#8a4f8a"
 }

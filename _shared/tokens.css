@@ -23,7 +23,7 @@
   --bantay-radius: 5px;
   --bantay-spacing: 10px;
 
-  --bantay-body-font: Bitter, Georgia, "Times New Roman", serif;
+  --bantay-body-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --bantay-display-font: Bitter, Georgia, "Times New Roman", serif;
   --bantay-base-size: 13px;
   --bantay-line-height: 1.55;
