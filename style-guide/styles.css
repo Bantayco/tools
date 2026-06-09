@@ -10,12 +10,14 @@
   --app-primary-ink: #ffffff;
   --app-shadow: 0 14px 38px rgba(0, 0, 0, 0.12);
 
-  --brand-ink: #142026;
-  --brand-muted: #61717d;
-  --brand-bg: #f5f7f8;
-  --brand-surface: #ffffff;
-  --brand-primary: #0f766e;
-  --brand-accent: #d97706;
+  /* Raw brand colors (set by the editor). The preview maps these to working
+     --brand-* below — straight through in light, derived in dark. */
+  --src-ink: #142026;
+  --src-muted: #61717d;
+  --src-bg: #f5f7f8;
+  --src-surface: #ffffff;
+  --src-primary: #0f766e;
+  --src-accent: #d97706;
   --brand-radius: 8px;
   --brand-spacing: 10px;
   --brand-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -341,6 +343,38 @@ output {
   overflow: auto;
 }
 
+/* Preview light/dark toggle (segmented). */
+.scheme-toggle {
+  display: inline-flex;
+  border: 1px solid var(--app-line);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.scheme-toggle[hidden] {
+  display: none;
+}
+
+.scheme-toggle button {
+  min-height: 32px;
+  min-width: 52px;
+  border: 0;
+  border-radius: 0;
+  background: var(--app-panel);
+  color: var(--app-muted);
+  font-size: 12px;
+  padding: 0 12px;
+}
+
+.scheme-toggle button + button {
+  border-left: 1px solid var(--app-line);
+}
+
+.scheme-toggle button.active {
+  background: var(--app-primary);
+  color: var(--app-primary-ink);
+}
+
 .tabs button {
   min-width: 76px;
 }
@@ -356,6 +390,14 @@ output {
 }
 
 .brand-preview {
+  /* Light: working colors map straight from the brand source. */
+  --brand-ink: var(--src-ink);
+  --brand-muted: var(--src-muted);
+  --brand-bg: var(--src-bg);
+  --brand-surface: var(--src-surface);
+  --brand-primary: var(--src-primary);
+  --brand-accent: var(--src-accent);
+
   min-height: 100%;
   background: var(--brand-bg);
   color: var(--brand-ink);
@@ -363,6 +405,18 @@ output {
   font-size: var(--brand-base-size);
   line-height: var(--brand-line-height);
   padding: calc(var(--brand-spacing) * 2.4);
+}
+
+/* Dark preview: derive dark neutrals from the brand, and lift the brand hues
+   for contrast — same philosophy as the shipped dark.css. A preview aid, so the
+   dark values are derived (the editor doesn't author a separate dark palette). */
+.brand-preview[data-scheme="dark"] {
+  --brand-bg:      color-mix(in srgb, var(--src-ink) 84%, #0c0c0d);
+  --brand-surface: color-mix(in srgb, var(--src-ink) 70%, #18181b);
+  --brand-ink:     color-mix(in srgb, var(--src-bg) 90%, #ffffff);
+  --brand-muted:   color-mix(in srgb, var(--src-bg) 52%, var(--src-ink));
+  --brand-primary: color-mix(in srgb, var(--src-primary) 75%, #ffffff);
+  --brand-accent:  color-mix(in srgb, var(--src-accent) 78%, #ffffff);
 }
 
 .sample-nav {

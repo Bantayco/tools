@@ -183,6 +183,9 @@ const copyCurrent = document.querySelector("#copyCurrent");
 const downloadCurrent = document.querySelector("#downloadCurrent");
 const headlineWeightValue = document.querySelector("#headlineWeightValue");
 const headlineScaleValue = document.querySelector("#headlineScaleValue");
+const schemeToggle = document.querySelector("#schemeToggle");
+const schemeLight = document.querySelector("#schemeLight");
+const schemeDark = document.querySelector("#schemeDark");
 
 const tabs = {
   preview: {
@@ -296,6 +299,41 @@ async function loadFromAssetParam() {
 Object.entries(tabs).forEach(([name, tab]) => {
   tab.button.addEventListener("click", () => setActiveTab(name));
 });
+
+// Preview light/dark toggle. A view preference (local only), and only the
+// preview pane is affected — the editor chrome follows the dashboard theme.
+const PREVIEW_SCHEME_KEY = "bantay-style-preview-scheme";
+let previewScheme = readPreviewScheme();
+applyScheme(previewScheme);
+schemeLight.addEventListener("click", () => setScheme("light"));
+schemeDark.addEventListener("click", () => setScheme("dark"));
+
+function readPreviewScheme() {
+  try {
+    return localStorage.getItem(PREVIEW_SCHEME_KEY) === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+}
+
+function setScheme(scheme) {
+  previewScheme = scheme === "dark" ? "dark" : "light";
+  try {
+    localStorage.setItem(PREVIEW_SCHEME_KEY, previewScheme);
+  } catch {
+    /* storage disabled — ignore */
+  }
+  applyScheme(previewScheme);
+}
+
+function applyScheme(scheme) {
+  brandPreview.dataset.scheme = scheme;
+  const dark = scheme === "dark";
+  schemeDark.classList.toggle("active", dark);
+  schemeLight.classList.toggle("active", !dark);
+  schemeDark.setAttribute("aria-pressed", String(dark));
+  schemeLight.setAttribute("aria-pressed", String(!dark));
+}
 
 copyCurrent.addEventListener("click", () => {
   const current = currentExport();
@@ -512,12 +550,12 @@ function render() {
   headlineWeightValue.textContent = String(state.headlineWeight);
   headlineScaleValue.textContent = state.headlineScale.toFixed(2);
 
-  document.documentElement.style.setProperty("--brand-ink", state.ink);
-  document.documentElement.style.setProperty("--brand-muted", state.muted);
-  document.documentElement.style.setProperty("--brand-bg", state.background);
-  document.documentElement.style.setProperty("--brand-surface", state.surface);
-  document.documentElement.style.setProperty("--brand-primary", state.primary);
-  document.documentElement.style.setProperty("--brand-accent", state.accent);
+  document.documentElement.style.setProperty("--src-ink", state.ink);
+  document.documentElement.style.setProperty("--src-muted", state.muted);
+  document.documentElement.style.setProperty("--src-bg", state.background);
+  document.documentElement.style.setProperty("--src-surface", state.surface);
+  document.documentElement.style.setProperty("--src-primary", state.primary);
+  document.documentElement.style.setProperty("--src-accent", state.accent);
   document.documentElement.style.setProperty("--brand-radius", `${state.radius}px`);
   document.documentElement.style.setProperty("--brand-spacing", `${state.spacing}px`);
   document.documentElement.style.setProperty("--brand-body", fontStacks[state.bodyFont]);
@@ -546,6 +584,9 @@ function setActiveTab(name) {
     tab.button.setAttribute("aria-selected", String(isActive));
     tab.panel.classList.toggle("visible", isActive);
   });
+
+  // The light/dark toggle only applies to the rendered preview.
+  schemeToggle.hidden = name !== "preview";
 }
 
 function currentExport() {
