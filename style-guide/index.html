@@ -25,6 +25,7 @@
         </div>
         <div class="top-actions" aria-label="Style guide actions">
           <input id="guideName" type="text" placeholder="guide name" autocomplete="off" aria-label="Guide name">
+          <button id="importGuide" type="button" title="Paste token JSON to overwrite this guide's values">Import</button>
           <select id="myGuides" aria-label="My saved guides" title="My saved guides">
             <option value="">My guides…</option>
           </select>
@@ -292,6 +293,22 @@
         <div class="modal-actions">
           <button id="resetCancel" type="button">Cancel</button>
           <button id="resetConfirmBtn" type="button" class="danger" disabled>Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="importModal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+        <h2 id="importTitle">Import token values</h2>
+        <p>Paste a Bantay token JSON (the <code>bantay.json</code> shape). Its values overwrite this guide; autosave keeps it under the current guide name.</p>
+        <label>
+          JSON
+          <textarea id="importText" rows="10" autocomplete="off" spellcheck="false" placeholder='{ "ink": "#2d2317", "background": "#f3ebdd", ... }'></textarea>
+        </label>
+        <p id="importError" class="modal-error" hidden></p>
+        <div class="modal-actions">
+          <button id="importCancel" type="button">Cancel</button>
+          <button id="importConfirmBtn" type="button" class="primary">Import</button>
         </div>
       </div>
     </div>

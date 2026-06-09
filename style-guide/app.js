@@ -173,6 +173,12 @@ const resetConfirmBtn = document.querySelector("#resetConfirmBtn");
 const resetCancel = document.querySelector("#resetCancel");
 const guideName = document.querySelector("#guideName");
 const myGuides = document.querySelector("#myGuides");
+const importGuide = document.querySelector("#importGuide");
+const importModal = document.querySelector("#importModal");
+const importText = document.querySelector("#importText");
+const importError = document.querySelector("#importError");
+const importConfirmBtn = document.querySelector("#importConfirmBtn");
+const importCancel = document.querySelector("#importCancel");
 const copyCurrent = document.querySelector("#copyCurrent");
 const downloadCurrent = document.querySelector("#downloadCurrent");
 const headlineWeightValue = document.querySelector("#headlineWeightValue");
@@ -243,13 +249,12 @@ render();
 boot();
 
 async function boot() {
-  const items = await store.init();
-  fillSwitcher(items);
-  // Precedence: ?id=<slug> (a saved guide) > ?f=<name> (a shipped preset).
+  fillSwitcher(await store.init());
+  // Precedence: ?id=<slug> (a saved guide) > ?f=<name> (a shipped set).
   const id = params.get("id");
   try {
     if (id) await openSaved(slugify(id));
-    else await loadFromAssetParam(items);
+    else await loadFromAssetParam();
   } catch (error) {
     showStatus(error.message);
   } finally {
@@ -270,29 +275,18 @@ async function openSaved(slug) {
   showStatus(`Loaded "${set.title || slug}"`);
 }
 
-// If the URL carries ?f=<name>, load that shipped preset from /_shared/tokens/.
-// When signed in, persist it as one of your guides so it shows up in your files
-// — unless you already have a guide by that name, in which case just load it
-// into the editor and don't overwrite your saved copy.
-async function loadFromAssetParam(existing = []) {
+// If the URL carries ?f=<name>, load that shipped set from /_shared/tokens/.
+async function loadFromAssetParam() {
   const name = getAssetParam("f");
   if (!name) return;
   try {
     const set = await loadTokenSet(name);
     applyState({ ...defaults, ...set });
     guideName.value = name;
-    const slug = slugify(name);
-    store.setSlug(slug);
+    store.setSlug(slugify(name));
     store.saveLocal();
     render();
-    if (store.signedIn && !existing.some((it) => it.slug === slug)) {
-      await store.commit();
-      fillSwitcher(await store.init());
-      myGuides.value = slug;
-      showStatus(`Saved "${name}" to your guides`);
-    } else {
-      showStatus(`Loaded "${name}"`);
-    }
+    showStatus(`Loaded "${name}"`);
   } catch (error) {
     showStatus(error.message);
     setAssetParam(null, "f");
@@ -347,8 +341,61 @@ resetConfirmBtn.addEventListener("click", () => {
   showStatus("Reset to defaults");
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !resetModal.hidden) closeResetModal();
+  if (event.key !== "Escape") return;
+  if (!resetModal.hidden) closeResetModal();
+  if (!importModal.hidden) closeImportModal();
 });
+
+// Import — paste a token JSON to overwrite the current guide's values. Autosave
+// then persists them under the current guide (a fresh guide gets named from the
+// imported brand, so it lands as a new file in your account).
+importGuide.addEventListener("click", openImportModal);
+importCancel.addEventListener("click", closeImportModal);
+importModal.addEventListener("click", (event) => {
+  if (event.target === importModal) closeImportModal();
+});
+importConfirmBtn.addEventListener("click", doImport);
+
+function openImportModal() {
+  importText.value = "";
+  importError.hidden = true;
+  importModal.hidden = false;
+  importText.focus();
+}
+
+function closeImportModal() {
+  importModal.hidden = true;
+}
+
+function doImport() {
+  let parsed;
+  try {
+    parsed = JSON.parse(importText.value);
+  } catch {
+    importError.textContent = "That isn't valid JSON.";
+    importError.hidden = false;
+    return;
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    importError.textContent = "Expected a JSON object of token values.";
+    importError.hidden = false;
+    return;
+  }
+
+  applyState({ ...defaults, ...parsed });
+  render();
+
+  // A fresh, unnamed guide: name it from the imported brand so it saves as a new
+  // file. An already-named guide: just overwrite its values in place.
+  if (!guideName.value.trim() && parsed.brandName) {
+    guideName.value = parsed.brandName;
+    store.rename();
+  } else {
+    store.change();
+  }
+  closeImportModal();
+  showStatus("Imported");
+}
 
 function resetTarget() {
   return guideName.value.trim() || "untitled";

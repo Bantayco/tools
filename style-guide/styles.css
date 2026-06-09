@@ -236,6 +236,25 @@ p {
   margin-top: 4px;
 }
 
+.modal-card textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--app-line);
+  border-radius: 7px;
+  background: var(--app-bg);
+  color: var(--app-ink);
+  padding: 9px 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.modal-error {
+  margin: -4px 0 0;
+  color: #b42318;
+  font-size: 13px;
+}
+
 button.danger {
   border-color: #b42318;
   background: #b42318;
