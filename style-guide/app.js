@@ -238,7 +238,8 @@ render();
 boot();
 
 async function boot() {
-  fillSwitcher(await store.init());
+  const items = await store.init();
+  fillSwitcher(items);
   // Precedence: ?id=<slug> (a saved guide) > ?f=<name> (a shipped preset).
   const id = params.get("id");
   if (id) {
@@ -248,7 +249,7 @@ async function boot() {
       showStatus(error.message);
     }
   } else {
-    await loadFromAssetParam();
+    await loadFromAssetParam(items);
   }
 }
 
@@ -265,18 +266,29 @@ async function openSaved(slug) {
   showStatus(`Loaded "${set.title || slug}"`);
 }
 
-// If the URL carries ?f=<name>, load that saved set from /_shared/tokens/.
-async function loadFromAssetParam() {
+// If the URL carries ?f=<name>, load that shipped preset from /_shared/tokens/.
+// When signed in, persist it as one of your guides so it shows up in your files
+// — unless you already have a guide by that name, in which case just load it
+// into the editor and don't overwrite your saved copy.
+async function loadFromAssetParam(existing = []) {
   const name = getAssetParam("f");
   if (!name) return;
   try {
     const set = await loadTokenSet(name);
     applyState({ ...defaults, ...set });
     guideName.value = name;
-    store.setSlug(slugify(name));
+    const slug = slugify(name);
+    store.setSlug(slug);
     store.saveLocal();
     render();
-    showStatus(`Loaded "${name}"`);
+    if (store.signedIn && !existing.some((it) => it.slug === slug)) {
+      await store.commit();
+      fillSwitcher(await store.init());
+      myGuides.value = slug;
+      showStatus(`Saved "${name}" to your guides`);
+    } else {
+      showStatus(`Loaded "${name}"`);
+    }
   } catch (error) {
     showStatus(error.message);
     setAssetParam(null, "f");
