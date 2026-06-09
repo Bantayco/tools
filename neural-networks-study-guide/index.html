@@ -160,7 +160,9 @@
   </footer>
 </div>
 
-<script>
+<script type="module">
+  import { getAsset, saveAsset } from "/_shared/api.js";
+
   const plan = [
     { ch: 1, title: "Chapter 1 — Using neural nets to recognize handwritten digits", days: [
       { t: "Perceptrons", d: "The perceptron model, weighted sums and thresholds, bias, NAND-gate universality. No exercises — read for intuition." },
@@ -267,19 +269,57 @@
     weeksEl.textContent = `~${weeks} weeks from today`;
   }
 
-  // Progress is per-browser — localStorage (this tool is personal checklist state,
-  // not an account document).
-  function load() {
+  // Persistence: one record per account in D1 when signed in (a single fixed
+  // slug — not multiple documents), localStorage when signed out. localStorage
+  // is always written as a backstop.
+  const TOOL = 'neural-networks-study-guide';
+  const PROGRESS_SLUG = 'progress';
+  let signedIn = false;
+  let accountTimer = null;
+
+  function loadLocal() {
     try { const r = localStorage.getItem(KEY); if (r) done = JSON.parse(r); } catch (e) { done = {}; }
     try { const p = localStorage.getItem(PACE_KEY); if (p) pace = parseInt(p, 10) || 4; } catch (e) {}
+  }
+  function saveLocal() {
+    try { localStorage.setItem(KEY, JSON.stringify(done)); localStorage.setItem(PACE_KEY, String(pace)); } catch (e) {}
+  }
+  function queueAccountSave() {
+    clearTimeout(accountTimer);
+    accountTimer = setTimeout(async () => {
+      try { await saveAsset(TOOL, PROGRESS_SLUG, { title: 'Study progress', done, pace }); }
+      catch (e) { if (e.message === 'Not signed in') signedIn = false; }
+    }, 600);
+  }
+
+  async function load() {
+    try {
+      const rec = await getAsset(TOOL, PROGRESS_SLUG); // account record
+      signedIn = true;
+      done = rec.done || {};
+      pace = rec.pace || 4;
+      saveLocal();
+    } catch (e) {
+      if (e.message === 'Not signed in') {
+        signedIn = false;
+        loadLocal();
+      } else {
+        // Signed in, but no record yet — keep any local progress and seed it.
+        signedIn = true;
+        loadLocal();
+        if (Object.keys(done).length) queueAccountSave();
+      }
+    }
     syncPaceButtons();
     render();
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {}
+    saveLocal();
+    if (signedIn) queueAccountSave();
   }
   function savePace() {
-    try { localStorage.setItem(PACE_KEY, String(pace)); } catch (e) {}
+    saveLocal();
+    if (signedIn) queueAccountSave();
   }
   function syncPaceButtons() {
     document.querySelectorAll('#pace button').forEach(b => {
