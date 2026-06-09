@@ -180,6 +180,66 @@
               </label>
             </div>
           </section>
+
+          <section class="control-section">
+            <div class="section-head">
+              <h2>Dark mode</h2>
+              <label class="section-switch" title="Author this guide's dark palette">
+                <input id="customDark" type="checkbox"> Override
+              </label>
+            </div>
+            <p class="section-hint">Off → dark preview is derived from the light palette. On → author dark values per guide (published to <code>dark.css</code>). Flip the preview to <strong>Dark</strong> to see them.</p>
+            <div class="dark-fields grid-2" id="darkFields">
+              <label>
+                Background
+                <input id="darkBackground" type="color">
+              </label>
+              <label>
+                Surface
+                <input id="darkSurface" type="color">
+              </label>
+              <label>
+                Ink
+                <input id="darkInk" type="color">
+              </label>
+              <label>
+                Muted
+                <input id="darkMuted" type="color">
+              </label>
+              <label>
+                Primary
+                <input id="darkPrimary" type="color">
+              </label>
+              <label>
+                Accent
+                <input id="darkAccent" type="color">
+              </label>
+              <label>
+                Success
+                <input id="darkSuccess" type="color">
+              </label>
+              <label>
+                Emphasis
+                <input id="darkEmphasis" type="color">
+              </label>
+              <label>
+                Category 1
+                <input id="darkCat1" type="color">
+              </label>
+              <label>
+                Category 2
+                <input id="darkCat2" type="color">
+              </label>
+              <label>
+                Category 3
+                <input id="darkCat3" type="color">
+              </label>
+              <label>
+                Category 4
+                <input id="darkCat4" type="color">
+              </label>
+            </div>
+          </section>
         </aside>
 
         <section class="preview-area" aria-label="Live style guide preview">
@@ -270,6 +330,16 @@
                 </span>
               </div>
               <pre><code id="extendedCssOutput"></code></pre>
+            </div>
+            <div class="publish-file" id="darkPublishFile" hidden>
+              <div class="publish-file-head">
+                <code>_shared/dark.css</code>
+                <span class="publish-actions">
+                  <button id="copyDarkCss" type="button">Copy</button>
+                  <button id="downloadDarkCss" type="button">Download</button>
+                </span>
+              </div>
+              <pre><code id="darkCssOutput"></code></pre>
             </div>
             <div class="publish-file">
               <div class="publish-file-head">

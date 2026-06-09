@@ -120,8 +120,27 @@ const defaults = {
   cat1: "#2f6f95",
   cat2: "#b3701c",
   cat3: "#2f7d52",
-  cat4: "#8a4f8a"
+  cat4: "#8a4f8a",
+  customDark: false,
+  darkBackground: "#11131a",
+  darkSurface: "#1a1e27",
+  darkInk: "#e8e6dd",
+  darkMuted: "#9aa298",
+  darkPrimary: "#34b3a2",
+  darkAccent: "#d8a07a",
+  darkSuccess: "#5fa37a",
+  darkEmphasis: "#e08a76",
+  darkCat1: "#6fb1d6",
+  darkCat2: "#e0a35f",
+  darkCat3: "#8ccf97",
+  darkCat4: "#c98ec9"
 };
+
+// The 12 authored dark-palette fields (a guide's "Override" set).
+const DARK_KEYS = [
+  "darkBackground", "darkSurface", "darkInk", "darkMuted", "darkPrimary", "darkAccent",
+  "darkSuccess", "darkEmphasis", "darkCat1", "darkCat2", "darkCat3", "darkCat4"
+];
 
 const controls = {};
 const controlIds = [
@@ -148,7 +167,19 @@ const controlIds = [
   "cat1",
   "cat2",
   "cat3",
-  "cat4"
+  "cat4",
+  "darkBackground",
+  "darkSurface",
+  "darkInk",
+  "darkMuted",
+  "darkPrimary",
+  "darkAccent",
+  "darkSuccess",
+  "darkEmphasis",
+  "darkCat1",
+  "darkCat2",
+  "darkCat3",
+  "darkCat4"
 ];
 
 const status = document.querySelector("#status");
@@ -159,6 +190,12 @@ const cssOutput = document.querySelector("#cssOutput");
 const sharedCssOutput = document.querySelector("#sharedCssOutput");
 const extendedCssOutput = document.querySelector("#extendedCssOutput");
 const bantayJsonOutput = document.querySelector("#bantayJsonOutput");
+const customDark = document.querySelector("#customDark");
+const darkFields = document.querySelector("#darkFields");
+const darkCssOutput = document.querySelector("#darkCssOutput");
+const darkPublishFile = document.querySelector("#darkPublishFile");
+const copyDarkCss = document.querySelector("#copyDarkCss");
+const downloadDarkCss = document.querySelector("#downloadDarkCss");
 const copyExtendedCss = document.querySelector("#copyExtendedCss");
 const downloadExtendedCss = document.querySelector("#downloadExtendedCss");
 const copySharedCss = document.querySelector("#copySharedCss");
@@ -308,6 +345,14 @@ applyScheme(previewScheme);
 schemeLight.addEventListener("click", () => setScheme("light"));
 schemeDark.addEventListener("click", () => setScheme("dark"));
 
+// Toggling the per-guide dark override. The currently-shown (derived) values
+// become the editable starting point; jump the preview to dark so it's visible.
+customDark.addEventListener("change", () => {
+  render();
+  store.change();
+  if (customDark.checked) setScheme("dark");
+});
+
 function readPreviewScheme() {
   try {
     return localStorage.getItem(PREVIEW_SCHEME_KEY) === "dark" ? "dark" : "light";
@@ -358,6 +403,8 @@ copySharedCss.addEventListener("click", () => copyText(sharedCssOutput.textConte
 downloadSharedCss.addEventListener("click", () => downloadText("tokens.css", sharedCssOutput.textContent, "text/css"));
 copyExtendedCss.addEventListener("click", () => copyText(extendedCssOutput.textContent, "tokens-extended.css copied"));
 downloadExtendedCss.addEventListener("click", () => downloadText("tokens-extended.css", extendedCssOutput.textContent, "text/css"));
+copyDarkCss.addEventListener("click", () => copyText(darkCssOutput.textContent, "dark.css copied"));
+downloadDarkCss.addEventListener("click", () => downloadText("dark.css", darkCssOutput.textContent, "text/css"));
 copyBantayJson.addEventListener("click", () => copyText(bantayJsonOutput.textContent, "bantay.json copied"));
 downloadBantayJson.addEventListener("click", () => downloadText("bantay.json", bantayJsonOutput.textContent, "application/json"));
 
@@ -513,6 +560,7 @@ function applyState(state) {
   controlIds.forEach((id) => {
     controls[id].value = state[id] ?? defaults[id];
   });
+  customDark.checked = state.customDark ?? defaults.customDark;
 }
 
 function getState() {
@@ -540,7 +588,20 @@ function getState() {
     cat1: controls.cat1.value,
     cat2: controls.cat2.value,
     cat3: controls.cat3.value,
-    cat4: controls.cat4.value
+    cat4: controls.cat4.value,
+    customDark: customDark.checked,
+    darkBackground: controls.darkBackground.value,
+    darkSurface: controls.darkSurface.value,
+    darkInk: controls.darkInk.value,
+    darkMuted: controls.darkMuted.value,
+    darkPrimary: controls.darkPrimary.value,
+    darkAccent: controls.darkAccent.value,
+    darkSuccess: controls.darkSuccess.value,
+    darkEmphasis: controls.darkEmphasis.value,
+    darkCat1: controls.darkCat1.value,
+    darkCat2: controls.darkCat2.value,
+    darkCat3: controls.darkCat3.value,
+    darkCat4: controls.darkCat4.value
   };
 }
 
@@ -566,12 +627,30 @@ function render() {
   document.documentElement.style.setProperty("--brand-headline-scale", state.headlineScale);
   brandPreview.dataset.buttonStyle = state.buttonStyle;
 
+  // Dark palette: authored when overriding, else derived from the light palette.
+  const dark = darkPalette(state);
+  if (!state.customDark) {
+    // Mirror the derived values into the (disabled) inputs as a live seed.
+    DARK_KEYS.forEach((k) => { controls[k].value = dark[k]; });
+  }
+  darkFields.classList.toggle("disabled", !state.customDark);
+  DARK_KEYS.forEach((k) => { controls[k].disabled = !state.customDark; });
+  document.documentElement.style.setProperty("--srcd-bg", dark.darkBackground);
+  document.documentElement.style.setProperty("--srcd-surface", dark.darkSurface);
+  document.documentElement.style.setProperty("--srcd-ink", dark.darkInk);
+  document.documentElement.style.setProperty("--srcd-muted", dark.darkMuted);
+  document.documentElement.style.setProperty("--srcd-primary", dark.darkPrimary);
+  document.documentElement.style.setProperty("--srcd-accent", dark.darkAccent);
+  brandPreview.dataset.dark = state.customDark ? "custom" : "derived";
+
   brandPreview.querySelector(".sample-nav strong").textContent = state.brandName;
   skillOutput.textContent = buildSkill(state);
   tokensOutput.textContent = JSON.stringify(buildTokens(state), null, 2);
   cssOutput.textContent = buildCss(state);
   sharedCssOutput.textContent = buildSharedCss(state);
   extendedCssOutput.textContent = buildExtendedCss(state);
+  darkCssOutput.textContent = buildDarkCss(state);
+  darkPublishFile.hidden = !state.customDark;
   bantayJsonOutput.textContent = JSON.stringify(state, null, 2);
 }
 
@@ -795,6 +874,83 @@ function buildExtendedCss(state) {
   --bantay-cat-2: ${state.cat2};
   --bantay-cat-3: ${state.cat3};
   --bantay-cat-4: ${state.cat4};
+}`;
+}
+
+// --- Dark palette: derivation + the guide's authored override ----------------
+
+function hexToRgb(hex) {
+  let h = String(hex).replace("#", "").trim();
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const n = parseInt(h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex(rgb) {
+  return "#" + rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+}
+
+// color-mix(in srgb, a (aWeight*100)%, b) — channelwise blend in sRGB.
+function mix(aHex, bHex, aWeight) {
+  const a = hexToRgb(aHex);
+  const b = hexToRgb(bHex);
+  return rgbToHex([0, 1, 2].map((i) => aWeight * a[i] + (1 - aWeight) * b[i]));
+}
+
+// Derive a dark palette from the light one (matches the CSS color-mix fallback
+// in styles.css for the base six; extended colors are lifted toward white).
+function deriveDark(s) {
+  return {
+    darkBackground: mix(s.ink, "#0c0c0d", 0.84),
+    darkSurface: mix(s.ink, "#18181b", 0.7),
+    darkInk: mix(s.background, "#ffffff", 0.9),
+    darkMuted: mix(s.background, s.ink, 0.52),
+    darkPrimary: mix(s.primary, "#ffffff", 0.75),
+    darkAccent: mix(s.accent, "#ffffff", 0.78),
+    darkSuccess: mix(s.success, "#ffffff", 0.72),
+    darkEmphasis: mix(s.emphasis, "#ffffff", 0.74),
+    darkCat1: mix(s.cat1, "#ffffff", 0.7),
+    darkCat2: mix(s.cat2, "#ffffff", 0.7),
+    darkCat3: mix(s.cat3, "#ffffff", 0.7),
+    darkCat4: mix(s.cat4, "#ffffff", 0.7)
+  };
+}
+
+// The dark palette this guide should use: authored values when overriding,
+// otherwise the derived ones.
+function darkPalette(state) {
+  if (!state.customDark) return deriveDark(state);
+  const out = {};
+  DARK_KEYS.forEach((k) => { out[k] = state[k] ?? defaults[k]; });
+  return out;
+}
+
+// dark.css — the shipped structure (single --_dark-* source + the two triggers).
+function buildDarkCss(state) {
+  const d = darkPalette(state);
+  const rows = [
+    ["background", d.darkBackground], ["surface", d.darkSurface], ["ink", d.darkInk],
+    ["muted", d.darkMuted], ["primary", d.darkPrimary], ["accent", d.darkAccent],
+    ["success", d.darkSuccess], ["emphasis", d.darkEmphasis],
+    ["cat-1", d.darkCat1], ["cat-2", d.darkCat2], ["cat-3", d.darkCat3], ["cat-4", d.darkCat4]
+  ];
+  const sources = rows.map(([t, v]) => `  --_dark-${t}: ${v};`).join("\n");
+  const remap = (pad) => rows.map(([t]) => `${pad}--bantay-${t}: var(--_dark-${t});`).join("\n");
+  return `/* Bantay design system — DARK theme. Paste into _shared/dark.css. */
+:root {
+${sources}
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+${remap("  ")}
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+${remap("    ")}
+  }
 }`;
 }
 

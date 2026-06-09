@@ -184,6 +184,29 @@ p {
   color: var(--app-muted);
 }
 
+/* Section header switch (e.g. Dark mode → Override). */
+.section-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--app-muted);
+  cursor: pointer;
+}
+
+.section-switch input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--app-primary);
+  cursor: pointer;
+}
+
+/* Disabled dark-palette inputs (override off → values are derived). */
+.dark-fields.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .section-hint {
   margin: -4px 0 12px;
   color: var(--app-muted);
@@ -417,6 +440,17 @@ output {
   --brand-muted:   color-mix(in srgb, var(--src-bg) 52%, var(--src-ink));
   --brand-primary: color-mix(in srgb, var(--src-primary) 75%, #ffffff);
   --brand-accent:  color-mix(in srgb, var(--src-accent) 78%, #ffffff);
+}
+
+/* Custom dark: the guide authors its own dark palette (--srcd-*), overriding
+   the derived values above (higher specificity via the extra attribute). */
+.brand-preview[data-scheme="dark"][data-dark="custom"] {
+  --brand-bg:      var(--srcd-bg);
+  --brand-surface: var(--srcd-surface);
+  --brand-ink:     var(--srcd-ink);
+  --brand-muted:   var(--srcd-muted);
+  --brand-primary: var(--srcd-primary);
+  --brand-accent:  var(--srcd-accent);
 }
 
 .sample-nav {
