@@ -4,36 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Neural Networks — Study Guide</title>
-<!-- Bantay design system: provides --bantay-* tokens + the brand font (@import). -->
+<!-- Bantay design system: brand tokens (+ brand font @import) and extended tokens. -->
 <link rel="stylesheet" href="/_shared/tokens.css">
+<link rel="stylesheet" href="/_shared/tokens-extended.css">
 <style>
-  /* Mono isn't in the Bantay design system yet — load it locally (see MISSING-TOKENS.md). */
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
-
   :root {
-    /* ── Mapped straight from Bantay tokens ───────────────────────── */
+    /* Every value comes from a Bantay token now — see _shared/tokens.css and
+       _shared/tokens-extended.css. This tool defines no colors of its own. */
     --bg:           var(--bantay-background);
     --panel:        var(--bantay-surface);
+    --panel-2:      var(--bantay-surface-2);
     --ink:          var(--bantay-ink);
     --ink-soft:     var(--bantay-muted);
-    --accent:       var(--bantay-accent);
+    --ink-faint:    var(--bantay-ink-faint);
+    --line:         var(--bantay-line);
+    --line-bright:  var(--bantay-line-strong);
+    --accent:       var(--bantay-emphasis);
+    --done:         var(--bantay-success);
     --radius:       var(--bantay-radius);
     --display-font: var(--bantay-display-font);
     --body-font:    var(--bantay-body-font);
-
-    /* ── Derived from Bantay neutrals (no direct token — see MISSING-TOKENS.md) ── */
-    --panel-2:      color-mix(in srgb, var(--bantay-muted)  8%, var(--bantay-surface));
-    --ink-faint:    color-mix(in srgb, var(--bantay-muted) 60%, var(--bantay-background));
-    --line:         color-mix(in srgb, var(--bantay-muted) 20%, transparent);
-    --line-bright:  color-mix(in srgb, var(--bantay-muted) 42%, transparent);
-
-    /* ── GAPS: no Bantay token at all. Hardcoded — see MISSING-TOKENS.md ── */
-    --mono-font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    --done: var(--bantay-primary);  /* no "success" token → reuse primary */
-    --c1: #2f6f95;  /* categorical · blue   */
-    --c2: #b3701c;  /* categorical · amber  */
-    --c3: #2f7d52;  /* categorical · green  */
-    --c4: #8a4f8a;  /* categorical · purple */
+    --mono-font:    var(--bantay-mono-font);
+    --c1: var(--bantay-cat-1);
+    --c2: var(--bantay-cat-2);
+    --c3: var(--bantay-cat-3);
+    --c4: var(--bantay-cat-4);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {

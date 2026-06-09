@@ -1,0 +1,31 @@
+/* ============================================================
+ * Bantay design system — EXTENDED tokens.
+ * Complements _shared/tokens.css (the brand tokens). Link AFTER it:
+ *     <link rel="stylesheet" href="/_shared/tokens.css">
+ *     <link rel="stylesheet" href="/_shared/tokens-extended.css">
+ *
+ * Hand-maintained: the style-guide Publish flow only rewrites tokens.css,
+ * so these survive a brand re-publish. The neutrals derive from the brand
+ * automatically; the palette/status colors are brand-independent decisions.
+ * Roles surfaced by neural-networks-study-guide/MISSING-TOKENS.md.
+ * ============================================================ */
+:root {
+  /* Neutrals — derived from the brand */
+  --bantay-line:        color-mix(in srgb, var(--bantay-muted) 20%, transparent);
+  --bantay-line-strong: color-mix(in srgb, var(--bantay-muted) 42%, transparent);
+  --bantay-ink-faint:   color-mix(in srgb, var(--bantay-muted) 60%, var(--bantay-background));
+  --bantay-surface-2:   color-mix(in srgb, var(--bantay-muted) 8%, var(--bantay-surface));
+
+  /* Type — platform monospace (no web load) */
+  --bantay-mono-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  /* Status / emphasis */
+  --bantay-success: var(--bantay-primary);  /* until a distinct success hue is chosen */
+  --bantay-emphasis: #c0573f;                /* warm attention color (warnings, highlights) */
+
+  /* Categorical palette — color-coding, charts, tags */
+  --bantay-cat-1: #2f6f95;  /* blue   */
+  --bantay-cat-2: #b3701c;  /* amber  */
+  --bantay-cat-3: #2f7d52;  /* green  */
+  --bantay-cat-4: #8a4f8a;  /* purple */
+}

@@ -8,7 +8,17 @@ const TOOLS = {
   mermaid: { label: "Mermaid", href: "/mermaid/", blurb: "Edit and preview diagrams." },
 };
 
+// Standalone tools (not document editors) — just links.
+const APPS = [
+  {
+    label: "Neural Networks Study Guide",
+    href: "/neural-networks-study-guide/",
+    blurb: "Nielsen's book, day by day, with progress tracking.",
+  },
+];
+
 const newTools = document.querySelector("#newTools");
+const appsEl = document.querySelector("#apps");
 const filesEl = document.querySelector("#files");
 const authEl = document.querySelector("#auth");
 
@@ -22,6 +32,7 @@ function setAuth(signedIn) {
 }
 
 renderNewCards();
+renderApps();
 renderFiles();
 
 function renderNewCards() {
@@ -34,6 +45,16 @@ function renderNewCards() {
       </a>`
     )
     .join("");
+}
+
+function renderApps() {
+  appsEl.innerHTML = APPS.map(
+    (a) => `
+      <a class="card" href="${a.href}">
+        <strong>${esc(a.label)}</strong>
+        <span>${esc(a.blurb)}</span>
+      </a>`
+  ).join("");
 }
 
 async function renderFiles() {
