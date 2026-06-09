@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neural Networks — Study Guide</title>
+<title>Neural Networks Study Guide</title>
 <script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <!-- Bantay design system: brand tokens (+ brand font @import), extended + dark. -->
 <link rel="stylesheet" href="/_shared/tokens.css">
@@ -41,11 +41,12 @@
     line-height: var(--bantay-line-height);
     padding: 0 0 80px;
   }
-  .wrap { max-width: 820px; margin: 0 auto; padding: 0 24px; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 32px 24px 0; }
 
-  header { padding: 56px 0 28px; border-bottom: 1px solid var(--line); }
-  .kick { font-family: var(--mono-font); font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--c2); margin-bottom: 16px; }
-  h1 { font-family: var(--display-font); font-weight: 900; font-size: 44px; line-height: 1.04; letter-spacing: -0.02em; margin-bottom: 14px; }
+  /* Top bar — matches Mermaid Studio / Style Guide Studio. */
+  .topbar { padding: 16px 22px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  .topbar h1 { font-family: var(--display-font); font-weight: 500; font-size: 21px; letter-spacing: -0.01em; }
+  .subtitle { margin-top: 4px; color: var(--ink-soft); font-size: 14px; }
   .lede { font-size: 17px; color: var(--ink-soft); max-width: 60ch; }
 
   .progress-wrap { margin: 28px 0 8px; }
@@ -106,10 +107,13 @@
 </style>
 </head>
 <body>
+<header class="topbar">
+  <div>
+    <h1>Neural Networks Study Guide</h1>
+    <p class="subtitle">Nielsen's book, day by day</p>
+  </div>
+</header>
 <div class="wrap">
-  <header>
-    <div class="kick">Neural Networks &amp; Deep Learning · Nielsen</div>
-    <h1>The day-by-day plan</h1>
     <p class="lede">32 sections, one per day (text + its exercises). Tap a day to mark it done — your progress is saved automatically. The dense days (backprop, vanishing gradients) often run two days each, so budget ~36 study-days in total. At 4–5 days a week you'll finish in roughly eight weeks.</p>
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="fill"></div></div>
@@ -151,7 +155,6 @@
         </div>
       </div>
     </div>
-  </header>
 
   <div id="plan"></div>
 
