@@ -61,6 +61,41 @@ const monoFonts = new Set([
   "Fira Code", "Roboto Mono", "Inconsolata", "DM Mono", "System Mono"
 ]);
 
+// Google Fonts family specs (name -> css2 `family=` value). Fonts NOT listed
+// here are system fonts (Avenir Next, SF Pro, Georgia, Times New Roman, System
+// Mono) and need no web load. Used to auto-build the @import for published CSS.
+const googleFontSpecs = {
+  Inter: "Inter:wght@400..900",
+  "Source Sans": "Source+Sans+3:wght@400..900",
+  "IBM Plex Sans": "IBM+Plex+Sans:wght@400;500;600;700",
+  "Public Sans": "Public+Sans:wght@400..900",
+  "Work Sans": "Work+Sans:wght@400..900",
+  "Source Serif 4": "Source+Serif+4:wght@400..900",
+  "IBM Plex Serif": "IBM+Plex+Serif:wght@400;500;600;700",
+  Lora: "Lora:wght@400..700",
+  Merriweather: "Merriweather:wght@400;700;900",
+  "Playfair Display": "Playfair+Display:wght@400..900",
+  "PT Serif": "PT+Serif:wght@400;700",
+  Bitter: "Bitter:wght@400..900",
+  Spectral: "Spectral:wght@400;500;600;700;800",
+  "Space Grotesk": "Space+Grotesk:wght@400..700",
+  Sora: "Sora:wght@400..800",
+  Syne: "Syne:wght@400..800",
+  Oswald: "Oswald:wght@400..700",
+  "Bebas Neue": "Bebas+Neue",
+  Anton: "Anton",
+  "Abril Fatface": "Abril+Fatface",
+  "DM Serif Display": "DM+Serif+Display",
+  "JetBrains Mono": "JetBrains+Mono:wght@400..700",
+  "IBM Plex Mono": "IBM+Plex+Mono:wght@400;500;600;700",
+  "Space Mono": "Space+Mono:wght@400;700",
+  "Source Code Pro": "Source+Code+Pro:wght@400..700",
+  "Fira Code": "Fira+Code:wght@400..700",
+  "Roboto Mono": "Roboto+Mono:wght@400..700",
+  Inconsolata: "Inconsolata:wght@400..700",
+  "DM Mono": "DM+Mono:wght@400;500"
+};
+
 const defaults = {
   brandName: "Bantay",
   skillName: "bantay-brand",
@@ -573,10 +608,23 @@ function buildCss(state) {
 }`;
 }
 
+// Build the @import that loads the brand fonts (display + body) from Google
+// Fonts. System fonts are skipped (they need no load). Empty if both are system.
+function buildFontImport(state) {
+  const specs = [...new Set([state.displayFont, state.bodyFont])]
+    .map((font) => googleFontSpecs[font])
+    .filter(Boolean)
+    .sort();
+  if (!specs.length) return "";
+  const url = `https://fonts.googleapis.com/css2?family=${specs.join("&family=")}&display=swap`;
+  return `@import url("${url}");\n\n`;
+}
+
 // The shared design system: fixed --bantay-* names that every tool links via
-// _shared/tokens.css. This is what the Publish tab emits.
+// _shared/tokens.css. Includes the @import so the brand font loads everywhere.
 function buildSharedCss(state) {
-  return `:root {
+  return `/* Bantay design system — paste into _shared/tokens.css. */
+${buildFontImport(state)}:root {
   --bantay-ink: ${state.ink};
   --bantay-muted: ${state.muted};
   --bantay-background: ${state.background};
