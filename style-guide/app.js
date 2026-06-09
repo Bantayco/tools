@@ -109,6 +109,12 @@ const brandPreview = document.querySelector("#brandPreview");
 const skillOutput = document.querySelector("#skillOutput");
 const tokensOutput = document.querySelector("#tokensOutput");
 const cssOutput = document.querySelector("#cssOutput");
+const sharedCssOutput = document.querySelector("#sharedCssOutput");
+const bantayJsonOutput = document.querySelector("#bantayJsonOutput");
+const copySharedCss = document.querySelector("#copySharedCss");
+const downloadSharedCss = document.querySelector("#downloadSharedCss");
+const copyBantayJson = document.querySelector("#copyBantayJson");
+const downloadBantayJson = document.querySelector("#downloadBantayJson");
 const resetGuide = document.querySelector("#resetGuide");
 const resetModal = document.querySelector("#resetModal");
 const resetTargetEl = document.querySelector("#resetTarget");
@@ -147,6 +153,10 @@ const tabs = {
     output: cssOutput,
     filename: "brand.css",
     type: "text/css"
+  },
+  publish: {
+    button: document.querySelector("#tabPublish"),
+    panel: document.querySelector("#publishPanel")
   }
 };
 
@@ -244,6 +254,12 @@ downloadCurrent.addEventListener("click", () => {
   }
   downloadText(current.filename, current.output.textContent, current.type);
 });
+
+// Publish tab — each shared file copies/downloads on its own.
+copySharedCss.addEventListener("click", () => copyText(sharedCssOutput.textContent, "tokens.css copied"));
+downloadSharedCss.addEventListener("click", () => downloadText("tokens.css", sharedCssOutput.textContent, "text/css"));
+copyBantayJson.addEventListener("click", () => copyText(bantayJsonOutput.textContent, "bantay.json copied"));
+downloadBantayJson.addEventListener("click", () => downloadText("bantay.json", bantayJsonOutput.textContent, "application/json"));
 
 // Reset is destructive (autosave overwrites the current guide), so require the
 // user to type the file name to confirm.
@@ -395,6 +411,8 @@ function render() {
   skillOutput.textContent = buildSkill(state);
   tokensOutput.textContent = JSON.stringify(buildTokens(state), null, 2);
   cssOutput.textContent = buildCss(state);
+  sharedCssOutput.textContent = buildSharedCss(state);
+  bantayJsonOutput.textContent = JSON.stringify(state, null, 2);
 }
 
 function setActiveTab(name) {
@@ -409,7 +427,7 @@ function setActiveTab(name) {
 }
 
 function currentExport() {
-  if (activeTab === "preview") return null;
+  if (activeTab === "preview" || activeTab === "publish") return null;
   return {
     ...tabs[activeTab],
     label: tabs[activeTab].button.textContent
@@ -552,6 +570,29 @@ function buildCss(state) {
   --${state.skillName}-line-height: ${state.lineHeight};
   --${state.skillName}-headline-weight: ${state.headlineWeight};
   --${state.skillName}-headline-scale: ${state.headlineScale};
+}`;
+}
+
+// The shared design system: fixed --bantay-* names that every tool links via
+// _shared/tokens.css. This is what the Publish tab emits.
+function buildSharedCss(state) {
+  return `:root {
+  --bantay-ink: ${state.ink};
+  --bantay-muted: ${state.muted};
+  --bantay-background: ${state.background};
+  --bantay-surface: ${state.surface};
+  --bantay-primary: ${state.primary};
+  --bantay-accent: ${state.accent};
+
+  --bantay-radius: ${state.radius}px;
+  --bantay-spacing: ${state.spacing}px;
+
+  --bantay-body-font: ${fontStacks[state.bodyFont]};
+  --bantay-display-font: ${fontStacks[state.displayFont]};
+  --bantay-base-size: ${state.baseSize}px;
+  --bantay-line-height: ${state.lineHeight};
+  --bantay-headline-weight: ${state.headlineWeight};
+  --bantay-headline-scale: ${state.headlineScale};
 }`;
 }
 

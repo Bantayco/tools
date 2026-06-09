@@ -150,6 +150,7 @@
               <button id="tabSkill" type="button" role="tab" aria-selected="false">Skill</button>
               <button id="tabTokens" type="button" role="tab" aria-selected="false">Tokens</button>
               <button id="tabCss" type="button" role="tab" aria-selected="false">CSS</button>
+              <button id="tabPublish" type="button" role="tab" aria-selected="false">Publish</button>
             </div>
             <div class="export-actions">
               <button id="copyCurrent" type="button">Copy</button>
@@ -204,6 +205,29 @@
           </section>
           <section id="cssPanel" class="panel code-panel" aria-label="Generated CSS variables">
             <pre><code id="cssOutput"></code></pre>
+          </section>
+          <section id="publishPanel" class="panel publish-panel" aria-label="Publish to the shared design system">
+            <p class="publish-note">Paste each block into its file in the repo, then commit &amp; push — every tool picks up the new look on next load.</p>
+            <div class="publish-file">
+              <div class="publish-file-head">
+                <code>_shared/tokens.css</code>
+                <span class="publish-actions">
+                  <button id="copySharedCss" type="button">Copy</button>
+                  <button id="downloadSharedCss" type="button">Download</button>
+                </span>
+              </div>
+              <pre><code id="sharedCssOutput"></code></pre>
+            </div>
+            <div class="publish-file">
+              <div class="publish-file-head">
+                <code>_shared/tokens/bantay.json</code>
+                <span class="publish-actions">
+                  <button id="copyBantayJson" type="button">Copy</button>
+                  <button id="downloadBantayJson" type="button">Download</button>
+                </span>
+              </div>
+              <pre><code id="bantayJsonOutput"></code></pre>
+            </div>
           </section>
         </section>
       </section>

@@ -57,10 +57,14 @@ to the `TOOLS` registry in `home.js` and it appears automatically.
 ## The design-system loop (meta)
 
 The **style-guide** tool is the editor; its **output** is the design system.
-Export a set's CSS → commit to `_shared/tokens.css` (what all tools link).
-Export/save a set's JSON → `_shared/tokens/<name>.json` (what the editor
-reloads via `?f=`). The style guide thus produces the very tokens every
-tool — including itself — consumes.
+To update the shared look: open the guide, go to the **Publish** tab, and copy
+its two blocks into the repo:
+- `_shared/tokens.css` — the live `--bantay-*` variables every tool links.
+- `_shared/tokens/bantay.json` — the flat set the editor reloads via `?f=bantay`.
+
+Commit & push, and every tool picks up the new look on next load. (The Publish
+tab emits the fixed `--bantay-*` names; the regular **CSS** tab emits
+`--<skillName>-*` for external/standalone use.)
 
 ## Saving to an account (Functions + D1 + Access)
 
