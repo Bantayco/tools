@@ -13,7 +13,11 @@ const DEFAULT_SOURCE = `flowchart TD
   B -- No --> D[Debug]
   D --> B`;
 
-mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
+const prefersDark =
+  document.documentElement.getAttribute("data-theme") === "dark" ||
+  (!document.documentElement.hasAttribute("data-theme") &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches);
+mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: prefersDark ? "dark" : "default" });
 
 const editor = document.querySelector("#editor");
 const preview = document.querySelector("#preview");

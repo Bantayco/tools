@@ -1,5 +1,6 @@
 // cache-bust: served with no-long-cache headers (see /_headers)
 import { listAllAssets } from "/_shared/api.js";
+import { getTheme, setTheme } from "/_shared/theme.js";
 
 // Single source of truth for the tools on the dashboard. Add a tool here and it
 // shows up both as a "start new" card and as the label/link for its files.
@@ -21,6 +22,26 @@ const newTools = document.querySelector("#newTools");
 const appsEl = document.querySelector("#apps");
 const filesEl = document.querySelector("#files");
 const authEl = document.querySelector("#auth");
+const themeEl = document.querySelector("#theme");
+
+const THEMES = [
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "system", label: "System" },
+];
+
+function renderTheme() {
+  const current = getTheme();
+  themeEl.innerHTML = THEMES.map(
+    (t) => `<button type="button" data-theme-val="${t.value}" class="${t.value === current ? "on" : ""}">${t.label}</button>`
+  ).join("");
+}
+themeEl.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-theme-val]");
+  if (!btn) return;
+  setTheme(btn.dataset.themeVal);
+  renderTheme();
+});
 
 const SIGN_IN = "/signin?next=%2F";
 const SIGN_OUT = "/cdn-cgi/access/logout"; // Cloudflare Access — clears the session cookie
@@ -31,6 +52,7 @@ function setAuth(signedIn) {
     : `<a class="auth-link" href="${SIGN_IN}">Sign in</a>`;
 }
 
+renderTheme();
 renderNewCards();
 renderApps();
 renderFiles();
@@ -74,6 +96,10 @@ async function renderFiles() {
   }
 
   setAuth(true);
+
+  // Only document tools belong in "Your files"; standalone tools (e.g. the
+  // study guide's progress record) are reached from the Tools section instead.
+  items = items.filter((it) => TOOLS[it.tool]);
 
   if (!items.length) {
     filesEl.innerHTML = `<p class="note">No files yet — start one above.</p>`;

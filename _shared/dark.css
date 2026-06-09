@@ -1,0 +1,45 @@
+/* ============================================================
+ * Bantay design system — DARK theme.
+ * Link AFTER tokens.css + tokens-extended.css:
+ *     <link rel="stylesheet" href="/_shared/tokens.css">
+ *     <link rel="stylesheet" href="/_shared/tokens-extended.css">
+ *     <link rel="stylesheet" href="/_shared/dark.css">
+ *
+ * Applied when <html data-theme="dark">, or by system preference when no
+ * explicit theme is set. Only the BASE tokens are overridden — the derived
+ * neutrals (line, ink-faint, surface-2, line-strong) recompute automatically
+ * because they're color-mix()es of these.
+ * ============================================================ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bantay-background: #11131a;
+  --bantay-surface:    #1a1e27;
+  --bantay-ink:        #e8e6dd;
+  --bantay-muted:      #9aa298;
+  --bantay-primary:    #34b3a2;
+  --bantay-accent:     #d8a07a;
+  --bantay-success:    #5fa37a;
+  --bantay-emphasis:   #e08a76;
+  --bantay-cat-1:      #6fb1d6;
+  --bantay-cat-2:      #e0a35f;
+  --bantay-cat-3:      #8ccf97;
+  --bantay-cat-4:      #c98ec9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+    --bantay-background: #11131a;
+    --bantay-surface:    #1a1e27;
+    --bantay-ink:        #e8e6dd;
+    --bantay-muted:      #9aa298;
+    --bantay-primary:    #34b3a2;
+    --bantay-accent:     #d8a07a;
+    --bantay-success:    #5fa37a;
+    --bantay-emphasis:   #e08a76;
+    --bantay-cat-1:      #6fb1d6;
+    --bantay-cat-2:      #e0a35f;
+    --bantay-cat-3:      #8ccf97;
+    --bantay-cat-4:      #c98ec9;
+  }
+}
