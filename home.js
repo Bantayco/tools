@@ -16,6 +16,11 @@ const APPS = [
     href: "/neural-networks-study-guide/",
     blurb: "Nielsen's book, day by day, with progress tracking.",
   },
+  {
+    label: "AI Syllabus",
+    href: "/ai-syllabus/",
+    blurb: "AI from first principles — a reading & replication syllabus.",
+  },
 ];
 
 const newTools = document.querySelector("#newTools");

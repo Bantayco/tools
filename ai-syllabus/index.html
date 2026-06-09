@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Syllabus</title>
+<script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<!-- Bantay design system: brand tokens (+ brand font @import), extended + dark. -->
+<link rel="stylesheet" href="/_shared/tokens.css">
+<link rel="stylesheet" href="/_shared/tokens-extended.css">
+<link rel="stylesheet" href="/_shared/dark.css">
+<style>
+  :root {
+    /* Every value comes from a Bantay token — see _shared/tokens.css and
+       _shared/tokens-extended.css. This tool defines no colors of its own. */
+    --ink:          var(--bantay-ink);
+    --ink-soft:     var(--bantay-muted);
+    --ink-faint:    var(--bantay-ink-faint);
+    --paper:        var(--bantay-background);
+    --paper-card:   var(--bantay-surface);
+    --rule:         var(--bantay-line);
+    --rule-strong:  var(--bantay-line-strong);
+    --accent:       var(--bantay-emphasis);
+    --accent-soft:  color-mix(in srgb, var(--bantay-emphasis) 70%, var(--bantay-background));
+    --green:        var(--bantay-cat-3);
+    --amber:        var(--bantay-cat-2);
+    --red:          var(--bantay-emphasis);
+    --shadow:       color-mix(in srgb, var(--bantay-ink) 8%, transparent);
+    --display-font: var(--bantay-display-font);
+    --body-font:    var(--bantay-body-font);
+    --mono-font:    var(--bantay-mono-font);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body-font);
+    font-size: 17px;
+    line-height: var(--bantay-line-height);
+    font-optical-sizing: auto;
+  }
+
+  /* Top bar — matches Mermaid Studio / Style Guide Studio / Study Guide. */
+  .topbar { padding: 16px 22px; border-bottom: 1px solid var(--rule); background: var(--paper-card); }
+  .topbar h1 { font-family: var(--display-font); font-weight: var(--bantay-headline-weight); font-size: 21px; letter-spacing: -0.01em; margin: 0; }
+  .topbar .subtitle { margin-top: 4px; color: var(--ink-soft); font-size: 14px; }
+
+  .sheet {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 56px 96px;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead {
+    border-bottom: 3px double var(--ink);
+    padding-bottom: 28px;
+    margin-bottom: 8px;
+  }
+  .eyebrow {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--display-font);
+    font-weight: var(--bantay-headline-weight);
+    font-size: 48px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+  h1 .sub {
+    display: block;
+    font-size: 23px;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--ink-soft);
+    letter-spacing: -0.01em;
+    margin-top: 8px;
+  }
+  .standfirst {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  /* ---- How to use ---- */
+  .howto {
+    background: var(--paper-card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    padding: 22px 26px;
+    margin: 34px 0 44px;
+    font-size: 15.5px;
+    line-height: 1.58;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .howto p { margin: 0 0 10px; }
+  .howto p:last-child { margin-bottom: 0; }
+  .howto strong { color: var(--ink); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin-top: 14px;
+    font-family: var(--mono-font);
+    font-size: 12.5px;
+  }
+  .legend span { white-space: nowrap; display: inline-flex; align-items: center; }
+
+  /* ---- Units ---- */
+  .unit {
+    margin: 0 0 52px;
+    break-inside: avoid;
+  }
+  .unit-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+  }
+  .unit-num {
+    font-family: var(--mono-font);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  h2 {
+    font-family: var(--display-font);
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.015em;
+    margin: 0;
+    flex: 1;
+  }
+  .unit-tag {
+    font-family: var(--body-font);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .unit-intro {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin: 14px 0 20px;
+  }
+
+  /* ---- Tables ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    margin: 8px 0 4px;
+  }
+  thead th {
+    font-family: var(--mono-font);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: left;
+    font-weight: 600;
+    padding: 0 12px 8px 0;
+    border-bottom: 1.5px solid var(--rule-strong);
+    vertical-align: bottom;
+  }
+  tbody td {
+    padding: 11px 12px 11px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.42;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .rung {
+    font-family: var(--mono-font);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    width: 1%;
+  }
+  .rung .sub { color: var(--accent-soft); }
+  .paper-cell { width: 42%; }
+  .paper-title { font-style: italic; color: var(--ink); }
+  .paper-meta { font-style: normal; color: var(--ink-faint); }
+  .proj-cell { color: var(--ink-soft); }
+
+  /* Monochrome difficulty badges — distinguishable by fill pattern and
+     letter, so they survive black-and-white printing. */
+  .lvl {
+    font-family: var(--mono-font);
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    border: 1.2px solid var(--ink);
+    border-radius: 2px;
+    padding: 1px 5px 1px 4px;
+    white-space: nowrap;
+    display: inline-block;
+    line-height: 1.4;
+    margin-right: 3px;
+  }
+  /* fill swatch before the label */
+  .lvl::before {
+    font-size: 9px;
+    margin-right: 4px;
+    letter-spacing: -1px;
+  }
+  .lvl.g { background: var(--ink); color: var(--paper-card); }
+  .lvl.g::before { content: "\2588\2588"; }            /* ██ solid */
+  .lvl.y { background: transparent; color: var(--ink); }
+  .lvl.y::before { content: "\2593\2591"; }            /* ▓░ half */
+  .lvl.r { background: transparent; color: var(--ink); }
+  .lvl.r::before { content: "\2591\2591"; }            /* ░░ empty */
+
+  /* ---- Capstone ---- */
+  .capstone {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 32px 34px;
+    margin: 8px 0 4px;
+    border-radius: var(--bantay-radius);
+  }
+  .capstone h3 {
+    font-family: var(--display-font);
+    font-weight: 600;
+    font-size: 20px;
+    margin: 0 0 12px;
+    color: var(--amber);
+  }
+  .capstone p { margin: 0; font-size: 16px; line-height: 1.62; color: color-mix(in srgb, var(--paper) 88%, var(--ink-soft)); }
+  .capstone .lvl { color: var(--paper); border-color: var(--paper); background: transparent; }
+  .capstone .lvl.g { background: var(--paper); color: var(--ink); }
+
+  /* ---- Practical notes ---- */
+  .notes ul { padding-left: 0; list-style: none; margin: 12px 0 0; }
+  .notes li {
+    padding: 10px 0 10px 26px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+    font-size: 15.5px;
+    color: var(--ink-soft);
+  }
+  .notes li:last-child { border-bottom: none; }
+  .notes li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: var(--mono-font);
+  }
+  .notes strong { color: var(--ink); }
+
+  .colophon {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .sheet { padding: 32px 22px 72px; }
+    h1 { font-size: 36px; }
+  }
+
+  /* ---- Print ---- */
+  @media print {
+    :root { --paper: #fff; --paper-card: #fff; }
+    @page { margin: 16mm 14mm; }
+
+    .topbar { display: none; }
+
+    /* Reset the document box so Chrome's print path measures the full flow
+       height instead of clipping to a single mis-measured page. */
+    html, body {
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      overflow: visible !important;
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff;
+    }
+    body { font-size: 11pt; line-height: 1.42; }
+
+    .sheet {
+      max-width: none !important;
+      width: auto !important;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    h1 { font-size: 30pt; }
+    h1 .sub { font-size: 15pt; }
+    h2 { font-size: 17pt; }
+    .standfirst { font-size: 11.5pt; }
+    .howto { box-shadow: none; margin: 18px 0 26px; }
+    .unit { margin-bottom: 26px; overflow: visible; }
+    .unit-head { break-after: avoid; page-break-after: avoid; }
+
+    /* Keep table rows intact but DON'T wrap whole tall sections in an
+       avoid-block — an avoid taller than one page can trigger clipping. */
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
+    table { overflow: visible; }
+
+    .capstone {
+      background: #fff !important;
+      color: var(--ink) !important;
+      border: 2px solid var(--ink);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .capstone h3 { color: var(--accent) !important; }
+    .capstone p { color: var(--ink-soft) !important; }
+    .capstone .lvl { color: var(--accent) !important; }
+    .lvl, .unit-num, .rung .sub, .notes li::before, .eyebrow { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>AI Syllabus</h1>
+    <p class="subtitle">From first principles — read &amp; replicate</p>
+  </div>
+</header>
+<div class="sheet">
+
+  <header class="masthead">
+    <p class="eyebrow">Self-Study Course · Read &amp; Replicate</p>
+    <h1>AI From First Principles
+      <span class="sub">A Reading &amp; Replication Syllabus</span>
+    </h1>
+    <p class="standfirst">Structured around the four learning objectives — discriminative, generative, representational, and value/policy — the architecture spine that feeds them, and the post-training layers stacked on top. Each unit pairs canonical papers with a project to replicate, climbing from a laptop-scale "hello world" to a recognizable approximation of the state of the art.</p>
+  </header>
+
+  <div class="howto">
+    <p><strong>How to use this.</strong> Each ladder is independent — climb them in any order, though Unit&nbsp;0 (architecture) and the discriminative ladder are the gentlest start. Each rung pairs a paper with a project.</p>
+    <p>Projects are tagged by the compute they realistically need:</p>
+    <div class="legend">
+      <span><span class="lvl g">LAPTOP</span> laptop / Colab, minutes&ndash;hours</span>
+      <span><span class="lvl y">GPU</span> a single GPU</span>
+      <span><span class="lvl r">READ</span> read-to-understand, or replicate scaled-down</span>
+    </div>
+  </div>
+
+  <!-- UNIT 0 -->
+  <section class="unit">
+    <div class="unit-head">
+      <span class="unit-num">UNIT 0</span>
+      <h2>The Architecture Spine</h2>
+      <span class="unit-tag">structure</span>
+    </div>
+    <p class="unit-intro">The structural lineage every objective depends on. Read these first; they're the shared vocabulary.</p>
+    <table>
+      <thead><tr><th>Year</th><th class="paper-cell">Paper</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td class="rung">1986</td><td class="paper-cell"><span class="paper-title">Learning Representations by Back-Propagating Errors</span> <span class="paper-meta">— Rumelhart, Hinton &amp; Williams</span></td><td class="proj-cell">Backprop: how weights get set at all</td></tr>
+        <tr><td class="rung">1997</td><td class="paper-cell"><span class="paper-title">Long Short-Term Memory</span> <span class="paper-meta">— Hochreiter &amp; Schmidhuber</span></td><td class="proj-cell">Recurrence with stable gradients</td></tr>
+        <tr><td class="rung">1998</td><td class="paper-cell"><span class="paper-title">Gradient-Based Learning Applied to Document Recognition</span> <span class="paper-meta">— LeCun et al.</span></td><td class="proj-cell">CNN (LeNet); spatial weight-sharing</td></tr>
+        <tr><td class="rung">2014</td><td class="paper-cell"><span class="paper-title">Sequence to Sequence Learning</span> <span class="paper-meta">— Sutskever, Vinyals &amp; Le</span></td><td class="proj-cell">Encoder&ndash;decoder for sequences</td></tr>
+        <tr><td class="rung">2015</td><td class="paper-cell"><span class="paper-title">Neural MT by Jointly Learning to Align and Translate</span> <span class="paper-meta">— Bahdanau, Cho &amp; Bengio</span></td><td class="proj-cell">Attention, bolted onto an RNN</td></tr>
+        <tr><td class="rung">2017</td><td class="paper-cell"><span class="paper-title">Attention Is All You Need</span> <span class="paper-meta">— Vaswani et al.</span></td><td class="proj-cell">Transformer; drop recurrence, keep attention</td></tr>
+      </tbody>
+    </table>
+    <table style="margin-top:14px">
+      <tbody>
+        <tr><td class="rung"><span class="lvl g">LAPTOP</span> P0</td><td class="proj-cell"><strong>Project&nbsp;0.</strong> Implement an MLP from scratch in NumPy — forward pass and manual backprop, no autograd — and train it on MNIST to ~97%. This is the one time you should <em>not</em> use PyTorch; doing backprop by hand once makes everything after it legible.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- LADDER 1 -->
+  <section class="unit">
+    <div class="unit-head">
+      <span class="unit-num">LADDER 1</span>
+      <h2>Discriminative</h2>
+      <span class="unit-tag">input → label</span>
+    </div>
+    <p class="unit-intro">The climb from a linear classifier to a fine-tuned pretrained backbone.</p>
+    <table>
+      <thead><tr><th>Rung</th><th class="paper-cell">Paper</th><th>Project</th></tr></thead>
+      <tbody>
+        <tr><td class="rung">1</td><td class="paper-cell"><span class="paper-meta">Logistic regression (textbook)</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> Logistic regression on MNIST (~92%). Establish the train/loss/eval loop.</td></tr>
+        <tr><td class="rung">2</td><td class="paper-cell"><span class="paper-title">Backprop</span> <span class="paper-meta">— Rumelhart et al. 1986</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> MLP on MNIST (~98%), now in PyTorch with autograd.</td></tr>
+        <tr><td class="rung">3</td><td class="paper-cell"><span class="paper-title">LeNet</span> <span class="paper-meta">— LeCun et al. 1998</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> LeNet-style CNN on MNIST → CIFAR-10.</td></tr>
+        <tr><td class="rung"><span class="sub">3.5</span></td><td class="paper-cell"><span class="paper-title">AlexNet</span> <span class="paper-meta">2012 · </span><span class="paper-title">VGG</span> <span class="paper-meta">2014</span></td><td class="proj-cell"><span class="lvl y">GPU</span> Train a small VGG on CIFAR-10.</td></tr>
+        <tr><td class="rung">4</td><td class="paper-cell"><span class="paper-title">Deep Residual Learning</span> <span class="paper-meta">— He et al. 2015</span></td><td class="proj-cell"><span class="lvl y">GPU</span> ResNet-18 on CIFAR-10 to &gt;93%.</td></tr>
+        <tr><td class="rung"><span class="sub">4.5</span></td><td class="paper-cell"><span class="paper-title">Batch Normalization</span> <span class="paper-meta">— Ioffe &amp; Szegedy 2015</span></td><td class="proj-cell"><span class="lvl y">GPU</span> Ablate batch-norm in/out of your ResNet; measure the gap.</td></tr>
+        <tr><td class="rung">5</td><td class="paper-cell"><span class="paper-title">An Image is Worth 16×16 Words (ViT)</span> <span class="paper-meta">— Dosovitskiy et al. 2020</span></td><td class="proj-cell"><span class="lvl y">GPU</span> Fine-tune a pretrained ViT on a small custom dataset.</td></tr>
+        <tr><td class="rung"><span class="sub">5.5</span></td><td class="paper-cell"><span class="paper-title">DINOv2</span> <span class="paper-meta">— Oquab et al. 2023</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; use DINOv2 features for a linear-probe classifier.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- LADDER 2 -->
+  <section class="unit">
+    <div class="unit-head">
+      <span class="unit-num">LADDER 2</span>
+      <h2>Generative</h2>
+      <span class="unit-tag">model the distribution → sample</span>
+    </div>
+    <table>
+      <thead><tr><th>Rung</th><th class="paper-cell">Paper</th><th>Project</th></tr></thead>
+      <tbody>
+        <tr><td class="rung">1</td><td class="paper-cell"><span class="paper-title">Reducing Dimensionality</span> <span class="paper-meta">— Hinton &amp; Salakhutdinov 2006</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> Autoencoder on MNIST; visualize reconstructions.</td></tr>
+        <tr><td class="rung">2</td><td class="paper-cell"><span class="paper-title">Auto-Encoding Variational Bayes</span> <span class="paper-meta">— Kingma &amp; Welling 2013</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> VAE on MNIST; sample new digits, interpolate the latent.</td></tr>
+        <tr><td class="rung">3</td><td class="paper-cell"><span class="paper-title">Generative Adversarial Nets</span> <span class="paper-meta">— Goodfellow et al. 2014</span></td><td class="proj-cell"><span class="lvl y">GPU</span> GAN on MNIST. Expect instability — that's the lesson.</td></tr>
+        <tr><td class="rung"><span class="sub">3.5</span></td><td class="paper-cell"><span class="paper-title">DCGAN</span> <span class="paper-meta">2015 · </span><span class="paper-title">StyleGAN</span> <span class="paper-meta">2018</span></td><td class="proj-cell"><span class="lvl y">GPU</span> DCGAN on CIFAR-10 or CelebA.</td></tr>
+        <tr><td class="rung">4</td><td class="paper-cell"><span class="paper-title">Denoising Diffusion Probabilistic Models</span> <span class="paper-meta">— Ho, Jain &amp; Abbeel 2020</span></td><td class="proj-cell"><span class="lvl y">GPU</span> DDPM on MNIST/CIFAR-10 from scratch. The core modern skill.</td></tr>
+        <tr><td class="rung"><span class="sub">4.5</span></td><td class="paper-cell"><span class="paper-title">Score-Based SDEs</span> <span class="paper-meta">2021 · </span><span class="paper-title">Classifier-Free Guidance</span> <span class="paper-meta">2022</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; add classifier-free guidance to your DDPM.</td></tr>
+        <tr><td class="rung">5</td><td class="paper-cell"><span class="paper-title">Latent Diffusion (Stable Diffusion)</span> <span class="paper-meta">— Rombach et al. 2022</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; fine-tune pretrained SD with LoRA instead of training from scratch.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- LADDER 3 -->
+  <section class="unit">
+    <div class="unit-head">
+      <span class="unit-num">LADDER 3</span>
+      <h2>Representational</h2>
+      <span class="unit-tag">input → useful vector</span>
+    </div>
+    <table>
+      <thead><tr><th>Rung</th><th class="paper-cell">Paper</th><th>Project</th></tr></thead>
+      <tbody>
+        <tr><td class="rung">1</td><td class="paper-cell"><span class="paper-meta">PCA (Pearson 1901; textbook)</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> PCA on MNIST to 2D; watch the digit clusters form.</td></tr>
+        <tr><td class="rung">2</td><td class="paper-cell"><span class="paper-title">Autoencoder bottleneck</span> <span class="paper-meta">— Hinton &amp; Salakhutdinov 2006</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> Compare its 2D latent to PCA's.</td></tr>
+        <tr><td class="rung">3</td><td class="paper-cell"><span class="paper-title">word2vec</span> <span class="paper-meta">— Mikolov et al. 2013</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> Train on text8; verify king − man + woman ≈ queen.</td></tr>
+        <tr><td class="rung"><span class="sub">3.5</span></td><td class="paper-cell"><span class="paper-title">GloVe</span> <span class="paper-meta">— Pennington et al. 2014</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> Compare GloVe vs your word2vec on word analogies.</td></tr>
+        <tr><td class="rung">4</td><td class="paper-cell"><span class="paper-title">BERT</span> <span class="paper-meta">2018 · </span><span class="paper-title">ELMo</span> <span class="paper-meta">2018</span></td><td class="proj-cell"><span class="lvl y">GPU</span> Fine-tune a small BERT for classification; extract embeddings.</td></tr>
+        <tr><td class="rung">5</td><td class="paper-cell"><span class="paper-title">SimCLR</span> <span class="paper-meta">— Chen et al. 2020</span></td><td class="proj-cell"><span class="lvl y">GPU</span> SimCLR on CIFAR-10; evaluate with a linear probe.</td></tr>
+        <tr><td class="rung"><span class="sub">5.5</span></td><td class="paper-cell"><span class="paper-title">BYOL</span> <span class="paper-meta">2020 · </span><span class="paper-title">DINO</span> <span class="paper-meta">2021</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; why does BYOL work without negative pairs?</td></tr>
+        <tr><td class="rung">6</td><td class="paper-cell"><span class="paper-title">I-JEPA</span> <span class="paper-meta">2023 · </span><span class="paper-title">V-JEPA</span> <span class="paper-meta">2024</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; the frontier. Predict masked <em>embeddings</em>, not pixels.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- LADDER 4 -->
+  <section class="unit">
+    <div class="unit-head">
+      <span class="unit-num">LADDER 4</span>
+      <h2>Value / Policy</h2>
+      <span class="unit-tag">state → action</span>
+    </div>
+    <p class="unit-intro">The one ladder whose "data" is an environment, not a fixed dataset. Two sub-lineages: value-based (Q-learning → DQN) and policy-based (REINFORCE → PPO), merging at actor-critic.</p>
+    <table>
+      <thead><tr><th>Rung</th><th class="paper-cell">Paper</th><th>Project</th></tr></thead>
+      <tbody>
+        <tr><td class="rung">1</td><td class="paper-cell"><span class="paper-title">Q-learning</span> <span class="paper-meta">— Watkins &amp; Dayan 1992</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> Tabular Q-learning on FrozenLake. A literal value table.</td></tr>
+        <tr><td class="rung"><span class="sub">1.5</span></td><td class="paper-cell"><span class="paper-title">REINFORCE</span> <span class="paper-meta">— Williams 1992</span></td><td class="proj-cell"><span class="lvl g">LAPTOP</span> REINFORCE on CartPole.</td></tr>
+        <tr><td class="rung">2</td><td class="paper-cell"><span class="paper-title">Playing Atari with Deep RL</span> <span class="paper-meta">— Mnih et al. 2013</span></td><td class="proj-cell"><span class="lvl y">GPU</span> DQN on CartPole.</td></tr>
+        <tr><td class="rung">3</td><td class="paper-cell"><span class="paper-title">Human-Level Control (Nature DQN)</span> <span class="paper-meta">— Mnih et al. 2015</span></td><td class="proj-cell"><span class="lvl y">GPU</span> DQN on a simple Atari game (Pong). Slow but doable.</td></tr>
+        <tr><td class="rung"><span class="sub">3.5</span></td><td class="paper-cell"><span class="paper-title">A3C</span> <span class="paper-meta">2016 · </span><span class="paper-title">SAC</span> <span class="paper-meta">2018</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; the value/policy merge.</td></tr>
+        <tr><td class="rung">4</td><td class="paper-cell"><span class="paper-title">Proximal Policy Optimization</span> <span class="paper-meta">— Schulman et al. 2017</span></td><td class="proj-cell"><span class="lvl y">GPU</span> PPO on a MuJoCo task. Same family as RLHF.</td></tr>
+        <tr><td class="rung">5</td><td class="paper-cell"><span class="paper-title">AlphaGo</span> <span class="paper-meta">2016 · </span><span class="paper-title">AlphaZero</span> <span class="paper-meta">2017 · </span><span class="paper-title">MuZero</span> <span class="paper-meta">2020</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; replicate AlphaZero on a tiny game (Connect-4).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- LADDER 5 -->
+  <section class="unit">
+    <div class="unit-head">
+      <span class="unit-num">LADDER 5</span>
+      <h2>Post-Training &amp; Alignment</h2>
+      <span class="unit-tag">reshape a finished model</span>
+    </div>
+    <p class="unit-intro">Training-method stages applied on top of a base LLM, not standalone models. They draw on multiple objectives — generative base, value/policy-style preference data, discriminative-style losses.</p>
+    <table>
+      <thead><tr><th>Rung</th><th class="paper-cell">Paper</th><th>Project</th></tr></thead>
+      <tbody>
+        <tr><td class="rung">1</td><td class="paper-cell"><span class="paper-title">FLAN</span> <span class="paper-meta">2021 · </span><span class="paper-title">InstructGPT</span> <span class="paper-meta">(SFT stage) 2022</span></td><td class="proj-cell"><span class="lvl y">GPU</span> Supervised-fine-tune a small (1–3B) open LLM on instructions.</td></tr>
+        <tr><td class="rung">2</td><td class="paper-cell"><span class="paper-title">Deep RL from Human Preferences</span> <span class="paper-meta">2017 · InstructGPT 2022</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; understand reward-model + PPO.</td></tr>
+        <tr><td class="rung">3</td><td class="paper-cell"><span class="paper-title">Direct Preference Optimization</span> <span class="paper-meta">— Rafailov et al. 2023</span></td><td class="proj-cell"><span class="lvl y">GPU</span> DPO-tune your SFT'd model on UltraFeedback; compare to baseline.</td></tr>
+        <tr><td class="rung"><span class="sub">3.5</span></td><td class="paper-cell"><span class="paper-title">KTO · IPO · ORPO</span> <span class="paper-meta">2024</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; what does each fix about DPO?</td></tr>
+        <tr><td class="rung">4</td><td class="paper-cell"><span class="paper-title">Constitutional AI / RLAIF</span> <span class="paper-meta">— Bai et al. 2022</span></td><td class="proj-cell"><span class="lvl r">READ</span> Read; preferences from an AI instead of humans.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- CAPSTONE -->
+  <section class="unit">
+    <div class="unit-head">
+      <span class="unit-num">CAPSTONE</span>
+      <h2>Build the Tree Yourself</h2>
+      <span class="unit-tag">architecture × method</span>
+    </div>
+    <div class="capstone">
+      <h3>Demonstrate "trained vs. develops"</h3>
+      <p><span class="lvl y">GPU</span> Pretrain a small (~10–50M param) decoder-only Transformer on a text corpus (TinyStories or a Wikipedia subset) with next-token prediction — the generative objective. Then, <em>without any further training</em>, extract its hidden states and use them as sentence embeddings for a retrieval task. Measure how good that "developed" representational capability is versus a purpose-built embedding model. This is the whole thesis in one experiment: a generative-objective model doing a representational job for free, because the architecture is general enough that the training objective isn't the only thing it can express.</p>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="unit notes">
+    <div class="unit-head">
+      <span class="unit-num">APPENDIX</span>
+      <h2>Practical Notes</h2>
+      <span class="unit-tag">logistics</span>
+    </div>
+    <ul>
+      <li><strong>Frameworks.</strong> PyTorch throughout, except Project&nbsp;0 (by hand in NumPy). <em>torchvision</em> for MNIST/CIFAR; <em>gymnasium</em> for RL environments; Hugging Face <em>transformers&nbsp;+&nbsp;datasets&nbsp;+&nbsp;trl</em> for the LLM and post-training units.</li>
+      <li><strong>Compute.</strong> Most green/amber projects fit a single consumer GPU or free Colab. The red papers are deliberately read-only or LoRA/scaled-down — don't train Stable Diffusion or a Nature-DQN Atari agent from scratch without the hardware and patience.</li>
+      <li><strong>Order.</strong> For a single through-line rather than four parallel climbs: Unit&nbsp;0 → Discriminative → Representational → Generative → Value/Policy → Post-Training → Capstone. This roughly follows increasing infrastructure overhead.</li>
+      <li><strong>Datasets.</strong> MNIST and CIFAR-10 carry the first three ladders; text8/Wikipedia for representational; Gymnasium/MuJoCo/Atari for RL; instruction and preference sets (UltraFeedback, etc.) for post-training.</li>
+    </ul>
+    <p class="colophon">A map, not a contract — skip the red read-only units freely on a first pass, and return to them once the hands-on rungs have built your intuition.</p>
+  </section>
+
+</div>
+</body>
+</html>
