@@ -617,6 +617,12 @@ function render() {
   document.documentElement.style.setProperty("--src-surface", state.surface);
   document.documentElement.style.setProperty("--src-primary", state.primary);
   document.documentElement.style.setProperty("--src-accent", state.accent);
+  document.documentElement.style.setProperty("--src-success", state.success);
+  document.documentElement.style.setProperty("--src-emphasis", state.emphasis);
+  document.documentElement.style.setProperty("--src-cat-1", state.cat1);
+  document.documentElement.style.setProperty("--src-cat-2", state.cat2);
+  document.documentElement.style.setProperty("--src-cat-3", state.cat3);
+  document.documentElement.style.setProperty("--src-cat-4", state.cat4);
   document.documentElement.style.setProperty("--brand-radius", `${state.radius}px`);
   document.documentElement.style.setProperty("--brand-spacing", `${state.spacing}px`);
   document.documentElement.style.setProperty("--brand-body", fontStacks[state.bodyFont]);
@@ -641,9 +647,15 @@ function render() {
   document.documentElement.style.setProperty("--srcd-muted", dark.darkMuted);
   document.documentElement.style.setProperty("--srcd-primary", dark.darkPrimary);
   document.documentElement.style.setProperty("--srcd-accent", dark.darkAccent);
+  document.documentElement.style.setProperty("--srcd-success", dark.darkSuccess);
+  document.documentElement.style.setProperty("--srcd-emphasis", dark.darkEmphasis);
+  document.documentElement.style.setProperty("--srcd-cat-1", dark.darkCat1);
+  document.documentElement.style.setProperty("--srcd-cat-2", dark.darkCat2);
+  document.documentElement.style.setProperty("--srcd-cat-3", dark.darkCat3);
+  document.documentElement.style.setProperty("--srcd-cat-4", dark.darkCat4);
   brandPreview.dataset.dark = state.customDark ? "custom" : "derived";
 
-  brandPreview.querySelector(".sample-nav strong").textContent = state.brandName;
+  brandPreview.querySelector(".bp-wordmark").textContent = state.brandName;
   skillOutput.textContent = buildSkill(state);
   tokensOutput.textContent = JSON.stringify(buildTokens(state), null, 2);
   cssOutput.textContent = buildCss(state);

@@ -263,40 +263,128 @@
 
           <section id="previewPanel" class="panel visible" aria-label="Rendered style guide">
             <article id="brandPreview" class="brand-preview">
-              <div class="sample-nav">
-                <strong>Bantay</strong>
-                <nav aria-label="Sample navigation">
-                  <a href="#">Overview</a>
-                  <a href="#">Tools</a>
-                  <a href="#">Settings</a>
-                </nav>
+              <div class="bp-inner">
+                <header class="bp-hero">
+                  <div class="bp-wordmark">Bantay</div>
+                  <div class="bp-tagline">A calm, protective brand system — typography, color, and interface in one place.</div>
+                </header>
+
+                <section class="bp-section">
+                  <div class="bp-section-label">Color</div>
+                  <div class="bp-swatches">
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-bg)"></div><span class="bp-swatch-name">Background</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-surface)"></div><span class="bp-swatch-name">Surface</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-ink)"></div><span class="bp-swatch-name">Ink</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-muted)"></div><span class="bp-swatch-name">Muted</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-primary)"></div><span class="bp-swatch-name">Primary</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-accent)"></div><span class="bp-swatch-name">Accent</span></div>
+                  </div>
+                  <div class="bp-swatches">
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-success)"></div><span class="bp-swatch-name">Success</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-emphasis)"></div><span class="bp-swatch-name">Emphasis</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-cat-1)"></div><span class="bp-swatch-name">Cat 1</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-cat-2)"></div><span class="bp-swatch-name">Cat 2</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-cat-3)"></div><span class="bp-swatch-name">Cat 3</span></div>
+                    <div class="bp-swatch-item"><div class="bp-swatch" style="background:var(--brand-cat-4)"></div><span class="bp-swatch-name">Cat 4</span></div>
+                  </div>
+                </section>
+
+                <section class="bp-section">
+                  <div class="bp-section-label">Typography</div>
+                  <div class="bp-type">
+                    <div class="bp-type-row">
+                      <div class="bp-type-meta">Display</div>
+                      <div class="bp-display-sample">Build with a calm, protective voice.</div>
+                    </div>
+                    <div class="bp-type-row">
+                      <div class="bp-type-meta">Body</div>
+                      <div class="bp-body-sample">Track what matters and keep it current through conversation. The body face has to carry long-form reading and dense tool copy alike — legible at small sizes, comfortable in paragraphs.</div>
+                    </div>
+                    <div class="bp-type-row">
+                      <div class="bp-type-meta">Interface</div>
+                      <div class="bp-ui-sample"><span>Dashboard</span><span>New</span><span>Publish</span><span>Settings</span></div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="bp-section">
+                  <div class="bp-section-label">Components</div>
+                  <div class="bp-grid">
+                    <div class="bp-card">
+                      <div class="bp-card-label">Buttons</div>
+                      <div class="bp-btn-row">
+                        <button type="button" class="bp-btn bp-btn-primary">Create</button>
+                        <button type="button" class="bp-btn bp-btn-secondary">Cancel</button>
+                        <button type="button" class="bp-btn bp-btn-ghost">View all</button>
+                      </div>
+                    </div>
+                    <div class="bp-card">
+                      <div class="bp-card-label">Inputs</div>
+                      <div class="bp-input-col">
+                        <input class="bp-input" placeholder="What are you running?">
+                        <input class="bp-input" value="Sophie's Graduation">
+                      </div>
+                    </div>
+                    <div class="bp-card">
+                      <div class="bp-card-label">Tags</div>
+                      <div class="bp-tag-row">
+                        <span class="bp-tag bp-tag-primary">Confirmed</span>
+                        <span class="bp-tag bp-tag-neutral">Pending</span>
+                        <span class="bp-tag bp-tag-outline">Draft</span>
+                      </div>
+                    </div>
+                    <div class="bp-card">
+                      <div class="bp-card-label">Checklist</div>
+                      <div class="bp-check-col">
+                        <label class="bp-check checked"><span class="bp-box"></span> Book venue</label>
+                        <label class="bp-check checked"><span class="bp-box"></span> Send invitations</label>
+                        <label class="bp-check"><span class="bp-box"></span> Order cake</label>
+                      </div>
+                    </div>
+                    <div class="bp-card">
+                      <div class="bp-card-label">Metrics</div>
+                      <div class="bp-metric-row">
+                        <div class="bp-metric"><div class="bp-metric-v">24</div><div class="bp-metric-l">Confirmed</div></div>
+                        <div class="bp-metric"><div class="bp-metric-v">8</div><div class="bp-metric-l">Pending</div></div>
+                        <div class="bp-metric"><div class="bp-metric-v">3</div><div class="bp-metric-l">Declined</div></div>
+                      </div>
+                    </div>
+                    <div class="bp-card">
+                      <div class="bp-card-label">Status</div>
+                      <div class="bp-status-row">
+                        <span class="bp-status"><span class="bp-dot bp-dot-active"></span> Ready</span>
+                        <span class="bp-status"><span class="bp-dot bp-dot-idle"></span> Idle</span>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="bp-section">
+                  <div class="bp-section-label">In context</div>
+                  <div class="bp-mockup">
+                    <div class="bp-chrome">
+                      <span class="bp-cdot"></span><span class="bp-cdot"></span><span class="bp-cdot"></span>
+                      <span class="bp-url">tools.bantay.co</span>
+                    </div>
+                    <div class="bp-page">
+                      <div class="bp-page-title">Sophie's Graduation Party</div>
+                      <div class="bp-page-sub">May 22, 2026 · UC Davis</div>
+                      <div class="bp-page-head">Guest List</div>
+                      <table class="bp-table">
+                        <thead><tr><th>Name</th><th>RSVP</th><th>Bringing</th></tr></thead>
+                        <tbody>
+                          <tr><td>Uncle Steve</td><td><span class="bp-tag bp-tag-primary">Confirmed</span></td><td>Potato salad</td></tr>
+                          <tr><td>Aunt Carol</td><td><span class="bp-tag bp-tag-neutral">Pending</span></td><td>—</td></tr>
+                        </tbody>
+                      </table>
+                      <div class="bp-chat">
+                        <input class="bp-chat-input" value="Uncle Steve confirmed — bringing potato salad" disabled>
+                        <button type="button" class="bp-chat-send">↑</button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
               </div>
-              <section class="sample-hero">
-                <p class="eyebrow">Brand system</p>
-                <h2>Build protective tools with a calm, unmistakable Bantay voice.</h2>
-                <p class="lede">Use this guide to keep typography, interface rhythm, color, and product copy consistent across every internal helper and customer-facing tool.</p>
-                <div class="sample-actions">
-                  <button type="button" class="sample-primary">Create workflow</button>
-                  <button type="button" class="sample-secondary">Review guide</button>
-                </div>
-              </section>
-              <section class="sample-grid">
-                <div class="sample-card">
-                  <span class="metric">A1</span>
-                  <h3>Headlines</h3>
-                  <p>Short, concrete, and oriented around the user action. Avoid slogan-heavy phrasing inside tools.</p>
-                </div>
-                <div class="sample-card">
-                  <span class="metric">B2</span>
-                  <h3>Interface</h3>
-                  <p>Controls should feel durable and easy to scan. Use restraint before decoration.</p>
-                </div>
-                <div class="sample-card">
-                  <span class="metric">C3</span>
-                  <h3>Color</h3>
-                  <p>Primary color signals commitment. Accent color supports notices, highlights, and states.</p>
-                </div>
-              </section>
             </article>
           </section>
 
