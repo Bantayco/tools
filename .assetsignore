@@ -1,6 +1,7 @@
-# Repo/meta files that live at the root but shouldn't be served publicly.
+# Repo/meta files that shouldn't be served publicly.
 # (Pages already excludes functions/, wrangler.toml, node_modules, and .git.)
-README.md
+*.md
+schema.sql
 package.json
 package-lock.json
 .claude

@@ -22,6 +22,8 @@ helpers/
 │   ├── app.js
 │   ├── styles.css
 │   └── examples/         # shipped diagrams loaded via ?f=<name>
+├── neural-networks-study-guide/  # standalone tool; themed off tokens.css,
+│                                 # progress in localStorage (see MISSING-TOKENS.md)
 ├── signin/               # the ONLY Access-protected path (sets the cookie)
 ├── _headers              # Cloudflare cache/security headers
 └── _redirects            # Cloudflare routing (clean URLs are automatic)
