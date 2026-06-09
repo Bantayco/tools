@@ -226,8 +226,9 @@ const headlineWeightValue = document.querySelector("#headlineWeightValue");
 const headlineScaleValue = document.querySelector("#headlineScaleValue");
 const buttonWeightValue = document.querySelector("#buttonWeightValue");
 const schemeToggle = document.querySelector("#schemeToggle");
-const schemeLight = document.querySelector("#schemeLight");
-const schemeDark = document.querySelector("#schemeDark");
+const fullPage = document.querySelector("#fullPage");
+const fullControls = document.querySelector("#fullControls");
+const exitFull = document.querySelector("#exitFull");
 
 const tabs = {
   preview: {
@@ -347,8 +348,26 @@ Object.entries(tabs).forEach(([name, tab]) => {
 const PREVIEW_SCHEME_KEY = "bantay-style-preview-scheme";
 let previewScheme = readPreviewScheme();
 applyScheme(previewScheme);
-schemeLight.addEventListener("click", () => setScheme("light"));
-schemeDark.addEventListener("click", () => setScheme("dark"));
+// Delegated so both the toolbar toggle and the full-page toggle stay in sync.
+document.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-scheme-set]");
+  if (btn) setScheme(btn.dataset.schemeSet);
+});
+
+// Full-page preview — hide all chrome, show only the preview.
+fullPage.addEventListener("click", enterFullPage);
+exitFull.addEventListener("click", exitFullPage);
+
+function enterFullPage() {
+  setActiveTab("preview");
+  appEl.classList.add("fullpreview");
+  fullControls.hidden = false;
+}
+
+function exitFullPage() {
+  appEl.classList.remove("fullpreview");
+  fullControls.hidden = true;
+}
 
 // Toggling the per-guide dark override. The currently-shown (derived) values
 // become the editable starting point; jump the preview to dark so it's visible.
@@ -378,11 +397,11 @@ function setScheme(scheme) {
 
 function applyScheme(scheme) {
   brandPreview.dataset.scheme = scheme;
-  const dark = scheme === "dark";
-  schemeDark.classList.toggle("active", dark);
-  schemeLight.classList.toggle("active", !dark);
-  schemeDark.setAttribute("aria-pressed", String(dark));
-  schemeLight.setAttribute("aria-pressed", String(!dark));
+  document.querySelectorAll("[data-scheme-set]").forEach((btn) => {
+    const on = btn.dataset.schemeSet === scheme;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-pressed", String(on));
+  });
 }
 
 copyCurrent.addEventListener("click", () => {
@@ -432,8 +451,9 @@ resetConfirmBtn.addEventListener("click", () => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
-  if (!resetModal.hidden) closeResetModal();
-  if (!importModal.hidden) closeImportModal();
+  if (!resetModal.hidden) { closeResetModal(); return; }
+  if (!importModal.hidden) { closeImportModal(); return; }
+  if (appEl.classList.contains("fullpreview")) exitFullPage();
 });
 
 // Import — paste a token JSON to overwrite the current guide's values. Autosave

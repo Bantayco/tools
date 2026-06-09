@@ -399,6 +399,43 @@ output {
   color: var(--app-primary-ink);
 }
 
+/* Full-page preview — hide all chrome, show only the preview edge-to-edge. */
+.app.fullpreview .topbar,
+.app.fullpreview .controls,
+.app.fullpreview .preview-toolbar {
+  display: none;
+}
+
+.app.fullpreview .workspace {
+  grid-template-columns: 1fr;
+  padding: 0;
+  gap: 0;
+}
+
+.app.fullpreview .preview-area {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.full-controls {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--app-line);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--app-panel) 86%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--app-shadow);
+}
+
+.full-controls[hidden] { display: none; }
+
 .tabs button {
   min-width: 76px;
 }
