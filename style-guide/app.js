@@ -224,7 +224,12 @@ const store = createStore({
 setupFontOptions();
 bindControls();
 
+const appEl = document.querySelector(".app");
 const params = new URLSearchParams(location.search);
+// A targeted load (?f=preset or ?id=saved) resolves async — hide the preview
+// until it paints so it doesn't flash the default/previous brand first.
+const targeted = params.has("f") || params.has("id");
+if (targeted) appEl.classList.add("loading");
 if (!params.has("new") && store.loadLocal()) {
   const draft = store.loadLocal();
   applyState({ ...defaults, ...draft });
@@ -242,14 +247,13 @@ async function boot() {
   fillSwitcher(items);
   // Precedence: ?id=<slug> (a saved guide) > ?f=<name> (a shipped preset).
   const id = params.get("id");
-  if (id) {
-    try {
-      await openSaved(slugify(id));
-    } catch (error) {
-      showStatus(error.message);
-    }
-  } else {
-    await loadFromAssetParam(items);
+  try {
+    if (id) await openSaved(slugify(id));
+    else await loadFromAssetParam(items);
+  } catch (error) {
+    showStatus(error.message);
+  } finally {
+    appEl.classList.remove("loading"); // reveal the preview (loaded or fell back)
   }
 }
 

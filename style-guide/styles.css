@@ -300,7 +300,12 @@ output {
   background: var(--app-panel);
   box-shadow: var(--app-shadow);
   overflow: hidden;
+  transition: opacity 0.15s ease;
 }
+
+/* While a targeted guide (?f= / ?id=) is still loading, hide the preview so it
+   never flashes the default brand before the real one paints. */
+.app.loading .preview-area { opacity: 0; }
 
 .preview-toolbar {
   display: flex;
