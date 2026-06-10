@@ -73,6 +73,20 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+/* Controls inside the preview react with the BRAND color being edited, not the
+   editor chrome's primary (the rules above would otherwise leak in). */
+.brand-preview button:hover,
+.brand-preview select:hover,
+.brand-preview input:hover {
+  border-color: var(--brand-primary);
+}
+
+.brand-preview button:focus-visible,
+.brand-preview select:focus-visible,
+.brand-preview input:focus-visible {
+  outline-color: color-mix(in srgb, var(--brand-primary) 30%, transparent);
+}
+
 button.primary,
 button.active {
   border-color: var(--app-primary);
