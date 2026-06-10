@@ -21,6 +21,11 @@ const APPS = [
     href: "/ai-syllabus/",
     blurb: "AI from first principles — a reading & replication syllabus.",
   },
+  {
+    label: "Spout",
+    href: "/spout/",
+    blurb: "Folder-aware text & code editor — tabs, markdown, Python linting.",
+  },
 ];
 
 const newTools = document.querySelector("#newTools");

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spout</title>
+    <script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+
+    <!-- Bantay design system (editor chrome). -->
+    <link rel="stylesheet" href="/_shared/tokens.css">
+    <link rel="stylesheet" href="/_shared/tokens-extended.css">
+    <link rel="stylesheet" href="/_shared/dark.css">
+
+    <!-- CodeMirror 5 (classic globals — robust buildless editor). -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/overlay.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/gfm/gfm.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/toml/toml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
+
+    <!-- Markdown preview (sanitized). -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+
+    <link rel="stylesheet" href="./styles.css?v=1">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Spout</h1>
+          <p id="status" class="status" aria-live="polite">Ready</p>
+        </div>
+        <div class="top-actions">
+          <button id="openFolder" type="button">Open folder…</button>
+          <button id="newFile" type="button">New file</button>
+        </div>
+      </header>
+
+      <section class="work">
+        <aside class="sidebar" aria-label="Files">
+          <div class="sidebar-head">
+            <span id="rootName" class="root-name">No folder open</span>
+            <button id="refreshTree" type="button" class="ghost" title="Refresh" hidden>⟳</button>
+          </div>
+          <div id="fileTree" class="tree-host" aria-label="File tree"></div>
+        </aside>
+
+        <section class="editor-area">
+          <div id="tabbar" class="tabbar" role="tablist" aria-label="Open files"></div>
+          <div class="editor-toolbar">
+            <span id="filepath" class="filepath"></span>
+            <span class="toolbar-spacer"></span>
+            <button id="previewToggle" type="button" class="ghost" hidden>Preview</button>
+          </div>
+          <div id="editorBody" class="editor-body">
+            <div id="cmHost" class="cm-host"></div>
+            <div id="previewPane" class="preview-pane markdown" hidden></div>
+            <div id="emptyState" class="empty-state">
+              <div class="empty-card">
+                <h2>Spout</h2>
+                <p>A folder-aware text &amp; code editor. Open a folder to browse and edit files, or start a new file.</p>
+                <div class="empty-actions">
+                  <button id="openFolder2" type="button">Open folder…</button>
+                  <button id="newFile2" type="button" class="ghost">New file</button>
+                </div>
+                <p id="fsaNote" class="fsa-note" hidden>Folder access needs a Chromium browser (Chrome, Edge, Arc). You can still create and download files anywhere.</p>
+              </div>
+            </div>
+          </div>
+          <div id="statusbar" class="statusbar"></div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js?v=1"></script>
+  </body>
+</html>
