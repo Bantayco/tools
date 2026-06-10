@@ -1,4 +1,4 @@
-// Spout — folder-aware text/code editor.
+// Typewriter — folder-aware text/code editor.
 //   - File System Access API for the folder tree + read/write (Chromium).
 //   - CodeMirror 5 (global) for editing; marked + DOMPurify for markdown preview.
 //   - ruff-wasm (lazy) for Python linting.
@@ -243,7 +243,7 @@ async function ensureRuff() {
       return ruffWorkspace;
     })().catch((err) => {
       ruffBroken = true;
-      console.warn("Spout: Python linter unavailable —", err);
+      console.warn("Typewriter: Python linter unavailable —", err);
       return null;
     });
   }
@@ -423,7 +423,7 @@ if (!fsaSupported) { els.fsaNote.hidden = false; }
 showEmpty();
 
 // Expose a tiny hook (used by "New file" flow + debugging).
-window.spout = { openText: (name, text = "") => addTab({ name, path: null, handle: null, text }) };
+window.typewriter = { openText: (name, text = "") => addTab({ name, path: null, handle: null, text }) };
 
 // ---- helpers ----------------------------------------------------------------
 function esc(v) {

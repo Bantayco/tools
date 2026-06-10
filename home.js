@@ -22,8 +22,8 @@ const APPS = [
     blurb: "AI from first principles — a reading & replication syllabus.",
   },
   {
-    label: "Spout",
-    href: "/spout/",
+    label: "Typewriter",
+    href: "/typewriter/",
     blurb: "Folder-aware text & code editor — tabs, markdown, Python linting.",
   },
 ];
