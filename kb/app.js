@@ -24,6 +24,8 @@ into interlinked articles; you read, edit, navigate and search them here.
 ## How it works
 
 - Every note is a markdown file. Write freely.
+- **Import** a PDF or EPUB (top right, or drop the file here) to pull its text
+  in as a new note — the raw source for the agent to summarize.
 - Link to another note with double brackets: [[Data Ingest]] or, with a custom
   label, [[Q and A|ask questions]].
 - Each note's **outgoing links** and **backlinks** show on the right, so the
@@ -47,6 +49,8 @@ const els = {
   status: document.querySelector("#status"),
   title: document.querySelector("#title"),
   viewToggle: document.querySelector("#viewToggle"),
+  importBtn: document.querySelector("#importBtn"),
+  fileInput: document.querySelector("#fileInput"),
   newNote: document.querySelector("#newNote"),
   search: document.querySelector("#search"),
   noteList: document.querySelector("#noteList"),
@@ -137,6 +141,28 @@ function bindEvents() {
 
   els.viewToggle.addEventListener("click", () => setMode(mode === "edit" ? "read" : "edit"));
   els.newNote.addEventListener("click", newNote);
+
+  // Import a PDF / EPUB — via the button or by dropping a file on the note.
+  els.importBtn.addEventListener("click", () => els.fileInput.click());
+  els.fileInput.addEventListener("change", () => {
+    const file = els.fileInput.files[0];
+    els.fileInput.value = ""; // allow re-importing the same file
+    if (file) handleImport(file);
+  });
+  els.editorBody.addEventListener("dragover", (e) => {
+    if (![...e.dataTransfer.types].includes("Files")) return;
+    e.preventDefault();
+    els.editorBody.classList.add("dragover");
+  });
+  els.editorBody.addEventListener("dragleave", (e) => {
+    if (e.target === els.editorBody) els.editorBody.classList.remove("dragover");
+  });
+  els.editorBody.addEventListener("drop", (e) => {
+    e.preventDefault();
+    els.editorBody.classList.remove("dragover");
+    const file = e.dataTransfer.files[0];
+    if (file) handleImport(file);
+  });
 
   els.search.addEventListener("input", renderList);
 
@@ -255,10 +281,63 @@ async function flush() {
   await store.commit();
 }
 
-// ?f=<name> loads a shipped example from /kb/examples/<name>.md
+// Import a PDF / EPUB: extract its text to markdown and open it as a new note.
+async function handleImport(file) {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  if (!["pdf", "epub"].includes(ext)) {
+    showStatus("Only PDF or EPUB files are supported");
+    return;
+  }
+  await flush();
+  showStatus(`Reading ${file.name}…`);
+  els.importBtn.disabled = true;
+
+  let result;
+  try {
+    const { extractFile } = await import("./ingest.js?v=1");
+    result = await extractFile(file, showStatus);
+  } catch (err) {
+    console.error(err);
+    showStatus(`Could not import ${file.name}: ${err.message}`);
+    return;
+  } finally {
+    els.importBtn.disabled = false;
+  }
+
+  const base = file.name.replace(/\.[^.]+$/, "");
+  const title = (result.title || base).trim().slice(0, 120) || base;
+  els.title.value = title;
+  els.editor.value = result.markdown || "";
+  store.setSlug(slugify(title) || "untitled");
+  dirty = true;
+
+  setMode("read");
+  updateConnections();
+  highlightActive();
+  setAssetParam(null, "f");
+  const url = new URL(location.href);
+  url.searchParams.set("id", store.slug);
+  url.searchParams.delete("new");
+  history.pushState(null, "", url);
+
+  const bytes = new Blob([JSON.stringify({ title, source: els.editor.value })]).size;
+  if (!els.editor.value.trim()) {
+    store.saveLocal();
+    showStatus(`Imported "${title}", but no text could be extracted (it may be scanned images).`);
+  } else if (bytes > 95_000) {
+    // Over the per-note save limit — keep it locally and tell the user.
+    store.saveLocal();
+    showStatus(`Imported "${title}" — ${fmtBytes(bytes)}. Too large to sync; saved locally. Trim or split it.`);
+  } else {
+    store.change(); // autosave (local always; remote when signed in)
+    showStatus(`Imported "${title}" (${fmtBytes(bytes)})`);
+  }
+}
+
+// ?f=<name> loads a shipped example from /kb/examples/<name>.txt
 async function loadExample(name) {
   try {
-    const res = await fetch(`/kb/examples/${name}.md`, { cache: "no-cache" });
+    const res = await fetch(`/kb/examples/${name}.txt`, { cache: "no-cache" });
     if (!res.ok) throw new Error(`Example "${name}" not found`);
     els.editor.value = await res.text();
     els.title.value = prettify(name);
@@ -445,6 +524,10 @@ function titleForSlug(slug) {
 
 function prettify(slug) {
   return String(slug).replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "Untitled";
+}
+
+function fmtBytes(n) {
+  return n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(0)} KB` : `${(n / 1048576).toFixed(1)} MB`;
 }
 
 function showStatus(message) {

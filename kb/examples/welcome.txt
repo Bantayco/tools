@@ -7,7 +7,8 @@ and query it here.
 
 ## The loop
 
-1. **Ingest** — drop source documents into a `raw/` pile.
+1. **Ingest** — drop source documents in. Use **Import** (top right) to pull a
+   PDF or EPUB's text in as a note, or drop the file straight onto the note.
 2. **Compile** — an LLM summarizes each source, extracts concepts into
    articles, and links them together with `[[wiki links]]`.
 3. **Q&A** — ask questions against the whole wiki; it researches across notes.

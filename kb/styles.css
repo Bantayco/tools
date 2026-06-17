@@ -82,6 +82,7 @@ button.on { background: color-mix(in srgb, var(--app-primary) 16%, transparent);
   grid-template-columns: 1fr 1fr;
   min-height: 0; min-width: 0;
 }
+.editor-body.dragover { outline: 2px dashed var(--app-primary); outline-offset: -8px; }
 /* Read mode: hide the source, give the rendered note the full width. */
 .editor-body.reading { grid-template-columns: 1fr; }
 .editor-body.reading .editor { display: none; }
