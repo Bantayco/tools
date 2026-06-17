@@ -3,5 +3,10 @@
 .wrangler/
 node_modules/
 
+# Playwright
+test-results/
+playwright-report/
+.playwright/
+
 # OS
 .DS_Store
