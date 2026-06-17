@@ -1,0 +1,33 @@
+The Attention Economy of the Infinite Feed
+
+Abstract
+
+We examine how variable-ratio reward schedules, borrowed wholesale from slot machines, came to govern the design of modern content feeds. We argue that the "infinite scroll" is not a neutral convenience but a deliberate removal of natural stopping cues, and that small, unpredictable rewards keep a reader engaged long after their stated goal has been met. This paper, fittingly, has been chopped into bite-size cards so you can experience the very mechanism it describes.
+
+Introduction
+
+Reading a long document used to have a built-in finish line: the bottom of the page, the edge of the paper, the last chapter. These boundaries gave the mind permission to stop. The feed quietly deleted them. When there is always one more card, the question shifts from "am I done?" to "what's next?" — and that second question never resolves.
+
+The dopamine system does not fire hardest when a reward arrives. It fires hardest in anticipation, in the gap between the flick of a thumb and whatever appears. Unpredictability sharpens that spike. If every scroll paid out the same reward, the brain would quickly learn to ignore it. Because each scroll might pay out something delightful, it cannot.
+
+Methods
+
+We instrumented a simple reading surface and replaced its scrollbar with a snapping, full-screen card feed. Each card carried a tiny, occasionally-skipped reward: a flash of points, a streak counter, a burst of confetti at round-numbered milestones. We measured nothing rigorously, because rigor was never the point. The point was to feel it.
+
+Three ingredients did most of the work. First, segmentation: breaking text into single-breath chunks so progress feels rapid. Second, variability: rewarding only some scrolls, and never quite the same way twice. Third, visible progress: a bar that fills, a level that climbs, a number that only ever goes up.
+
+Results
+
+Participants reported that the material felt easier, even when it was not. A dense paragraph, split across four cards, was rated as "lighter" than the identical text shown as one block. The streak counter was described as "weirdly motivating" and, by the same participants moments later, as "kind of evil."
+
+The most-cited sensation was the small pull to continue — the sense, at the bottom of each card, that stopping now would waste the momentum already built. This is the sunk-cost fallacy wearing a party hat.
+
+Discussion
+
+None of this is new. Casinos discovered the variable-ratio schedule decades ago, and the feed merely ported it to glass. What is new is ubiquity: the same loop now mediates news, learning, friendship, and rest. A tool that makes a dry paper feel fun is, depending on where you stand, either a study aid or a trap with good manners.
+
+We are not arguing that engagement is evil. Curiosity, too, is a reward loop, and the best teachers have always exploited it. We are arguing for awareness: a reader who can name the mechanism is a reader who can choose to stop.
+
+Conclusion
+
+The feed is sticky because it is generous with small surprises and stingy with endings. If you have scrolled this far, notice the pull to keep going, and notice that the paper is, in fact, about to end. That faint reluctance you feel right now is the entire finding. Thanks for reading. You may now touch grass.
