@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Knowledge Base</title>
+    <script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+
+    <!-- Bantay design system. -->
+    <link rel="stylesheet" href="/_shared/tokens.css">
+    <link rel="stylesheet" href="/_shared/tokens-extended.css">
+    <link rel="stylesheet" href="/_shared/base.css">
+    <link rel="stylesheet" href="/_shared/dark.css">
+
+    <!-- Markdown render (sanitized). -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+
+    <link rel="stylesheet" href="./styles.css?v=1">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Knowledge Base</h1>
+          <p id="status" class="status" aria-live="polite">Ready</p>
+        </div>
+        <div class="top-actions" aria-label="Note actions">
+          <input id="title" type="text" placeholder="Note title" autocomplete="off" aria-label="Note title">
+          <button id="viewToggle" type="button" title="Toggle read / edit">Read</button>
+          <button id="newNote" type="button" class="primary" title="Start a new note">New note</button>
+        </div>
+      </header>
+
+      <section class="work">
+        <aside class="sidebar" aria-label="Notes">
+          <div class="sidebar-head">
+            <input id="search" type="search" placeholder="Search notes…" autocomplete="off" aria-label="Search notes">
+          </div>
+          <div id="noteList" class="note-list" aria-label="All notes"></div>
+          <p id="sideNote" class="side-note"></p>
+        </aside>
+
+        <section class="editor-area" aria-label="Note">
+          <div id="editorBody" class="editor-body">
+            <textarea id="editor" class="editor" spellcheck="true" autocomplete="off"
+              placeholder="Write markdown. Link other notes with [[Note Title]]."
+              aria-label="Note source (markdown)"></textarea>
+            <article id="preview" class="preview-pane markdown" aria-label="Rendered note"></article>
+          </div>
+        </section>
+
+        <aside class="connections" aria-label="Connections">
+          <section class="conn-block">
+            <h2>Outgoing links</h2>
+            <div id="outLinks" class="link-list"></div>
+          </section>
+          <section class="conn-block">
+            <h2>Backlinks</h2>
+            <div id="backLinks" class="link-list"></div>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js?v=1"></script>
+  </body>
+</html>
