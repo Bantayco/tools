@@ -7,6 +7,7 @@ import { getTheme, setTheme } from "/_shared/theme.js";
 const TOOLS = {
   "style-guide": { label: "Style Guide", href: "/style-guide/", blurb: "Brand tokens for every tool." },
   mermaid: { label: "Mermaid", href: "/mermaid/", blurb: "Edit and preview diagrams." },
+  doomscroll: { label: "Paper Doomscroll", href: "/doomscroll/", blurb: "Turn a paper into a dopamine-drip card feed." },
 };
 
 // Standalone tools (not document editors) — just links.

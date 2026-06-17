@@ -1,0 +1,324 @@
+/* Paper Doomscroll — a vertical, scroll-snapping feed with dopamine effects.
+ * Themed off the shared tokens; the feed itself goes full-bleed. */
+
+/* ---------- Setup (paste) screen ---------- */
+.setup {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 22px 80px;
+}
+.setup-head h1 {
+  font-size: 30px;
+}
+.setup-head .status {
+  margin-top: 10px;
+  color: var(--bantay-muted);
+  max-width: 56ch;
+}
+.setup-form {
+  margin-top: 28px;
+  display: grid;
+  gap: 14px;
+}
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.row .spacer {
+  flex: 1;
+}
+#title {
+  flex: 1;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--bantay-line-strong);
+  border-radius: var(--bantay-radius);
+  background: var(--bantay-surface);
+  color: var(--bantay-ink);
+}
+#myPapers {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--bantay-line-strong);
+  border-radius: var(--bantay-radius);
+  background: var(--bantay-surface);
+  color: var(--bantay-ink);
+}
+.source {
+  width: 100%;
+  min-height: 46vh;
+  padding: 14px 16px;
+  resize: vertical;
+  border: 1px solid var(--bantay-line-strong);
+  border-radius: var(--bantay-radius);
+  background: var(--bantay-surface);
+  color: var(--bantay-ink);
+  font-family: var(--bantay-mono-font);
+  line-height: 1.5;
+}
+.actions button {
+  min-height: 40px;
+}
+#start {
+  font-weight: 700;
+  padding: 0 22px;
+}
+
+/* ---------- Feed shell ---------- */
+.feed {
+  position: fixed;
+  inset: 0;
+  background: var(--bantay-background);
+  overflow: hidden;
+}
+
+/* HUD across the top */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: max(10px, env(safe-area-inset-top)) 14px 8px;
+  background: linear-gradient(to bottom, var(--bantay-background) 55%, transparent);
+}
+.hud-btn {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--bantay-line);
+  background: var(--bantay-surface);
+  line-height: 1;
+}
+.progress {
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bantay-line);
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--bantay-primary), var(--bantay-accent));
+  transition: width 0.45s cubic-bezier(.2,.8,.2,1);
+}
+.hud-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bantay-surface-2);
+  border: 1px solid var(--bantay-line);
+  white-space: nowrap;
+}
+.chip.streak {
+  color: var(--bantay-emphasis);
+}
+.chip.level {
+  color: var(--bantay-primary);
+}
+.chip.bump {
+  animation: chip-bump 0.4s cubic-bezier(.2,1.6,.4,1);
+}
+@keyframes chip-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Card stack ---------- */
+.cards {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  outline: none;
+}
+.cards::-webkit-scrollbar { width: 0; height: 0; }
+
+.card {
+  position: relative;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 84px 22px 96px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.card .kicker {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bantay-muted);
+  margin-bottom: 14px;
+}
+.card .body {
+  font-family: var(--bantay-display-font);
+  font-size: clamp(20px, 3.4vw, 30px);
+  line-height: 1.4;
+  color: var(--bantay-ink);
+}
+.card.is-heading .body {
+  font-weight: 700;
+  font-size: clamp(26px, 5vw, 42px);
+  line-height: 1.2;
+}
+.card .body em.spark {
+  font-style: normal;
+  background: linear-gradient(transparent 62%, color-mix(in srgb, var(--bantay-accent) 45%, transparent) 0);
+}
+
+/* Interstitial "hype" cards */
+.card.is-hype {
+  text-align: center;
+}
+.card.is-hype .hype-emoji {
+  font-size: clamp(48px, 14vw, 96px);
+  line-height: 1;
+  margin-bottom: 18px;
+  animation: float-emoji 2.4s ease-in-out infinite;
+}
+.card.is-hype .body {
+  font-weight: 700;
+}
+@keyframes float-emoji {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
+}
+
+/* Final card */
+.card.is-end {
+  text-align: center;
+}
+.card.is-end .stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+.card.is-end .stat {
+  background: var(--bantay-surface);
+  border: 1px solid var(--bantay-line);
+  border-radius: var(--bantay-radius);
+  padding: 14px 8px;
+}
+.card.is-end .stat b {
+  display: block;
+  font-size: 24px;
+  color: var(--bantay-primary);
+}
+.card.is-end .stat span {
+  font-size: 12px;
+  color: var(--bantay-muted);
+}
+
+/* Right-rail engagement buttons (TikTok-style) */
+.rail {
+  position: absolute;
+  right: 16px;
+  bottom: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+}
+.rail button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bantay-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.rail .ico {
+  font-size: 30px;
+  line-height: 1;
+  filter: grayscale(0.4);
+  transition: transform 0.18s cubic-bezier(.2,1.6,.4,1), filter 0.18s;
+}
+.rail button.on .ico {
+  filter: grayscale(0);
+  transform: scale(1.15);
+}
+.rail button.pop .ico {
+  animation: pop 0.4s cubic-bezier(.2,1.6,.4,1);
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.45); }
+  100% { transform: scale(1.15); }
+}
+
+/* card entrance */
+.card .kicker, .card .body, .card .hype-emoji, .card .stat-grid {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.card.seen .kicker { animation: rise 0.5s 0.02s forwards; }
+.card.seen .body { animation: rise 0.55s 0.08s forwards; }
+.card.seen .hype-emoji { animation: rise 0.5s forwards; }
+.card.seen .stat-grid { animation: rise 0.5s 0.14s forwards; }
+@keyframes rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Floating dopamine pops ---------- */
+.pops {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+.pop {
+  position: absolute;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--bantay-primary);
+  text-shadow: 0 1px 0 var(--bantay-background);
+  animation: pop-float 1.1s cubic-bezier(.2,.8,.2,1) forwards;
+  white-space: nowrap;
+}
+.pop.alt { color: var(--bantay-emphasis); }
+@keyframes pop-float {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.7); }
+  18% { opacity: 1; transform: translate(-50%, -10px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -120px) scale(1); }
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 7;
+}
+
+/* Honor reduced-motion: kill the looping/entrance flourishes. */
+@media (prefers-reduced-motion: reduce) {
+  .cards { scroll-behavior: auto; }
+  .card .kicker, .card .body, .card .hype-emoji, .card .stat-grid { opacity: 1; transform: none; animation: none; }
+  .card.is-hype .hype-emoji { animation: none; }
+  .pop { animation-duration: 0.6s; }
+}
