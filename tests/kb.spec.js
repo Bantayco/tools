@@ -14,14 +14,15 @@ test("default note renders in read mode with wiki links", async ({ page }) => {
   await expect(page.locator("#editor")).toBeHidden();
 
   // A link to a not-yet-written note renders as a "broken" wiki link.
-  const dataIngest = page.locator("#preview a.wikilink", { hasText: "Data Ingest" });
+  // (The welcome note links to Data Ingest more than once, so scope to the first.)
+  const dataIngest = page.locator("#preview a.wikilink", { hasText: "Data Ingest" }).first();
   await expect(dataIngest).toHaveClass(/broken/);
 });
 
 test("clicking a broken wiki link starts that note", async ({ page }) => {
   await page.goto("/kb/");
 
-  await page.locator("#preview a.wikilink", { hasText: "Data Ingest" }).click();
+  await page.locator("#preview a.wikilink", { hasText: "Data Ingest" }).first().click();
 
   // Lands on a fresh, writable note seeded with the link's title.
   await expect(page).toHaveURL(/\?id=data-ingest/);
