@@ -28,6 +28,11 @@ const APPS = [
     href: "/typewriter/",
     blurb: "Folder-aware text & code editor — tabs, markdown, Python linting.",
   },
+  {
+    label: "Stats Smell Test",
+    href: "/stats-smell-test/",
+    blurb: "Learn to read charts & stats with humility — examples + multiple choice.",
+  },
 ];
 
 const newTools = document.querySelector("#newTools");

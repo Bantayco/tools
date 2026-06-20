@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stats Smell Test</title>
+<script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<!-- Bantay design system: brand tokens (+ brand font @import), extended + dark. -->
+<link rel="stylesheet" href="/_shared/tokens.css">
+<link rel="stylesheet" href="/_shared/tokens-extended.css">
+<link rel="stylesheet" href="/_shared/dark.css">
+<style>
+  :root {
+    --bg:           var(--bantay-background);
+    --panel:        var(--bantay-surface);
+    --panel-2:      var(--bantay-surface-2);
+    --ink:          var(--bantay-ink);
+    --ink-soft:     var(--bantay-muted);
+    --ink-faint:    var(--bantay-ink-faint);
+    --line:         var(--bantay-line);
+    --line-bright:  var(--bantay-line-strong);
+    --accent:       var(--bantay-emphasis);
+    --done:         var(--bantay-success);
+    --radius:       var(--bantay-radius);
+    --display-font: var(--bantay-display-font);
+    --body-font:    var(--bantay-body-font);
+    --mono-font:    var(--bantay-mono-font);
+    --c1: var(--bantay-cat-1);  /* chart reading  */
+    --c2: var(--bantay-cat-2);  /* weak results   */
+    --c3: var(--bantay-cat-3);  /* the reflex     */
+    --c4: var(--bantay-cat-4);  /* core concepts  */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body-font);
+    font-size: 13px;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    padding: 0 0 64px;
+  }
+
+  /* ---- Top bar ---- */
+  .topbar { padding: 14px 22px; border-bottom: 1px solid var(--line); background: var(--panel); display: flex; align-items: center; gap: 16px; }
+  .topbar .brand { flex: 1; min-width: 0; }
+  .topbar h1 { font-family: var(--display-font); font-weight: var(--bantay-headline-weight); font-size: 19px; letter-spacing: -0.02em; }
+  .subtitle { margin-top: 3px; color: var(--ink-soft); font-size: 11.5px; }
+  .theme-toggle { display: inline-flex; gap: 3px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+  .theme-toggle button { background: transparent; border: none; color: var(--ink-soft); font-family: var(--mono-font); font-size: 11px; padding: 4px 9px; border-radius: 5px; cursor: pointer; transition: all .15s; }
+  .theme-toggle button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+  .wrap { max-width: 680px; margin: 0 auto; padding: 24px 24px 0; }
+
+  /* ---- Intro / reframe ---- */
+  .reframe { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 15px 18px; margin-bottom: 20px; }
+  .reframe .kicker { font-family: var(--mono-font); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .reframe p { font-size: 12.5px; line-height: 1.55; color: var(--ink-soft); }
+  .reframe strong { color: var(--ink); font-weight: 600; }
+
+  /* ---- Progress ---- */
+  .progress-wrap { margin-bottom: 18px; }
+  .progress-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .progress-meta .stat { font-family: var(--mono-font); font-size: 11px; color: var(--ink-faint); letter-spacing: 0.02em; }
+  .progress-meta .stat b { color: var(--ink); font-weight: 600; }
+  .progress-bar { height: 7px; background: var(--panel-2); border-radius: var(--radius); overflow: hidden; display: flex; }
+  .progress-fill { height: 100%; background: var(--done); width: 0%; transition: width .3s; }
+  .progress-fill.wrong { background: var(--accent); }
+
+  /* ---- Question card ---- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 20px 18px; }
+  .q-head { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+  .chip { font-family: var(--mono-font); font-size: 10.5px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 20px; border: 1px solid currentColor; white-space: nowrap; }
+  .chip.cat-A { color: var(--c2); }
+  .chip.cat-B { color: var(--c1); }
+  .chip.cat-C { color: var(--c4); }
+  .chip.cat-D { color: var(--c3); }
+  .q-count { font-family: var(--mono-font); font-size: 11px; color: var(--ink-faint); margin-left: auto; }
+
+  .scenario { font-size: 13.5px; line-height: 1.55; color: var(--ink); margin-bottom: 6px; }
+  .scenario .fig { display: block; margin-top: 11px; padding: 12px 14px; background: var(--panel-2); border: 1px dashed var(--line-bright); border-radius: var(--radius); font-family: var(--mono-font); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); white-space: pre-wrap; }
+  .q-prompt { font-size: 12px; color: var(--ink-soft); margin: 14px 0 11px; font-style: italic; }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt { display: flex; gap: 11px; align-items: flex-start; text-align: left; width: 100%; padding: 12px 14px; background: var(--bg); border: 1.5px solid var(--line); border-radius: var(--radius); color: var(--ink); font-size: 12.5px; line-height: 1.5; cursor: pointer; transition: border-color .12s, background .12s; min-height: auto; }
+  .opt:hover:not(:disabled) { border-color: var(--line-bright); }
+  .opt:disabled { cursor: default; }
+  .opt .marker { flex-shrink: 0; width: 20px; height: 20px; border: 1.5px solid var(--line-bright); border-radius: 50%; display: grid; place-items: center; font-family: var(--mono-font); font-size: 11px; font-weight: 600; color: var(--ink-faint); transition: all .12s; }
+  .opt .marker svg { width: 12px; height: 12px; }
+  .opt-text { flex: 1; padding-top: 1px; }
+  .opt.correct { border-color: var(--done); background: color-mix(in srgb, var(--done) 9%, var(--bg)); }
+  .opt.correct .marker { background: var(--done); border-color: var(--done); color: #fff; }
+  .opt.chosen-wrong { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--bg)); }
+  .opt.chosen-wrong .marker { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ---- Feedback ---- */
+  .feedback { margin-top: 15px; border-top: 1px solid var(--line); padding-top: 15px; display: none; }
+  .feedback.show { display: block; animation: rise .25s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .verdict { font-family: var(--display-font); font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+  .verdict.right { color: var(--done); }
+  .verdict.wrong { color: var(--accent); }
+  .explain { font-size: 12.5px; line-height: 1.6; color: var(--ink-soft); }
+  .explain b { color: var(--ink); font-weight: 600; }
+  .hedge { margin-top: 12px; padding: 11px 14px; background: var(--panel-2); border-radius: var(--radius); border-left: 3px solid var(--c3); }
+  .hedge .hedge-label { font-family: var(--mono-font); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--c3); margin-bottom: 5px; }
+  .hedge .hedge-text { font-size: 12.5px; line-height: 1.55; color: var(--ink); font-style: italic; }
+
+  /* ---- Footer nav ---- */
+  .nav { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+  .nav .spacer { flex: 1; }
+  .btn { min-height: 38px; padding: 0 18px; border: 1px solid var(--line-bright); border-radius: var(--radius); background: var(--panel); color: var(--ink); font-family: var(--body-font); font-size: 12.5px; cursor: pointer; transition: all .12s; }
+  .btn:hover:not(:disabled) { border-color: var(--ink); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn.primary { background: var(--bantay-primary); border-color: var(--bantay-primary); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.06); }
+  .btn.ghost { border-color: transparent; color: var(--ink-faint); padding: 0 10px; }
+  .btn.ghost:hover { color: var(--accent); border-color: transparent; }
+
+  /* ---- Results screen ---- */
+  .results { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 24px; text-align: center; }
+  .results h2 { font-family: var(--display-font); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .results .score { font-family: var(--display-font); font-size: 46px; font-weight: 600; line-height: 1; margin: 14px 0 4px; }
+  .results .score small { font-size: 22px; color: var(--ink-faint); font-weight: 400; }
+  .results .verdict-line { font-size: 13px; color: var(--ink-soft); max-width: 46ch; margin: 8px auto 0; line-height: 1.55; }
+  .breakdown { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0 22px; }
+  .bd-item { font-family: var(--mono-font); font-size: 11px; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--line); color: var(--ink-soft); }
+  .bd-item b { color: var(--ink); }
+  .results .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---- Reference (collapsible cheat sheet) ---- */
+  details.ref { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 18px; }
+  details.ref > summary { font-family: var(--mono-font); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; list-style: none; display: flex; align-items: center; gap: 7px; }
+  details.ref > summary::-webkit-details-marker { display: none; }
+  details.ref > summary::before { content: "▸"; transition: transform .15s; }
+  details.ref[open] > summary::before { transform: rotate(90deg); }
+  .ref-body { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+  .ref-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 12px; line-height: 1.5; }
+  .ref-row:last-child { border-bottom: none; }
+  .ref-row .flag { font-weight: 600; color: var(--ink); }
+  .ref-row .why { color: var(--ink-soft); }
+  @media (max-width: 520px) { .ref-row { grid-template-columns: 1fr; gap: 3px; } }
+
+  footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--line); font-style: italic; font-size: 11.5px; line-height: 1.55; color: var(--ink-faint); }
+  footer a { color: var(--ink-faint); }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <h1>Stats Smell Test</h1>
+      <div class="subtitle">Read evidence transparently — interpret, rate, name the disambiguator.</div>
+    </div>
+    <div class="theme-toggle" id="theme"></div>
+  </div>
+
+  <div class="wrap">
+    <div class="reframe">
+      <div class="kicker">The one reframe that matters</div>
+      <p>A statistic here is <strong>a piece of scattered evidence to weigh</strong>, not a calculation to nail. The scored behavior is statistical <strong>humility</strong>: “this is suggestive — here’s what would make it load-bearing.” When in doubt, interpret, then flag what you’d need to confirm.</p>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-meta">
+        <span class="stat" id="statLeft"></span>
+        <span class="stat" id="statRight"></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div id="stage"></div>
+
+    <details class="ref">
+      <summary>Cheat sheet — the hedges, all on one page</summary>
+      <div class="ref-body" id="refBody"></div>
+    </details>
+
+    <footer>
+      You don’t need to be a statistician. You need the reflex: <em>what’s the claim → how strong is the evidence → what’s the cheapest thing that would confirm or break it.</em>
+      Built from the <a href="/">Bantay</a> stats smell-test reference.
+    </footer>
+  </div>
+
+<script type="module">
+import { getTheme, setTheme } from "/_shared/theme.js";
+
+/* ---------------- Theme toggle ---------------- */
+const THEMES = [["light","Light"],["dark","Dark"],["system","Auto"]];
+const themeEl = document.getElementById("theme");
+function renderTheme() {
+  const cur = getTheme();
+  themeEl.innerHTML = THEMES.map(([v,l]) =>
+    `<button data-v="${v}" class="${v===cur?"on":""}">${l}</button>`).join("");
+}
+themeEl.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-v]"); if (!b) return;
+  setTheme(b.dataset.v); renderTheme();
+});
+renderTheme();
+
+/* ---------------- Categories ---------------- */
+const CATS = {
+  A: { label: "Weak result", },
+  B: { label: "Chart reading", },
+  C: { label: "Core concept", },
+  D: { label: "The reflex", },
+};
+
+/* ---------------- Question bank ----------------
+ * Each q: { cat, scenario, fig?, prompt, options:[...], answer:index,
+ *           explain, hedge }
+ * scenario = the example. options are candidate *responses* (interpretations);
+ * the right one is the calibrated, humble read. */
+const QUESTIONS = [
+  {
+    cat: "A",
+    scenario: "A growth deck claims: “New onboarding doubles completion.”",
+    fig: "New flow:  6 / 9 users completed\nOld flow:  3 / 9 users completed",
+    prompt: "Which response is best calibrated?",
+    options: [
+      "Completion doubled, so the new flow is clearly better — ship it.",
+      "It’s a randomized A/B test, so the sample size doesn’t really matter.",
+      "With n this small I’d treat the effect as a hint, not a finding, and want it replicated at scale.",
+      "Three extra completions is within the margin of error, so there’s definitely no effect.",
+    ],
+    answer: 2,
+    explain: "<b>Tiny n.</b> With nine users per arm, a single person flipping outcome swings the ratio. The effect might be real, but the evidence is thin. Note option 4 is the opposite error — declaring a confirmed null from low power.",
+    hedge: "With n this small I’d treat the effect as a hint, not a finding, and want it replicated at scale.",
+  },
+  {
+    cat: "A",
+    scenario: "An analyst screened 40 product features for correlation with churn. One — “uses dark mode” — came back at p = 0.03 and is now headlined as “the churn driver.”",
+    prompt: "What’s the cleanest thing to flag?",
+    options: [
+      "Dark mode causes churn; the p-value proves it.",
+      "If they ran many comparisons, a single significant hit could be noise — I’d want the pre-registration or a correction.",
+      "p = 0.03 is weak; only p < 0.001 would be worth taking seriously.",
+      "Correlation is fine here because churn is the outcome they care about.",
+    ],
+    answer: 1,
+    explain: "<b>Multiple comparisons, no correction.</b> Test 40 things at p < 0.05 and you expect ~2 false positives by chance alone. The fix is a correction (or a pre-registered hypothesis), not a stricter arbitrary threshold.",
+    hedge: "If they ran many comparisons, a single significant result could be noise — I’d want the pre-registration or a correction.",
+  },
+  {
+    cat: "A",
+    scenario: "“Users who saw the new homepage banner spent 12 minutes on the site — the banner is clearly engaging.” There was no group that didn’t see the banner.",
+    prompt: "Best read?",
+    options: [
+      "12 minutes is high, so the banner works.",
+      "There’s no clean control here, so I can’t separate the effect from background.",
+      "Time-on-site is a vanity metric, so the claim is meaningless.",
+      "It’s fine — every user is their own control.",
+    ],
+    answer: 1,
+    explain: "<b>No / bad baseline.</b> Without a banner-free comparison group, you can’t attribute the 12 minutes to the banner versus everything else (season, traffic source, the content itself).",
+    hedge: "There’s no clean control here, so I can’t separate the effect from background.",
+  },
+  {
+    cat: "A",
+    scenario: "A slide shows revenue climbing steeply — but the x-axis only spans March to May of this year.",
+    prompt: "What do you ask for?",
+    options: [
+      "Nothing — the trend is obvious and upward.",
+      "A forecast extending the same slope another six months.",
+      "I’d want to see the full time range before trusting the trend.",
+      "The exact p-value of the slope.",
+    ],
+    answer: 2,
+    explain: "<b>Cherry-picked window.</b> A trend that only exists in the displayed slice is a framing artifact. Spring growth may be seasonal, or a rebound from a dip just left of the chart.",
+    hedge: "I’d want to see the full time range before trusting the trend.",
+  },
+  {
+    cat: "A",
+    scenario: "An experiment with n = 2,000,000 reports conversion rising from 4.00% to 4.02%, p < 0.001.",
+    prompt: "How do you weigh it?",
+    options: [
+      "p < 0.001 — this is a strong, important result.",
+      "The result is fake; such a tiny change can’t be real.",
+      "It’s significant, but the effect size is small enough that I’d question whether it matters operationally.",
+      "More users would make the effect bigger.",
+    ],
+    answer: 2,
+    explain: "<b>Tiny effect size, ‘significant’.</b> Huge n makes even trivial differences statistically detectable. The 0.02-point lift is real and almost certainly too small to matter for any decision.",
+    hedge: "It’s significant but the effect size is small enough that I’d question whether it matters operationally.",
+  },
+  {
+    cat: "A",
+    scenario: "After noticing sales spiked on several rainy days last quarter, the team concludes “rain drives our sales” and writes it into the strategy doc.",
+    prompt: "Best response?",
+    options: [
+      "Makes sense — the data shows it.",
+      "If this hypothesis was formed after seeing the data, I’d want a fresh test before updating much.",
+      "Rain can’t affect sales, so ignore it.",
+      "Run the same quarter’s data again to confirm.",
+    ],
+    answer: 1,
+    explain: "<b>Post-hoc hypothesis.</b> A story fitted to the data after the fact will always look like it fits. The honest test is fresh data the hypothesis hasn’t already been shaped by (re-running the same quarter, option 4, isn’t fresh).",
+    hedge: "If this hypothesis was formed after seeing the data, I’d want a fresh test before updating much.",
+  },
+  {
+    cat: "B",
+    scenario: "A bar chart compares two teams’ satisfaction scores. The bars look dramatically different in height.",
+    fig: "Satisfaction (%)\n100 ┤        ▇\n 98 ┤  ▇     ▇\n 96 ┤  ▇     ▇\n 94 ┤  ▇     ▇\n 92 ┤  ▇     ▇\n 90 ┤  ▇     ▇\n     └──────────\n     Team A  Team B\n     (A = 94%, B = 99%)",
+    prompt: "What jumps out first?",
+    options: [
+      "Team B is nearly twice as satisfied as Team A.",
+      "The y-axis doesn’t start at zero, which exaggerates the gap.",
+      "The difference is significant.",
+      "Both teams are doing great, so it doesn’t matter.",
+    ],
+    answer: 1,
+    explain: "<b>Truncated y-axis.</b> Starting the axis at 90 turns a 5-point gap into a towering one. Zero-baseline (or just reading the numbers) shows the bars are nearly the same.",
+    hedge: "The y-axis doesn’t start at zero, which exaggerates the gap.",
+  },
+  {
+    cat: "B",
+    scenario: "A figure shows two group means as single dots. Group A sits a bit above Group B. No error bars, no shaded intervals.",
+    prompt: "What do you say?",
+    options: [
+      "A beats B.",
+      "No uncertainty shown, so I can’t tell if these differences are real.",
+      "The gap is small, so the groups are equal.",
+      "Add a trendline to settle it.",
+    ],
+    answer: 1,
+    explain: "<b>No error bars / CIs.</b> A point estimate with no spread could be rock-solid or pure noise — you can’t tell which. Treat the bare point with suspicion until uncertainty is shown.",
+    hedge: "No uncertainty shown, so I can’t tell if these differences are real.",
+  },
+  {
+    cat: "B",
+    scenario: "Two treatments are plotted with 95% confidence intervals. A spans 4–11; B spans 6–13. The bars sit side by side and clearly overlap.",
+    prompt: "Best read?",
+    options: [
+      "B is higher, so B wins.",
+      "The intervals overlap substantially, so I’d be cautious calling these groups different.",
+      "Overlap means the result is statistically significant.",
+      "Throw out the wider interval.",
+    ],
+    answer: 1,
+    explain: "<b>Overlapping CIs.</b> Heavy overlap means the data are consistent with no real difference between the groups. Don’t declare a winner.",
+    hedge: "The intervals overlap substantially, so I’d be cautious calling these groups different.",
+  },
+  {
+    cat: "B",
+    scenario: "A scatter plot with a rising fitted line looks like a clear upward relationship — but one point sits far out in the top-right, away from the cloud.",
+    prompt: "What’s the move?",
+    options: [
+      "Trust the line; more data is always better.",
+      "Drop every point except the extreme one.",
+      "The trend looks driven by a single outlier; without it the effect largely disappears.",
+      "The outlier proves the relationship is strong.",
+    ],
+    answer: 2,
+    explain: "<b>One outlier driving it.</b> Mentally remove the extreme point and ask whether the trend survives. A slope held up by one observation is fragile.",
+    hedge: "The trend looks driven by a single outlier; without it the effect largely disappears.",
+  },
+  {
+    cat: "B",
+    scenario: "“Cities with more libraries have higher crime.” The evidence is a scatter of cities with a fitted line through it.",
+    prompt: "How do you interpret it?",
+    options: [
+      "Libraries cause crime.",
+      "Closing libraries would reduce crime.",
+      "This is an association; I’d want a controlled comparison before reading it causally.",
+      "The line proves the mechanism.",
+    ],
+    answer: 2,
+    explain: "<b>Correlation dressed as causation.</b> A line through a scatter is not a mechanism — population size plausibly drives both. Association ≠ cause without a controlled comparison.",
+    hedge: "This is an association; I’d want a controlled comparison before reading it causally.",
+  },
+  {
+    cat: "C",
+    scenario: "A teammate reads a result and says: “p = 0.04, so there’s a 96% chance our hypothesis is true.”",
+    prompt: "Which correction is right?",
+    options: [
+      "Right — that’s exactly what a p-value means.",
+      "Close — it’s a 4% chance the hypothesis is false.",
+      "A p-value is how surprising the data would be if nothing were going on — it’s not the probability the hypothesis is true.",
+      "p-values only apply to medical trials.",
+    ],
+    answer: 2,
+    explain: "<b>p-value ≠ P(hypothesis).</b> A p-value measures how unlikely the observed data would be <i>if the null were true</i>. Low p = “data surprising under the null,” nothing about how probable your hypothesis is.",
+    hedge: "A low p means the data would be unlikely if nothing were going on — it doesn’t tell me the probability the hypothesis is true.",
+  },
+  {
+    cat: "C",
+    scenario: "A test comes back p = 0.21. The summary slide reads: “No effect — the feature does nothing.”",
+    prompt: "Best response?",
+    options: [
+      "Agreed, p > 0.05 means no effect.",
+      "Non-significant here likely reflects low power, not a confirmed null.",
+      "Re-run until it drops below 0.05.",
+      "The feature definitely has a large effect.",
+    ],
+    answer: 1,
+    explain: "<b>p > 0.05 ≠ “no effect.”</b> You failed to <i>detect</i> an effect — often because n was too small. Absence of evidence isn’t evidence of absence.",
+    hedge: "Non-significant here likely reflects low power, not a confirmed null.",
+  },
+  {
+    cat: "C",
+    scenario: "A report says: “Estimated lift +8%, 95% CI [−15%, +31%]. The 95% CI means there’s a 95% chance the true lift is in that range.”",
+    prompt: "What’s the most important thing to flag?",
+    options: [
+      "Correct, and the lift is solid at +8%.",
+      "The interval is wrong; it should be narrower.",
+      "That’s the wrong definition of a CI, and this one crosses zero — so the lift isn’t distinguishable from none.",
+      "8% is small, so ignore the interval.",
+    ],
+    answer: 2,
+    explain: "<b>CI misread + crosses zero.</b> A 95% CI is a property of the <i>procedure</i> (≈95% of such intervals would contain the truth over many repeats), not a 95% probability for this one. And because it spans zero, the data are consistent with no lift at all. Wide CI = high uncertainty.",
+    hedge: "A wide CI like this means high uncertainty, and since it crosses zero the effect isn’t distinguishable from none.",
+  },
+  {
+    cat: "C",
+    scenario: "A promising intervention shows a large effect but misses significance: p = 0.08 with n = 12. A teammate says “not significant — drop it.”",
+    prompt: "Best calibrated response?",
+    options: [
+      "Agree — p > 0.05, so there’s nothing there.",
+      "A large, important effect can miss significance with small n — I’d want a properly powered test before dropping it.",
+      "Lower the threshold to 0.10 so it passes.",
+      "The effect size doesn’t matter, only the p-value.",
+    ],
+    answer: 1,
+    explain: "<b>Effect size and significance are different questions.</b> A big effect can fail to reach significance when n is tiny. Ask both: <i>is it real?</i> and <i>is it big enough to matter?</i> Here the magnitude warrants a real test, not a discard.",
+    hedge: "A large effect missing significance at small n usually means low power, not a confirmed null — I’d want it properly powered.",
+  },
+  {
+    cat: "B",
+    scenario: "A polished figure compares outcomes across four groups. Nowhere on the chart — axes, caption, or legend — is the sample size reported.",
+    prompt: "What do you note?",
+    options: [
+      "Fine — a clean chart doesn’t need n.",
+      "The colors are well chosen, so trust it.",
+      "There’s no n anywhere on the figure, which is itself worth flagging.",
+      "Assume n is large because it looks professional.",
+    ],
+    answer: 2,
+    explain: "<b>Is n on the figure?</b> Missing sample size is a tell. Without it you can’t judge whether the differences are stable or noise — flag the omission.",
+    hedge: "I can’t see n anywhere on the figure, which itself is worth flagging before I trust the differences.",
+  },
+  {
+    cat: "D",
+    scenario: "A stat flashes up in a live review and you’ve got one breath to respond well.",
+    prompt: "Which reflex does the rubric actually reward?",
+    options: [
+      "Compute the exact p-value in your head and state the precise answer.",
+      "Say the claim is wrong and move on.",
+      "What’s the claim → how strong is the evidence → what’s the cheapest thing that would confirm or break it.",
+      "Defer entirely: “I’m not a statistician, I can’t say.”",
+    ],
+    answer: 2,
+    explain: "<b>The reflex under the clock.</b> Interpret, rate, name the disambiguator. That single move turns “I’m shaky on stats” into “I read evidence transparently.” You don’t need certainty — you need calibration.",
+    hedge: "Here’s the claim, here’s how strong I think the evidence is, and here’s the cheapest thing that would confirm or break it.",
+  },
+  {
+    cat: "D",
+    scenario: "You’ve interpreted a chart and rated the evidence as weak. To close like the rubric wants, you add one more sentence.",
+    prompt: "What should that sentence do?",
+    options: [
+      "Restate that you’re not confident.",
+      "Name the cheapest disambiguator — the specific thing that would confirm or break the claim.",
+      "Apologize for not running the numbers.",
+      "List every possible statistical caveat you can think of.",
+    ],
+    answer: 1,
+    explain: "<b>Name the disambiguator.</b> Calibrated humility isn’t vague hedging or an exhaustive caveat-dump — it’s pointing at the one concrete check (a control, the full time range, the n, a correction) that would settle it.",
+    hedge: "This is suggestive, not load-bearing — the cheapest thing that would settle it is [the control / full range / sample size / correction].",
+  },
+];
+
+/* ---------------- Cheat sheet ---------------- */
+const CHEATS = [
+  ["Tiny n", "Noise dominates — treat as a hint, want it replicated at scale."],
+  ["Many comparisons", "One hit among many can be chance — want a correction or pre-registration."],
+  ["No baseline", "No control = can’t separate the effect from background."],
+  ["Cherry-picked window", "Trend may live only in the slice — want the full time range."],
+  ["Tiny effect, ‘sig.’", "Real but trivial — ask if it matters operationally."],
+  ["Post-hoc story", "Fitted after seeing data — want a fresh test."],
+  ["Truncated / log y-axis", "Non-zero baseline exaggerates the gap."],
+  ["No error bars", "No uncertainty shown — can’t tell if differences are real."],
+  ["Overlapping CIs", "Heavy overlap ≈ likely no real difference."],
+  ["One outlier", "Remove it mentally — does the trend survive?"],
+  ["Correlation ≠ cause", "A line through a scatter is not a mechanism."],
+  ["p-value", "How surprising the data are if the null were true — NOT P(hypothesis)."],
+  ["p > 0.05", "Didn’t detect an effect (often low power) — not a confirmed null."],
+  ["95% CI", "Property of the procedure; wide = uncertain; crosses 0/1 = indistinguishable from none."],
+  ["Effect size ≠ p", "Ask both: is it real, and is it big enough to matter?"],
+];
+document.getElementById("refBody").innerHTML = CHEATS.map(([f,w]) =>
+  `<div class="ref-row"><span class="flag">${f}</span><span class="why">${w}</span></div>`).join("");
+
+/* ---------------- State ---------------- */
+const STORE_KEY = "bantay-stats-smell-test";
+const stage = document.getElementById("stage");
+const fill = document.getElementById("progressFill");
+const statLeft = document.getElementById("statLeft");
+const statRight = document.getElementById("statRight");
+
+let order, idx, answers; // answers[questionIndex] = chosen option index (or undefined)
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (s && Array.isArray(s.order) && s.order.length === QUESTIONS.length) {
+      order = s.order; answers = s.answers || {}; idx = s.idx || 0; return;
+    }
+  } catch {}
+  fresh();
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ order, answers, idx })); } catch {}
+}
+function fresh() {
+  order = [...QUESTIONS.keys()];
+  // light shuffle so a retake feels different
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  answers = {}; idx = 0;
+}
+
+const CHECK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CROSS = '<svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+const LETTERS = ["A","B","C","D","E"];
+
+function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");}
+
+function answeredCount(){ return order.filter(qi => answers[qi] !== undefined).length; }
+function correctCount(){ return order.filter(qi => answers[qi] === QUESTIONS[qi].answer).length; }
+
+function updateProgress() {
+  const total = QUESTIONS.length, done = answeredCount(), right = correctCount();
+  fill.style.width = (done/total*100) + "%";
+  statLeft.textContent = `${done} / ${total} answered`;
+  statRight.innerHTML = done ? `<b>${right}</b> correct` : "Calibration check";
+}
+
+function render() {
+  updateProgress();
+  if (idx >= order.length) return renderResults();
+
+  const qi = order[idx];
+  const q = QUESTIONS[qi];
+  const chosen = answers[qi];
+  const locked = chosen !== undefined;
+
+  const opts = q.options.map((text, i) => {
+    let cls = "opt";
+    let marker = `<span class="marker">${LETTERS[i]}</span>`;
+    if (locked) {
+      if (i === q.answer) { cls += " correct"; marker = `<span class="marker">${CHECK}</span>`; }
+      else if (i === chosen) { cls += " chosen-wrong"; marker = `<span class="marker">${CROSS}</span>`; }
+    }
+    return `<button class="${cls}" data-opt="${i}" ${locked?"disabled":""}>
+      ${marker}<span class="opt-text">${esc(text)}</span></button>`;
+  }).join("");
+
+  let feedback = "";
+  if (locked) {
+    const right = chosen === q.answer;
+    feedback = `<div class="feedback show">
+      <div class="verdict ${right?"right":"wrong"}">${right?"✓ Calibrated":"✗ Re-calibrate"}</div>
+      <div class="explain">${q.explain}</div>
+      <div class="hedge">
+        <div class="hedge-label">Hedge to lift under pressure</div>
+        <div class="hedge-text">“${esc(q.hedge)}”</div>
+      </div>
+    </div>`;
+  }
+
+  const last = idx === order.length - 1;
+  const nav = `<div class="nav">
+    <button class="btn ghost" id="prevBtn" ${idx===0?"disabled":""}>← Back</button>
+    <div class="spacer"></div>
+    <button class="btn primary" id="nextBtn" ${locked?"":"disabled"}>${last ? "See results" : "Next →"}</button>
+  </div>`;
+
+  stage.innerHTML = `<div class="card">
+    <div class="q-head">
+      <span class="chip cat-${q.cat}">${CATS[q.cat].label}</span>
+      <span class="q-count">${idx+1} / ${order.length}</span>
+    </div>
+    <div class="scenario">${esc(q.scenario)}${q.fig ? `<span class="fig">${esc(q.fig)}</span>` : ""}</div>
+    <div class="q-prompt">${esc(q.prompt)}</div>
+    <div class="options">${opts}</div>
+    ${feedback}
+  </div>${nav}`;
+
+  stage.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+    if (answers[qi] !== undefined) return;
+    answers[qi] = Number(b.dataset.opt);
+    save(); render();
+  }));
+  const nb = document.getElementById("nextBtn");
+  if (nb) nb.addEventListener("click", () => { idx++; save(); render(); window.scrollTo({top:0,behavior:"smooth"}); });
+  const pb = document.getElementById("prevBtn");
+  if (pb) pb.addEventListener("click", () => { idx = Math.max(0, idx-1); save(); render(); });
+}
+
+function renderResults() {
+  const total = QUESTIONS.length, right = correctCount();
+  const pct = Math.round(right/total*100);
+  let line;
+  if (pct >= 90) line = "Sharp. You’re reading evidence transparently and naming the disambiguator. The reflex is loaded.";
+  else if (pct >= 70) line = "Solid instincts. Re-run the misses below — the goal is calibrated humility, not certainty.";
+  else if (pct >= 50) line = "Getting there. The trap is statistical certainty; keep reaching for “suggestive — here’s what would confirm it.”";
+  else line = "Worth another pass. Skim the cheat sheet, then retake — these are reflexes, and reflexes come from reps.";
+
+  // per-category breakdown
+  const byCat = {};
+  for (const k of Object.keys(CATS)) byCat[k] = {n:0, r:0};
+  order.forEach(qi => {
+    const q = QUESTIONS[qi];
+    byCat[q.cat].n++;
+    if (answers[qi] === q.answer) byCat[q.cat].r++;
+  });
+  const bd = Object.entries(CATS).map(([k,c]) =>
+    `<span class="bd-item">${c.label} <b>${byCat[k].r}/${byCat[k].n}</b></span>`).join("");
+
+  const missed = order.filter(qi => answers[qi] !== undefined && answers[qi] !== QUESTIONS[qi].answer);
+
+  stage.innerHTML = `<div class="results">
+    <h2>Calibration complete</h2>
+    <div class="score">${right}<small> / ${total}</small></div>
+    <div class="verdict-line">${line}</div>
+    <div class="breakdown">${bd}</div>
+    <div class="actions">
+      ${missed.length ? `<button class="btn" id="reviewBtn">Review ${missed.length} miss${missed.length>1?"es":""}</button>` : ""}
+      <button class="btn primary" id="retakeBtn">Retake (reshuffle)</button>
+    </div>
+  </div>`;
+
+  const rt = document.getElementById("retakeBtn");
+  rt.addEventListener("click", () => { fresh(); save(); render(); window.scrollTo({top:0,behavior:"smooth"}); });
+  const rv = document.getElementById("reviewBtn");
+  if (rv) rv.addEventListener("click", () => {
+    order = missed.slice(); idx = 0;
+    // keep answers so the review shows them already revealed
+    save(); render(); window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+
+load();
+render();
+</script>
+</body>
+</html>
