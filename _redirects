@@ -8,3 +8,10 @@
 # so unknown subpaths serve the tool shell instead of 404ing:
 #
 #   /style-guide/*  /style-guide/index.html  200
+
+# --- fastenaiting.com custom domain -----------------------------------------
+# fastenaiting.com is added as a Cloudflare Pages custom domain on this same
+# project. Route bare visits (fastenaiting.com/) into the /fastenaiting/ tool
+# so it feels like a single-purpose site instead of a subpath.
+https://fastenaiting.com/  /fastenaiting/  302
+https://www.fastenaiting.com/  /fastenaiting/  302

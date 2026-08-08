@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>fastenAIting — identify any fastener</title>
+    <meta name="description" content="Snap or upload a photo of a screw, bolt, nut, or washer — we identify it, generate a printable 12mm label, and link you to buy more.">
+    <script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+
+    <link rel="stylesheet" href="/_shared/tokens.css">
+    <link rel="stylesheet" href="/_shared/tokens-extended.css">
+    <link rel="stylesheet" href="/_shared/base.css">
+    <link rel="stylesheet" href="/_shared/dark.css">
+    <link rel="stylesheet" href="./styles.css?v=1">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1><span class="brand-mark">fasten<b>AI</b>ting</span></h1>
+          <p class="tagline">Point. Shoot. Print a label. Buy more.</p>
+        </div>
+        <div class="top-actions">
+          <button id="settingsBtn" type="button" class="ghost" title="Settings">⚙︎ Settings</button>
+          <button id="resetBtn" type="button" class="ghost" title="Start over">↺ Reset</button>
+        </div>
+      </header>
+
+      <p id="status" class="status" aria-live="polite">Ready. Show me a fastener.</p>
+
+      <!-- ============ 1. CAPTURE ============ -->
+      <section class="card" aria-label="Capture">
+        <div class="tabs" role="tablist">
+          <button class="tab on" data-tab="camera" role="tab" aria-selected="true">📷 Camera</button>
+          <button class="tab" data-tab="upload" role="tab" aria-selected="false">📁 Upload</button>
+          <button class="tab" data-tab="manual" role="tab" aria-selected="false">✎ Manual</button>
+        </div>
+
+        <div id="tab-camera" class="tab-panel on">
+          <div class="camera-stage">
+            <video id="video" playsinline muted autoplay></video>
+            <div id="cameraPlaceholder" class="placeholder">
+              <p>Camera not started.</p>
+              <p class="small">On phones, the rear camera will be used.</p>
+            </div>
+          </div>
+          <div class="row wrap">
+            <button id="startCam" type="button" class="primary">Start camera</button>
+            <button id="switchCam" type="button" disabled title="Switch camera">↻ Flip</button>
+            <button id="snap" type="button" disabled class="primary">Snap →</button>
+            <button id="stopCam" type="button" disabled>Stop</button>
+            <span class="grow"></span>
+            <label class="hint">Fill the frame. Include a coin or ruler if you can.</label>
+          </div>
+        </div>
+
+        <div id="tab-upload" class="tab-panel">
+          <label id="drop" for="fileInput" class="drop">
+            <input id="fileInput" type="file" accept="image/*" hidden>
+            <div>
+              <b>Drop a photo</b> or click to pick a file.
+              <p class="small">JPG / PNG / HEIC / WebP up to ~10&nbsp;MB</p>
+            </div>
+          </label>
+        </div>
+
+        <div id="tab-manual" class="tab-panel">
+          <p class="small">Skip the photo — just describe it, then hit <b>Analyze</b> or fill the fields below directly.</p>
+          <textarea id="manualText" rows="3" placeholder="e.g. #8 pan-head Phillips wood screw, 1 1/4&quot;, zinc plated"></textarea>
+          <div class="row">
+            <button id="manualAnalyze" type="button" class="primary">Analyze description</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 2. PHOTO + AI RESULT ============ -->
+      <section class="card two-col" aria-label="Identification">
+        <div class="photo-wrap">
+          <img id="photo" alt="" hidden>
+          <div id="photoEmpty" class="placeholder">
+            <p>No photo yet.</p>
+          </div>
+          <div class="row">
+            <button id="identifyBtn" type="button" class="primary" disabled>🔍 Identify with AI</button>
+            <span id="aiStatus" class="hint"></span>
+          </div>
+        </div>
+
+        <form id="specForm" class="specs" autocomplete="off">
+          <div class="grid">
+            <label>Category
+              <select name="category">
+                <option value="">—</option>
+                <option>Screw</option>
+                <option>Bolt</option>
+                <option>Nut</option>
+                <option>Washer</option>
+                <option>Anchor</option>
+                <option>Rivet</option>
+                <option>Nail</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label>Sub-type
+              <input name="subtype" placeholder="e.g. Wood, Hex, Lock…">
+            </label>
+            <label>Head shape
+              <select name="head">
+                <option value="">—</option>
+                <option>Pan</option>
+                <option>Flat (countersunk)</option>
+                <option>Oval</option>
+                <option>Round</option>
+                <option>Truss</option>
+                <option>Button</option>
+                <option>Hex</option>
+                <option>Socket cap</option>
+                <option>Bugle</option>
+                <option>None</option>
+              </select>
+            </label>
+            <label>Drive
+              <select name="drive">
+                <option value="">—</option>
+                <option>Phillips</option>
+                <option>Slotted</option>
+                <option>Pozidriv</option>
+                <option>Torx</option>
+                <option>Square (Robertson)</option>
+                <option>Hex (Allen)</option>
+                <option>External hex</option>
+                <option>Combination</option>
+                <option>None</option>
+              </select>
+            </label>
+            <label>Thread
+              <select name="thread">
+                <option value="">—</option>
+                <option>Coarse</option>
+                <option>Fine</option>
+                <option>Machine</option>
+                <option>Wood</option>
+                <option>Self-tapping</option>
+                <option>Sheet metal</option>
+                <option>None</option>
+              </select>
+            </label>
+            <label>Standard
+              <select name="standard">
+                <option value="">—</option>
+                <option value="sae">SAE (imperial)</option>
+                <option value="metric">Metric</option>
+              </select>
+            </label>
+            <label>Size / gauge
+              <input name="size" placeholder='e.g. #8, 1/4", M6'>
+            </label>
+            <label>Length
+              <input name="length" placeholder='e.g. 1", 25mm'>
+            </label>
+            <label>Thread pitch / TPI
+              <input name="pitch" placeholder="e.g. 1.0, 20 tpi">
+            </label>
+            <label>Material
+              <select name="material">
+                <option value="">—</option>
+                <option>Steel</option>
+                <option>Stainless</option>
+                <option>Brass</option>
+                <option>Aluminum</option>
+                <option>Nylon</option>
+                <option>Zinc</option>
+                <option>Copper</option>
+              </select>
+            </label>
+            <label>Finish
+              <select name="finish">
+                <option value="">—</option>
+                <option>Zinc-plated</option>
+                <option>Black oxide</option>
+                <option>Bright</option>
+                <option>Chrome</option>
+                <option>Galvanized</option>
+                <option>Painted</option>
+                <option>Unfinished</option>
+              </select>
+            </label>
+            <label>Color
+              <input name="color" placeholder="e.g. silver, black">
+            </label>
+          </div>
+          <label class="notes">Notes / description
+            <input name="notes" placeholder="Anything else worth remembering">
+          </label>
+        </form>
+      </section>
+
+      <!-- ============ 3. LABEL + BUY ============ -->
+      <section class="card" aria-label="Label &amp; buy">
+        <div class="label-head">
+          <div>
+            <h2>Label preview</h2>
+            <p class="hint">12&nbsp;mm tape · Brother-compatible · 180&nbsp;dpi PNG</p>
+          </div>
+          <div class="row">
+            <label class="inline">Style
+              <select id="labelStyle">
+                <option value="strip">Strip (long)</option>
+                <option value="square">Square (2×)</option>
+              </select>
+            </label>
+            <label class="inline">Length
+              <select id="labelLen">
+                <option value="40">40 mm</option>
+                <option value="60" selected>60 mm</option>
+                <option value="80">80 mm</option>
+                <option value="100">100 mm</option>
+              </select>
+            </label>
+            <button id="downloadLabel" type="button" class="primary">⬇ Download PNG</button>
+            <button id="printLabel" type="button">🖨 Print</button>
+          </div>
+        </div>
+
+        <div class="label-stage">
+          <canvas id="labelCanvas"></canvas>
+        </div>
+
+        <h2 class="buy-h">Buy more</h2>
+        <div id="buyLinks" class="buy-links">
+          <a class="buy home-depot" target="_blank" rel="noopener sponsored">
+            <span class="mark">Home Depot</span><span class="chev">↗</span>
+          </a>
+          <a class="buy lowes" target="_blank" rel="noopener sponsored">
+            <span class="mark">Lowe's</span><span class="chev">↗</span>
+          </a>
+          <a class="buy amazon" target="_blank" rel="noopener sponsored">
+            <span class="mark">Amazon</span><span class="chev">↗</span>
+          </a>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <p>fastenAIting — a <a href="https://tools.bantay.co">Bantay Tools</a> project.
+          Affiliate links may earn a small commission.</p>
+      </footer>
+    </main>
+
+    <!-- ============ SETTINGS DIALOG ============ -->
+    <dialog id="settings" class="settings">
+      <form method="dialog">
+        <h2>Settings</h2>
+
+        <fieldset>
+          <legend>AI provider</legend>
+          <p class="small">By default we use the server-side identifier. To skip the server and use your own Anthropic key, paste it here — it's stored only in this browser's localStorage.</p>
+          <label>Anthropic API key (optional)
+            <input id="setApiKey" type="password" autocomplete="off" placeholder="sk-ant-…">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Affiliate tags</legend>
+          <label>Amazon associate tag
+            <input id="setAmazonTag" placeholder="yourtag-20">
+          </label>
+          <label>Home Depot CJ / Impact ID (optional)
+            <input id="setHomeDepotTag" placeholder="AID/PID or partner id">
+          </label>
+          <label>Lowe's CJ / Impact ID (optional)
+            <input id="setLowesTag" placeholder="AID/PID or partner id">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Label defaults</legend>
+          <label class="row inline">
+            <input type="checkbox" id="setShowIso" checked> Include isometric drawing
+          </label>
+          <label class="row inline">
+            <input type="checkbox" id="setShowBrand" checked> Include "fastenAIting" wordmark
+          </label>
+        </fieldset>
+
+        <div class="row" style="justify-content:flex-end;gap:8px">
+          <button value="cancel">Cancel</button>
+          <button id="saveSettings" value="save" class="primary">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./app.js?v=1"></script>
+  </body>
+</html>

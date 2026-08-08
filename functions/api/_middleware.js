@@ -2,8 +2,18 @@
 // the Cloudflare Access JWT and exposes it as context.data.userId / .email.
 import { json, verifyAccessJwt, getCookie } from "./_lib.js";
 
+// Paths under /api/* that are intentionally PUBLIC (no login required).
+// The fastenaiting identifier is one — the tool is meant to work for anyone
+// who visits fastenaiting.com without signing in.
+const PUBLIC_PREFIXES = ["/api/fastenaiting/"];
+
 export async function onRequest(context) {
   const { request, env, next, data } = context;
+
+  const url = new URL(request.url);
+  if (PUBLIC_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+    return next();
+  }
 
   // Local dev escape hatch: `wrangler pages dev` has no Access in front, so
   // set DEV_USER to act as a fixed identity. NEVER set this in production.
