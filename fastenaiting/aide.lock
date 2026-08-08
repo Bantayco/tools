@@ -1,0 +1,1008 @@
+# aide.lock — canonical snapshot of the aidefile.
+# GENERATED — do not hand-edit. Regenerate on every aide change with:
+#   node scripts/aide-lock.mjs fastenaiting/fastenaiting.aide
+#
+# The diff on this file is the auditable record of what actually changed
+# in the behavioral spec — new scenarios, modified invariants, moved
+# constraints. CI compares (aide, lock) to reject drift in either
+# direction: an aide edit without a lock update, or a lock update that
+# doesn't match its aide.
+
+lock_version: 1
+generator:
+  name: aide-lock
+  version: 0.1.0
+source:
+  file: fastenaiting/fastenaiting.aide
+  sha256: 3438429d205fd659a40a036b16b2781394cb289d4aca88acec02b049dae2827b
+aide:
+  id: fastenaiting
+  title: fastenAIting
+  version: '0.1'
+summary:
+  cujs: 13
+  scenarios: 21
+  invariants: 18
+  constraints: 18
+  foundations: 5
+  wisdoms: 9
+  relationships: 52
+entities:
+  cuj:
+    cuj_buy_more:
+      parent: cujs
+      props:
+        area: commerce
+        feature: A user opens a search at a major retailer for the identified fastener
+        tier: secondary
+      sha256: ca8ae992151381db04e407897803d69d4c6b13d275573ff7557fe555edccd86b
+    cuj_configure_affiliate:
+      parent: cujs
+      props:
+        area: settings
+        feature: A user attaches their own affiliate tags to outbound retailer links
+        tier: tertiary
+      sha256: df2232f5e67d9407a252ec13c4c55dda5078d70781821aac77852af08f3d9c4a
+    cuj_configure_ai_key:
+      parent: cujs
+      props:
+        area: settings
+        feature: A user brings their own Anthropic API key
+        tier: tertiary
+      sha256: 46a2a3194038f30ccd78eb6a6bffb625259cda05ad082d97b7bf601ce91ce390
+    cuj_custom_domain:
+      parent: cujs
+      props:
+        area: platform
+        feature: A visitor lands on fastenaiting.com and is served the tool
+        tier: primary
+      sha256: 93f82f39ef2eee000115da01182ebe6f8581f0c5303a4eec8f3cce0ee4ab9521
+    cuj_download_label:
+      parent: cujs
+      props:
+        area: label
+        feature: A user downloads the label as a PNG ready for a Brother P-touch printer
+        tier: primary
+      sha256: d4488c878b76d6e960e12cf6cc37a8cb48ec3c47b3dc8c613eca2c9879670ef6
+    cuj_edit_ai_result:
+      parent: cujs
+      props:
+        area: entry
+        feature: A user corrects an AI-identified spec
+        tier: primary
+      sha256: 652de85e79cacfaa322c376d35b1c142bad815f632ec0c7640b8e4630e2105c2
+    cuj_enter_spec_manually:
+      parent: cujs
+      props:
+        area: entry
+        feature: A user records a fastener spec by filling the form directly
+        tier: secondary
+      sha256: 4a2963439ee53422114d3556262e8ded36fa67a37ee90bec99e2b19e5a163eec
+    cuj_generate_label:
+      parent: cujs
+      props:
+        area: label
+        feature: A user gets a printable 12mm label reflecting the current spec
+        tier: primary
+      sha256: 70329c3e7fa22fe6df35bf3b956fd118b97b48f45ee5964b1bde274e9ee1125b
+    cuj_identify_from_camera:
+      parent: cujs
+      props:
+        area: capture
+        feature: A user identifies a fastener using their device camera
+        tier: primary
+      sha256: 6fcf1b9655a97d1dcd1441f6c1a3aae3ead1f2341b87ad7692c0400ca8dcfbeb
+    cuj_identify_from_text:
+      parent: cujs
+      props:
+        area: capture
+        feature: A user identifies a fastener by describing it in words
+        tier: secondary
+      sha256: 87066066b982e2537f68d5829f743e4872d491593730d6f762dd4a661b04cdbb
+    cuj_identify_from_upload:
+      parent: cujs
+      props:
+        area: capture
+        feature: A user identifies a fastener by uploading or dropping a photo
+        tier: primary
+      sha256: 207c6e537205ab84222d69af92aa79618357c9cee7b6c6b26744980cb55f9fd5
+    cuj_install_pwa:
+      parent: cujs
+      props:
+        area: platform
+        feature: A user installs the tool as a standalone app on their device
+        tier: secondary
+      sha256: 62de91ca54f6d626358d78ec4650405a6b0295cd1a122b619d28bff29ebe4932
+    cuj_offline_use:
+      parent: cujs
+      props:
+        area: platform
+        feature: A user opens the installed app with no network
+        tier: secondary
+      sha256: 99daa16c03d8805523a77b31230a8ba2a19c46c36314929485557cc75f6f83d8
+  scenario:
+    sc_buy_search_link:
+      parent: cuj_buy_more
+      props:
+        given: A spec is filled enough to produce a query
+        name: Home Depot / Lowe's / Amazon search
+        then:
+          - A new tab opens on the retailer's own search page with the composed query
+          - The user's configured affiliate tag is attached if set
+          - Every outbound link carries rel="noopener sponsored"
+          - If the spec is empty, links stay disabled and unclickable
+        when: The user taps one of the three retailer links
+      sha256: 3aa70080ce34de27b73ab92047d0ffda8bd4dbf97ba3d4eb4ef790549ed5d446
+    sc_byok:
+      parent: cuj_configure_ai_key
+      props:
+        given: The user opens Settings
+        name: Paste an Anthropic key in Settings
+        then:
+          - The key is stored only in this browser's localStorage
+          - It is sent only to /api/fastenaiting/identify as x-user-api-key
+          - It is never included in labels, downloads, links, or logs
+          - Clearing the key in Settings removes it from localStorage
+        when: The user pastes a key and saves
+      sha256: 2b324ef3a2c43874fe77c2f6e8a3099c2a3b86a3c8ce8df80954eb18c77883f6
+    sc_camera_happy:
+      parent: cuj_identify_from_camera
+      props:
+        given: User is on the tool with a working camera-capable device
+        name: Snap and identify (happy path)
+        then:
+          - Rear camera stream appears within 2 seconds of permission grant
+          - The snap freezes the current frame as the working photo
+          - The spec form populates with category, sub-type, head, drive, size, length, material, finish (best-effort)
+          - The label preview redraws to reflect the populated spec
+        when: User grants camera permission, frames the fastener, taps the shutter, and taps "Identify with AI"
+      sha256: b499b8af0836ea7b8ed744cc3a666ff1f9d4a1c2e4ffb019762a8ea475859209
+    sc_camera_permission_denied:
+      parent: cuj_identify_from_camera
+      props:
+        given: The tool has requested camera access
+        name: User denies camera permission
+        then:
+          - A clear error is shown in the status line
+          - The camera placeholder remains visible
+          - The Upload and Manual tabs remain available as alternatives
+          - No further getUserMedia call fires without a new user gesture
+        when: The user denies permission (or the OS blocks getUserMedia)
+      sha256: 273c396da2d6c99375ea3819eabfd42d1451b2415050b852f2cde3b88b6e4c47
+    sc_camera_stop:
+      parent: cuj_identify_from_camera
+      props:
+        given: The camera stream is running
+        name: User stops the camera
+        then:
+          - Every MediaStreamTrack.stop() completes
+          - The OS camera indicator turns off
+          - Restarting the stream requires a new user gesture
+        when: The user taps stop, resets the tool, or leaves the page
+      sha256: 73bd1ae3431af669e0e0e0db21267a357fc5659b8441403a5123f53a22c362aa
+    sc_camera_switch_facing:
+      parent: cuj_identify_from_camera
+      props:
+        given: The camera stream is running and more than one video device is available
+        name: User flips between front and rear camera
+        then:
+          - The previous stream's tracks are stopped (no camera light left on)
+          - A new stream starts with the opposite facingMode
+          - The video element updates without a page reload
+        when: The user taps the flip button
+      sha256: bfc28c97684b8a826a63ae42153785fa18aff8a8acbdeb8d0128ea6005cdd4c4
+    sc_configure_amazon_tag:
+      parent: cuj_configure_affiliate
+      props:
+        given: The user has an Amazon Associates tag
+        name: Amazon associate tag
+        then:
+          - All Amazon outbound links include tag=<the tag>
+          - The stored tag never leaves the browser
+          - Clearing the field removes the tag from future links
+        when: The user saves it in Settings
+      sha256: 22fe19523d41258c20c2c8e12e7db35111d006c9b1f899be96f5544437af2a1c
+    sc_download_png:
+      parent: cuj_download_label
+      props:
+        given: The label preview is populated
+        name: Download PNG
+        then:
+          - A PNG named after the fastener spec is saved
+          - The file opens as a plain PNG in Brother P-touch software and any image viewer
+          - No metadata contains the user's photo or API key
+        when: The user taps "Download PNG"
+      sha256: 4de6a13253310a788f7e4a43d1556eb0656482f92d9ab82acc8a576560792a59
+    sc_edit_after_identify:
+      parent: cuj_edit_ai_result
+      props:
+        given: The AI has populated the form
+        name: AI got the drive wrong; user fixes it
+        then:
+          - The change is accepted without prompting
+          - The label and buy links update immediately
+          - No prior AI response overrides the user's edit later
+        when: The user changes a select or types over an input
+      sha256: fda37f7a596308c2468272d2c4b72ee6a8ba4dc2b3cb8268db9880c5b4b48b5a
+    sc_install_ios_share:
+      parent: cuj_install_pwa
+      props:
+        given: The user is on iOS Safari (no beforeinstallprompt)
+        name: iOS Safari home-screen add
+        then:
+          - The app launches standalone with the fastenAIting icon
+          - The status bar respects theme_color
+          - The camera continues to work in the standalone context
+        when: The user chooses "Add to Home Screen" from the share sheet
+      sha256: 5e4a281a8b3147ed8ad2e59cf0ab4a35fe9f25eb56c93ec8fc1336b51a9c7323
+    sc_install_prompt:
+      parent: cuj_install_pwa
+      props:
+        given: The browser has fired beforeinstallprompt
+        name: Install button on a supporting browser
+        then:
+          - The browser's native install dialog appears
+          - On accept, the app is installed and the button disappears
+          - On dismiss, the button hides but re-appears on the next eligible visit
+        when: The user taps Install
+      sha256: d15b35d8b327156f5fba72df441b2ae4231638a49d9b4ca4394f4720f759c880
+    sc_label_live_preview:
+      parent: cuj_generate_label
+      props:
+        given: A spec is (partially) filled
+        name: Live label preview reflects every spec change
+        then:
+          - The canvas redraws within one animation frame
+          - The isometric on the label matches the selected fastener family
+          - The primary line, sub-line, finish line, and wordmark all fit within the 12mm × N mm area
+        when: Any field changes, or the label style / length is switched
+      sha256: 874545a5b1ca7f3a496be02212026cc9b3110ef48c171acd64467aacda4fd926
+    sc_label_pixel_size:
+      parent: cuj_generate_label
+      props:
+        given: The user selects Style + Length
+        name: Label is exact 12mm × N mm at print resolution
+        then:
+          - The canvas aspect ratio matches height 12mm: width Nmm within 1 pixel
+          - The canvas resolution is 360dpi (12mm ≈ 170 px tall)
+          - Text and isometric never overflow the safe inner rectangle
+        when: The canvas is (re)drawn
+      sha256: 55c3e81f81104d819a45accf9eb3af81664bd0dff6c6064096183b50a3b4b2a4
+    sc_manual_form_only:
+      parent: cuj_enter_spec_manually
+      props:
+        given: User is offline or does not want AI
+        name: Fill the spec form without ever calling AI
+        then:
+          - The label preview redraws on every field change
+          - The isometric drawing reflects the selected head/drive/thread/color
+          - The buy links become clickable once the query has any signal (size, length, subtype, or category)
+        when: User selects category, size, length, and any other known fields
+      sha256: 37a382e25e2d6186390fcf5f37c162f0f1021c3a32ca85b3c0e8d1aeae321733
+    sc_manual_text_analyze:
+      parent: cuj_identify_from_text
+      props:
+        given: User has no photo but knows what they have
+        name: Text description analyzed by AI
+        then:
+          - The spec form populates with best-effort inferred fields
+          - The label preview reflects the new spec
+          - Empty descriptions are rejected with a clear error
+        when: User types a description and taps "Analyze description"
+      sha256: 428c60652d060cd97168af4fc3ce57038272226725a31d0f1bb30e962818f31f
+    sc_offline_shell:
+      parent: cuj_offline_use
+      props:
+        given: The user has visited the app at least once and is now offline
+        name: App shell loads offline
+        then:
+          - The UI loads from the service worker cache
+          - Manual entry, label preview, and download all work
+          - An offline pill appears explaining the AI needs the network
+          - The Identify button surfaces a clear network error if used
+        when: The user opens the app
+      sha256: 1a4c44db341c747fde288ae229dad2e9fbd3d2d476282486a90d0986c0d7ffc5
+    sc_print_from_browser:
+      parent: cuj_download_label
+      props:
+        given: A rendered label preview
+        name: Print the label directly from the browser
+        then:
+          - A print window opens with only the label image sized to 12mm high
+          - The user's browser print dialog appears
+          - Closing the dialog leaves the main tool untouched
+        when: The user taps "Print"
+      sha256: 344bb5e101d3354bff61ee6eb7bb9cb564b2c5009c6be85213f2b64e43465124
+    sc_root_redirect:
+      parent: cuj_custom_domain
+      props:
+        given: A visitor types fastenaiting.com in the address bar
+        name: Bare fastenaiting.com opens the tool
+        then:
+          - The root path 302-redirects to /fastenaiting/
+          - Camera permission prompt scopes to fastenaiting.com origin
+          - All PWA install metadata resolves within the same origin
+        when: The DNS resolves to Cloudflare Pages
+      sha256: f65f0902d921c7a0d8d43f233026c9bc4b32584ac94a3577f1a82dfc9f8c166b
+    sc_upload_drop:
+      parent: cuj_identify_from_upload
+      props:
+        given: The user is on a desktop pointer device with the Upload tab active
+        name: Drag-and-drop from desktop
+        then:
+          - The dropzone shows a hover state during the drag
+          - The image loads on drop, exactly as in the tap-to-pick flow
+        when: The user drops an image file onto the dropzone
+      sha256: bff77512ef6637551ae9cac7300485c01a19ab0df8fa1a6a5a2a32a76337c7bf
+    sc_upload_heic_iphone:
+      parent: cuj_identify_from_upload
+      props:
+        given: User is on iOS Safari and selects a HEIC photo from Photos
+        name: iPhone HEIC upload
+        then:
+          - The image renders in the photo slot with correct orientation
+          - Identify succeeds on the underlying pixels without requiring a HEIC library
+        when: The picker returns the file
+      sha256: a1fa016dafc67d4606a4e0fa0124477338d68a0266d3d8ca497b439816089928
+    sc_upload_pick:
+      parent: cuj_identify_from_upload
+      props:
+        given: User is on the Upload tab
+        name: Tap-to-pick from device library
+        then:
+          - The image renders in the photo slot
+          - Identify becomes enabled
+          - Non-image selections are rejected with a clear error and no upload attempted
+        when: User taps the dropzone and selects an image file
+      sha256: a3392571b9b0314299a9f1e03ba63d8a0709a185908b86785337686ff7090f21
+  invariant:
+    inv_camera_always_stops:
+      parent: invariants
+      props:
+        category: privacy
+        done: true
+        statement: >-
+          Every MediaStream started by the app is fully stopped before the app releases the user (stop, reset, tab
+          hidden, unload).
+        threat_signal: OS camera indicator remains on after user leaves camera tab or unloads the page.
+      sha256: 2e9cd13aab258c36bea8c4dfc3e0bf64bebab98c2803edd645ee1a3256baba15
+    inv_gesture_gated_camera:
+      parent: invariants
+      props:
+        category: privacy
+        done: true
+        statement: getUserMedia is only invoked as a direct result of a user gesture.
+        threat_signal: getUserMedia call in a stack trace with no preceding pointer/keyboard event.
+      sha256: 6d15a13ded31c9dec5e2832ee679d32bb19831df777ce8b9bd6c8bb3c4d7eff9
+    inv_identify_response_validated:
+      parent: invariants
+      props:
+        category: data_integrity
+        done: true
+        statement: >-
+          Only whitelisted fastener fields from the identify response ever populate the form. Additional keys are
+          ignored.
+        threat_signal: A form field with a name not in the declared schema was written to by the identify response.
+      sha256: 743ed0b6664486cc241e58d8266840dca9589516805974e0a524883ac01ff35d
+    inv_json_only_from_model:
+      parent: invariants
+      props:
+        category: data_integrity
+        done: true
+        statement: >-
+          The identify endpoint returns valid JSON matching the fastener schema, or an error — never partially parsed
+          prose.
+        threat_signal: A 200 response body that fails JSON.parse or fails the field whitelist.
+      sha256: a475b6fa638a5a104a15043a9ad3d079b3918738b77b9789dbc81cbf240b22b2
+    inv_key_never_leaks:
+      parent: invariants
+      props:
+        category: security
+        done: true
+        statement: >-
+          A user-supplied API key is sent only in the x-user-api-key header of /api/fastenaiting/identify, and never
+          appears in labels, downloads, filenames, URLs, storage other than localStorage, or console output.
+        threat_signal: An API key value found anywhere other than the localStorage settings blob and the identify request header.
+      sha256: a084b1af1a6b2b71e1e8604ae27169370f39622602e2b5487e77d83e4e420a06
+    inv_label_aspect_matches_tape:
+      parent: invariants
+      props:
+        category: export_fidelity
+        done: true
+        statement: 'The label canvas aspect ratio is exactly 12mm : selected-length-mm, within ±1 pixel.'
+        threat_signal: A downloaded label's dimensions don't match the announced tape geometry.
+      sha256: 4217f7c69431a2816ce0ce8b92c39814a55e71eda2adad04e2dc9862405ee6a4
+    inv_label_deterministic:
+      parent: invariants
+      props:
+        category: export_fidelity
+        done: false
+        statement: >-
+          The label rendered for a given spec + label-style + label-length is byte-identical on any load (same fonts,
+          same DPI, same layout math).
+        threat_signal: Two consecutive downloads of an unchanged label produce different PNG hashes.
+      sha256: 275ac3633343bde2923459e891058884c633c915835907daf700a5370b054d7b
+    inv_no_content_overflow:
+      parent: invariants
+      props:
+        category: export_fidelity
+        done: true
+        statement: All label text and the isometric fit inside the printable safe area — no clipping at the edges.
+        threat_signal: Text truncation without an ellipsis, or isometric extending past its allocated icon rectangle.
+      sha256: c6e5c18f20a1428e3d6e079fc614ec48938857e4c62cf8eeb46277f39b37386a
+    inv_no_ios_zoom_on_focus:
+      parent: invariants
+      props:
+        category: accessibility
+        done: true
+        statement: iOS Safari does not zoom the viewport when any input or select receives focus.
+        threat_signal: A form field with computed font-size below 16px.
+      sha256: c399a1ed9e72458d0bebf0ac95a98d18095c002338f388b09c6e8f5e32c7c65a
+    inv_no_pii_persisted:
+      parent: invariants
+      props:
+        category: privacy
+        done: true
+        statement: >-
+          Server-side storage never contains user photos, API keys, IP addresses, or any field derived from user
+          identity.
+        threat_signal: Any server log or D1 row referencing user identity from a fastenaiting request.
+      sha256: cf097217a9839116f9ac5b598f80d00185b6a8630cb4a26a821227b0f912da42
+    inv_offline_functional:
+      parent: invariants
+      props:
+        category: availability
+        done: true
+        statement: >-
+          With no network, the app shell loads, manual entry works, the label renders, and Download PNG succeeds. Only
+          Identify fails, with a clear message.
+        threat_signal: A user-visible error other than the identify network error, or a blank UI, when offline.
+      sha256: 6213c5db41f87adbfadcb7fca84caa7d4f1ea37b122cec32ecb243da498e0d86
+    inv_outbound_link_hygiene:
+      parent: invariants
+      props:
+        category: security
+        done: true
+        statement: Every outbound retailer link carries rel="noopener sponsored" and target="_blank".
+        threat_signal: A rendered .buy link missing either attribute.
+      sha256: 66b6deb8c921bf06965bd6af105ddeb87b369a6691da96022f716c2960287971
+    inv_photo_never_persists_server:
+      parent: invariants
+      props:
+        category: privacy
+        done: true
+        statement: >-
+          The captured photo is never stored on any server. It is transmitted once to the identify endpoint per user
+          request, then forgotten.
+        threat_signal: An identify request logs, echoes, or persists the image bytes.
+      sha256: 29e452e9b20ec5c8ce80fc9dde185cc344801f8d5fde83203dd829197a7c6746
+    inv_public_api_scope:
+      parent: invariants
+      props:
+        category: security
+        done: true
+        statement: /api/fastenaiting/* is the only public API path; every other /api route requires Cloudflare Access.
+        threat_signal: A 200 from any non-fastenaiting /api endpoint with no Cf-Access-Jwt-Assertion header.
+      sha256: 173b38fa2c9d3dc2256cbeb3c867e1c58a297bee78b78b608f9e813a2b52af7d
+    inv_pwa_installable:
+      parent: invariants
+      props:
+        category: platform
+        done: true
+        statement: >-
+          The manifest, HTTPS, icons, and service worker jointly satisfy the browser's installability criteria whenever
+          the app is served over its production origin.
+        threat_signal: Lighthouse PWA installability audit failing on a production URL.
+      sha256: 4391e1fcb54545a0762f7cc0fccb57688d5eca109efb91a403db82534f6a83c9
+    inv_sw_cache_versioned:
+      parent: invariants
+      props:
+        category: availability
+        done: true
+        statement: The service worker cache name embeds a version tag; activation purges every prior version.
+        threat_signal: caches.keys() contains more than one fastenaiting-* cache after activate.
+      sha256: 7a87bb80674cdbfa7c4d505ad68a45db93754015576fd0bceb8cf01cd4331e13
+    inv_sw_never_caches_identify:
+      parent: invariants
+      props:
+        category: availability
+        done: true
+        statement: The service worker never serves /api/fastenaiting/identify from cache and never stores its responses.
+        threat_signal: >-
+          An identify response served with a `from-service-worker` marker, or a cache entry matching
+          /api/fastenaiting/*.
+      sha256: af7c40dc2124c91c45bfbf6aa0a0d53f08d1ae58c97ab536c5f2a46848dcf118
+    inv_tap_target_size:
+      parent: invariants
+      props:
+        category: accessibility
+        done: true
+        statement: Every interactive control has a hit area of at least 44 × 44 CSS pixels.
+        threat_signal: A pointer target measured below 44 px in either dimension.
+      sha256: 9721aee67def45ab931fbc8a422a07033a3b2e2f14747f16e642e0b6dc957c9d
+  constraint:
+    con_affiliate_tags_client_only:
+      parent: constraints
+      props:
+        domain: privacy
+        rationale: >-
+          The tags belong to the person visiting; storing them server-side would be a data-protection liability and an
+          operational burden.
+        text: Affiliate tags are stored in localStorage only and read at link-render time.
+      sha256: 6b6a8a4d5419bbc6d7f4d4d9af3ea335c36237907ed2b752e8fb46bea7aeee96
+    con_ai_via_pages_function:
+      parent: constraints
+      props:
+        domain: security
+        rationale: >-
+          Anthropic's API does not permit browser CORS by default, and shipping keys client-side is unsafe. BYOK still
+          routes through the function via x-user-api-key so a single code path handles both modes.
+        text: >-
+          All Anthropic calls originate from the Pages Function at /api/fastenaiting/identify. The browser never calls
+          Anthropic directly.
+      sha256: 0975b92daf397bc9d3bfb7d944c36c848284500d7b92aee6bb1b5c5faf65f978
+    con_buy_search_urls:
+      parent: constraints
+      props:
+        domain: compliance
+        rationale: Search URLs are always allowed. Deep product URLs would break as SKUs rotate and could violate ToS.
+        text: >-
+          Buy links are search URLs built by affiliate.js from spec fields. No retailer scraping, no server-side product
+          lookup.
+      sha256: 054903df33f56aaa0f254a07c85fa27e47a0ea4c1b1d29462c19418c41c18ee2
+    con_camera_facing_environment:
+      parent: constraints
+      props:
+        domain: ux
+        rationale: >-
+          On phones the rear camera is almost always what the user wants for a fastener photo. Requesting the ideal
+          facing avoids a device chooser prompt.
+        text: >-
+          getUserMedia is called with facingMode { ideal: "environment" } on first use; the flip button toggles to
+          "user". Enumeration of devices happens after permission grant.
+      sha256: 80b393e0528abac2b0b75ba62fa47e6120094b67531c9bd60847ae71cfbd77dc
+    con_field_whitelist_on_apply:
+      parent: constraints
+      props:
+        domain: security
+        rationale: >-
+          A hostile or hallucinated response cannot inject unexpected DOM attributes or trigger unexpected downstream
+          behavior.
+        text: >-
+          applySpec iterates the form's own inputs by name and only writes fields that exist on the form. Unknown keys
+          are dropped.
+      sha256: 668db0211fc7689261500f55b508194d8f9369f9e6913b0f66fe88f589605b0d
+    con_haptic_snap_optional:
+      parent: constraints
+      props:
+        domain: ux
+        rationale: >-
+          A missing haptic is invisible on non-Android devices. Faking it (audio, visual flash) would be worse than
+          nothing.
+        text: navigator.vibrate(20) fires on snap only if the API exists. No polyfill, no fallback UI.
+      sha256: 960be1ee67d2a6d1c52ab8125b1b9a814b9d1370fdb43b87d93fbbe3bf2a3a08
+    con_json_only_prompt:
+      parent: constraints
+      props:
+        domain: data_design
+        rationale: >-
+          Free-form model output would force fragile client-side parsing. Rejecting non-JSON at the boundary keeps the
+          client trust surface small.
+        text: >-
+          The system prompt to the vision model requires a single JSON object with the whitelisted keys, no prose, no
+          code fences. The server strips fences defensively and rejects non-parsing responses.
+      sha256: 063b80425226dd2aa4bd83ce5a1c3721f1a42ffd80029a8d702121c5e5ef1075
+    con_label_360dpi_canvas:
+      parent: constraints
+      props:
+        domain: export_fidelity
+        rationale: >-
+          360dpi matches high-end P-touch printer resolution. Brother's own software rescales any image to tape, so a
+          slightly-too-high resolution is safer than too low.
+        text: >-
+          The label is drawn on an HTMLCanvasElement sized to 12mm × selected-length at 360dpi, downloaded via
+          toDataURL("image/png").
+      sha256: 01171ed02360efe53715d109403a69bec65047ac2d46c3e15632eaf471ad3e6d
+    con_manual_always_available:
+      parent: constraints
+      props:
+        domain: ux
+        rationale: >-
+          The AI is a shortcut, not a gate. Offline, over-budget, or misidentified fasteners must not block the
+          deliverable.
+        text: >-
+          Every AI-invoking path also has a fully manual equivalent that produces the same downstream artefacts (label,
+          buy links).
+      sha256: 0336f9810656c787fe35c2671b4abc7dcb77bc3300a8b432cd6682a4407654ea
+    con_mobile_first_layout:
+      parent: constraints
+      props:
+        domain: ux
+        rationale: >-
+          The primary use is one-handed in a hardware store. Mobile-first eliminates the retrofit tax and avoids iOS
+          zoom traps.
+        text: >-
+          CSS base styles target mobile; media queries at 520/640/720/760px progressively enhance. All inputs are 16px+,
+          tap targets 44px+, layout uses env(safe-area-inset-*).
+      sha256: 7a26f74bbbcb9eac0cce8c001abd94c265ad097f39143d60eb22c971661018f3
+    con_no_bantay_signin_dependency:
+      parent: constraints
+      props:
+        domain: security
+        rationale: >-
+          The tool must work at fastenaiting.com without any Bantay account. Any coupling would tie a public product to
+          a private auth system.
+        text: Nothing in fastenAIting reads or writes Bantay Tools' D1 database or requires signin.
+      sha256: d940db28b468ecf36e21a33ee7a3ae09785dd904b1cfedca695722f2713e2fb6
+    con_parametric_isometric_svg:
+      parent: constraints
+      props:
+        domain: data_design
+        rationale: >-
+          Every new head/drive combination would otherwise require a hand-drawn asset. Parametric drawing scales to
+          combinations we haven't foreseen.
+        text: >-
+          Isometric drawings are generated as SVG strings by fasteners.js from spec fields; no bitmap asset library is
+          checked in.
+      sha256: 1eaaca731c68a0c98c3faa1dc6341b2acf1abef145c61fa8dcc460808ab0cfd1
+    con_public_middleware_whitelist:
+      parent: constraints
+      props:
+        domain: security
+        rationale: >-
+          Adding a per-route auth bypass is error-prone. A single list at the middleware boundary is auditable and
+          reviewable in one place.
+        text: >-
+          /api/fastenaiting/* is opted out of Cloudflare Access via a PUBLIC_PREFIXES list in
+          functions/api/_middleware.js.
+      sha256: 5008a837316f8f3ca5e3bed324980d795323dbcdc53a58d774d71f70c4f8449a
+    con_pwa_scope:
+      parent: constraints
+      props:
+        domain: security
+        rationale: >-
+          Other tools on tools.bantay.co must not be affected by this SW; a stray scope would silently cache foreign
+          HTML.
+        text: >-
+          The manifest scope and service worker registration scope are both exactly /fastenaiting/. The SW never handles
+          requests outside this scope other than /_shared/.
+      sha256: 60870d7b2d1da969b1d50cd6f82510bab51ee6075fe84e0198f84455f9f597de
+    con_root_domain_redirect:
+      parent: constraints
+      props:
+        domain: platform
+        rationale: >-
+          The domain sits on the shared Pages project. A 302 keeps the tool at its canonical path without breaking
+          relative URLs.
+        text: _redirects sends https://fastenaiting.com/ and https://www.fastenaiting.com/ to /fastenaiting/ with a 302.
+      sha256: 86cf2e0b87c41d671299f24767caf30f9fb29e5ec780d7d75f1abd0ff2296c2a
+    con_shutter_start_and_snap:
+      parent: constraints
+      props:
+        domain: ux
+        rationale: >-
+          One thumb-reachable primary control is easier to teach than a start/snap toggle. Also reduces layout on small
+          screens.
+        text: >-
+          The single circular shutter button starts the camera on first press when no stream exists, and snaps a frame
+          on every press thereafter.
+      sha256: 4698825008128de5a73814d41e6d18033f0a9602e84b42c6539846b02d02d64d
+    con_sw_shell_cache_first:
+      parent: constraints
+      props:
+        domain: performance
+        rationale: >-
+          The shell rarely changes; the identify call is per-photo and offline-nonsensical. Two strategies keep code
+          simple and correctness obvious.
+        text: >-
+          The service worker is cache-first for the app shell + shared tokens, network-only for /api/fastenaiting/*, and
+          falls back to a 503 when both fail.
+      sha256: fe0ab7582ebc0454817df14b1c66279884f5763b2551e33747bc05478245ac00
+    con_sw_versioned_cache_name:
+      parent: constraints
+      props:
+        domain: performance
+        rationale: A single mutable cache is impossible to invalidate atomically. A version bump is the clearest deploy signal.
+        text: >-
+          The cache name embeds a version constant (fastenaiting-v1-shell); activate() deletes any cache whose name
+          starts with the prefix and doesn't match the current version.
+      sha256: d323e3c945981fa356b5e3615af89a50f740bf53377312976a860dc08bb331bf
+  foundation:
+    f_deliverable_is_the_label:
+      parent: foundations
+      props:
+        text: The label is the deliverable, not the identification. Everything else is scaffolding to make the label right.
+      sha256: e22b1881a2dd6b7707a956c1ae57321289a4ee6c566a86582b1f82f2facd8354
+    f_manual_override_always:
+      parent: foundations
+      props:
+        text: AI is a shortcut. Every field it fills is editable, every step it takes is skippable.
+      sha256: 4ae6719305bf2d565809768704444ba2b3da0e08eddc1af8e2252efd8ce27986
+    f_photo_stays_local:
+      parent: foundations
+      props:
+        text: The user's photo is not our asset. It leaves the device only to be identified, once, and is never persisted.
+      sha256: 07a70afc7969c7811c0aa1d3954892da6e40e10925c735b76b871aa4d97b90bc
+    f_static_first:
+      parent: foundations
+      props:
+        text: The tool ships as a static site plus one Pages Function. No build step, no framework, no client-side router.
+      sha256: 5892ac48e34e4b34aab9cf7f40d72440f9eb63b35f7032183ab746d0c7fd0e4a
+    f_thumb_reach:
+      parent: foundations
+      props:
+        text: On phones, the "next thing to do" is always one thumb away.
+      sha256: 08fe87792ede23479d55172a6fd171a73fea1228265675ce9db0db78eda345fe
+  wisdom:
+    w_12mm_legibility:
+      parent: wisdom
+      props:
+        text: >-
+          At 12mm tape height, sub-line text under ~14px stops being readable. Use size + type + finish as the visible
+          hierarchy; move minor detail into filename or PDF.
+      sha256: ce3e44f077f96f9a69b79aa477936d96271756fd7c08c436328260b458d30f7c
+    w_anthropic_no_cors:
+      parent: wisdom
+      props:
+        text: >-
+          Anthropic's API rejects browser CORS by default. Always route through a server-side function; don't try to
+          fetch from the client.
+      sha256: 81dd767125468f2c999e43df80800dffceaa9abd09ff2f7ab2eb684c498a023a
+    w_brother_scales_anything:
+      parent: wisdom
+      props:
+        text: >-
+          Brother P-touch software rescales any image to tape; matching aspect ratio matters more than exact pixel
+          count. Do not micro-optimize the PNG width.
+      sha256: 46f22dd00d6869a3b2cc2d7750b92eaed040fdb5c83b135162ec6fd1a9184e1a
+    w_camera_indicator:
+      parent: wisdom
+      props:
+        text: >-
+          The OS camera indicator is the user's trust signal. If it stays on after they think they're done, they will
+          not come back. Test with pagehide, visibilitychange, and tab reload.
+      sha256: ccf777d919a357f81d53a0afa9d40b4776817d4abac5367885652b2b5715ff12
+    w_face_the_light:
+      parent: wisdom
+      props:
+        text: >-
+          Identification quality collapses when the fastener is backlit against a white surface. The tagline copy —
+          'fill the frame, add a coin or ruler' — is doing more work than any prompt tweak.
+      sha256: 61a99e48d80cef9b1bfe398b71414fe3f4d348ab75da7e78cce51b6ab176d537
+    w_gauge_to_mm_approx:
+      parent: wisdom
+      props:
+        text: >-
+          US screw gauges convert to metric roughly as diameter_mm ≈ 1.524 + gauge × 0.815. Good enough for scaling the
+          isometric; wrong to use for engineering.
+      sha256: 8401ccd53c9e38417ccf11df0a644d38f848c033cde50c2c440481f40b038524
+    w_heic_free:
+      parent: wisdom
+      props:
+        text: >-
+          HEIC support is free via <input type=file accept='image/*'>. Browsers hand back decoded RGB via FileReader; do
+          not add a HEIC library.
+      sha256: 454d6289fb8104721631db5051000df2b310061a6d9e3f904c6a9d370d16d96c
+    w_ios_no_beforeinstallprompt:
+      parent: wisdom
+      props:
+        text: >-
+          iOS Safari never fires beforeinstallprompt. Detect standalone via matchMedia('(display-mode: standalone)') and
+          coach the user to Share > Add to Home Screen.
+      sha256: b181f581b41c67ebe27d387ad470296bec9455641f5fa4b410e57136d7f4999a
+    w_retailer_affiliate_deep_links:
+      parent: wisdom
+      props:
+        text: >-
+          Home Depot and Lowe's have no clean affiliate URL format. Store opaque partner tokens today; upgrade to
+          CJ/Impact deep-link tools later without touching schema.
+      sha256: ef0b121134ce9c3facef70bd7fe82fb48d6c2f0d063bb6e3f44c34bd75d28b2c
+relationships:
+  - from: sc_camera_happy
+    to: cuj_identify_from_camera
+    type: delegates_to
+    sha256: 465bc082a4f98208d1e1a4730cb55bb429a31a19769b849f6cde25f542a8e755
+  - from: cuj_buy_more
+    to: cuj_enter_spec_manually
+    type: depends_on
+    sha256: 5bf6bf55f12bea0b65620b436a0b150370bcb9124cdc1caafe2e119dc522cb0d
+  - from: cuj_download_label
+    to: cuj_generate_label
+    type: depends_on
+    sha256: d249756bb3838b97953e2b558e407fa13c45ef9b4ef3b4f641743b830e2c71fa
+  - from: cuj_edit_ai_result
+    to: cuj_enter_spec_manually
+    type: depends_on
+    sha256: 421f6302e8a3dcf8cc3857f047c782eeeb923647088926ccd41f471017e565e2
+  - from: cuj_generate_label
+    to: cuj_enter_spec_manually
+    type: depends_on
+    sha256: d36ed538a0e5075b17b67efebe4445a10fa57c8331e2857ed3cf72b1e1c52ff0
+  - from: cuj_offline_use
+    to: cuj_install_pwa
+    type: depends_on
+    sha256: 306c42d1d0462ed37b7b77766f038854902bc8097b9ef3776bab6dd101054eab
+  - from: sc_buy_search_link
+    to: inv_outbound_link_hygiene
+    type: enforced_by
+    sha256: d1532d8739ed52a67518a2633e8ad6501ac36314cb36df306d5fa5680001c8a2
+  - from: sc_byok
+    to: inv_key_never_leaks
+    type: enforced_by
+    sha256: e5c5fdaa5565f614d02ef7473ee5511e3a520ea20e900b9e7bf43e033ffdab0d
+  - from: sc_camera_happy
+    to: inv_gesture_gated_camera
+    type: enforced_by
+    sha256: 9ba1b5db4e8b4664928cf13b42a4aa891569ea76feac5551a6e45f6b4c443dbf
+  - from: sc_camera_happy
+    to: inv_identify_response_validated
+    type: enforced_by
+    sha256: 6aa3d6c6ffaad31829a1f8e3a9681ba40150f6fa4ac2b5596e365ba083539e1b
+  - from: sc_camera_happy
+    to: inv_photo_never_persists_server
+    type: enforced_by
+    sha256: c59aa1405c2e9297d8923092d014b6c47b4fe222799a49dc1e4d27eac4da52b4
+  - from: sc_camera_permission_denied
+    to: inv_gesture_gated_camera
+    type: enforced_by
+    sha256: 2c802f6307902b421a5969312418c810566bf455b938831bf400cd1cc71d0561
+  - from: sc_camera_stop
+    to: inv_camera_always_stops
+    type: enforced_by
+    sha256: d34dea682f75569318d841eacf6a3ff6452ed80b03de18670519eed3bfa15d16
+  - from: sc_camera_switch_facing
+    to: inv_camera_always_stops
+    type: enforced_by
+    sha256: 7e23cce44ae96e47a983748e5e0f324b77d1908b7c9156efac0bae270f87a790
+  - from: sc_configure_amazon_tag
+    to: inv_outbound_link_hygiene
+    type: enforced_by
+    sha256: e6999e975703b1fd1c7340c913f01bc1976683ca19392d2f648dd2bd24288fb5
+  - from: sc_download_png
+    to: inv_key_never_leaks
+    type: enforced_by
+    sha256: 19d20ae614d6aa7dc8f9245da2169226182757e92a81050cba966eab78634679
+  - from: sc_install_ios_share
+    to: inv_pwa_installable
+    type: enforced_by
+    sha256: f4e464830a5629de3f7305b43652c38c9f1afc80e95926e0248e5b0f04795bac
+  - from: sc_install_prompt
+    to: inv_pwa_installable
+    type: enforced_by
+    sha256: ca97351e895f97c90506e3161180348c07e93d95720b46d6151dca02ba8f6d70
+  - from: sc_label_live_preview
+    to: inv_label_deterministic
+    type: enforced_by
+    sha256: 776f6af9fa439c2901933a2b4732059cc6f2581442aad96362ef11bf1b08a43c
+  - from: sc_label_live_preview
+    to: inv_no_content_overflow
+    type: enforced_by
+    sha256: 5a468a4d9d7f007918a7adbd74986e4b65cc7db7795d36d2c5e8d38cac9b4c1a
+  - from: sc_label_pixel_size
+    to: inv_label_aspect_matches_tape
+    type: enforced_by
+    sha256: 16d5ae8a3e55776e8a2a7bdaa8790ca36afd7ced88939f69c270ed704f7a0c4c
+  - from: sc_manual_text_analyze
+    to: inv_json_only_from_model
+    type: enforced_by
+    sha256: 363ef8ad15d62d3b5ac00736501e1784a671db3e494a7b96c693d4bf1b47b10a
+  - from: sc_offline_shell
+    to: inv_offline_functional
+    type: enforced_by
+    sha256: e32c1980915b76774f8e657bb834f85532c7abbc4d9bd75c1c0f01b59c5b7d89
+  - from: sc_offline_shell
+    to: inv_sw_cache_versioned
+    type: enforced_by
+    sha256: d3f6a47cf794e9307662a0a7250d0e87187964e1753196e3e306623887b64768
+  - from: sc_offline_shell
+    to: inv_sw_never_caches_identify
+    type: enforced_by
+    sha256: f57b68161c8976746cb061e4e892646e78b25d6ecc1bbca29e8b80d9b7dfe973
+  - from: sc_root_redirect
+    to: inv_public_api_scope
+    type: enforced_by
+    sha256: c678f40e6b50879b49939011101e25b89e824fc45b4c3857e69396818b2c58fd
+  - from: sc_upload_drop
+    to: inv_photo_never_persists_server
+    type: enforced_by
+    sha256: a803478deee32c4fe4ebc980824e199cf01cbf89b316733e6299b23ea808d2e9
+  - from: sc_upload_pick
+    to: inv_identify_response_validated
+    type: enforced_by
+    sha256: 9759ea4bd4015d0d9fb7629b0fbdc2ce4fa5bd53cd3989fc76e988e9e4977652
+  - from: sc_upload_pick
+    to: inv_photo_never_persists_server
+    type: enforced_by
+    sha256: 0d94ce7491e8c1931fd58157e0582fdd6a5198ecab4865a60fc22a5d1dd936aa
+  - from: con_affiliate_tags_client_only
+    to: inv_no_pii_persisted
+    type: implements
+    sha256: 2b11dc0c35e71e3b42a4db8c8a61397a3f310c193c198d7ce57b4af68a23c23a
+  - from: con_ai_via_pages_function
+    to: inv_key_never_leaks
+    type: implements
+    sha256: e93e35e2ac6c9368456f9289c4d3034b9697c2fc80af85b74867c67a8450ba25
+  - from: con_ai_via_pages_function
+    to: inv_no_pii_persisted
+    type: implements
+    sha256: 53ee0ae9c85c3f52b82b2626e68e5ffea42bfbe4bb7efe4806dbe616f23e10ce
+  - from: con_ai_via_pages_function
+    to: inv_photo_never_persists_server
+    type: implements
+    sha256: f7e8ae8cd7de4d77be1d033658abac86264a2bdb01c7836527378f657f752ca5
+  - from: con_buy_search_urls
+    to: inv_outbound_link_hygiene
+    type: implements
+    sha256: 09f6af75210ac66aecc5d882f4a37298c87c97d3816420bdc018d5eed4bcca66
+  - from: con_camera_facing_environment
+    to: inv_gesture_gated_camera
+    type: implements
+    sha256: afc8b6180f980cf61888059b51dbc9c22cda53d9735405b6acf55787c6cfb89a
+  - from: con_field_whitelist_on_apply
+    to: inv_identify_response_validated
+    type: implements
+    sha256: 75b5cfef5a730d3347d8d3578cb399e2868ac8eaaecf732a8fce2b3b8f07b442
+  - from: con_field_whitelist_on_apply
+    to: inv_json_only_from_model
+    type: implements
+    sha256: 3c61846b7fe2bcd96bc98ed82c6f9a320d7863257bdfb71c5d5361488e6ba09e
+  - from: con_json_only_prompt
+    to: inv_json_only_from_model
+    type: implements
+    sha256: 0907695650db1506a0e6f7b3926bce2819883fd078bcf40842a4757aa3736959
+  - from: con_label_360dpi_canvas
+    to: inv_label_aspect_matches_tape
+    type: implements
+    sha256: 7fe89b0ed4c74c79021e9faed2fb9aba68a0e1696d324a48be6255bf2c8ba22e
+  - from: con_label_360dpi_canvas
+    to: inv_label_deterministic
+    type: implements
+    sha256: 4d5b44cd7ac1b176cdfe450d35d694fc3657f48f6cab0947cc1c76d1f7ac9bb0
+  - from: con_manual_always_available
+    to: inv_offline_functional
+    type: implements
+    sha256: e4a58ebf7664f08d1ffea55d761c8dcb533c25f7694bb73fda339e9f49ed8d05
+  - from: con_mobile_first_layout
+    to: inv_no_ios_zoom_on_focus
+    type: implements
+    sha256: b8e225ecca23c2a22fdabe22812c9eb99fbdc9d842ebbd56164735d1d9a4073a
+  - from: con_mobile_first_layout
+    to: inv_tap_target_size
+    type: implements
+    sha256: 92a680b3eaa3ce97263f0349020ce98b0c0ba095548197c6101a6e9939452699
+  - from: con_no_bantay_signin_dependency
+    to: inv_public_api_scope
+    type: implements
+    sha256: d6ec301efed33db0afcec57f75f1c2fb5a5d5306e5938723007c3d03cef8db46
+  - from: con_parametric_isometric_svg
+    to: inv_no_content_overflow
+    type: implements
+    sha256: c5839337c286466a7bf6f9ed32c307d1b844fa9ce4c54de12b113f72ce37b693
+  - from: con_public_middleware_whitelist
+    to: inv_public_api_scope
+    type: implements
+    sha256: fb9c4f509001c0d1c52c5fe5b93b7c4fe002993237f1ff26df3de931a327ae5b
+  - from: con_pwa_scope
+    to: inv_pwa_installable
+    type: implements
+    sha256: bc7dcec37462641d29574916f4bf78c7ece25abf04c9096712f47f0e5c032609
+  - from: con_root_domain_redirect
+    to: inv_public_api_scope
+    type: implements
+    sha256: 2391f00a36d7422065e276d6366a7a0e9e4dd62680228cd16dcb535992b2009d
+  - from: con_shutter_start_and_snap
+    to: inv_gesture_gated_camera
+    type: implements
+    sha256: 32cbeb148c41180d23291b141fe2d9845a7b3d1102028ef02e30b69a0e42c75e
+  - from: con_sw_shell_cache_first
+    to: inv_offline_functional
+    type: implements
+    sha256: 6a7edc7602de9aa93367f99c3d4e6de843bab8da2c19b1f623e59b8ed911a3fb
+  - from: con_sw_shell_cache_first
+    to: inv_sw_never_caches_identify
+    type: implements
+    sha256: 7b58225d99a2e2e111c4a62eb1249609996d7e390bc26916f4625feddfaf895d
+  - from: con_sw_versioned_cache_name
+    to: inv_sw_cache_versioned
+    type: implements
+    sha256: 5bdc4d10f07bdb91634cd2301e333899dff7fd493e3fcbd67fc3b6baa99bc39b

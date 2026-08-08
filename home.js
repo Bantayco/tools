@@ -14,6 +14,11 @@ const TOOLS = {
 // Standalone tools (not document editors) — just links.
 const APPS = [
   {
+    label: "fastenAIting",
+    href: "/fastenaiting/",
+    blurb: "Snap a fastener → identify → printable 12mm label + buy links.",
+  },
+  {
     label: "Neural Networks Study Guide",
     href: "/neural-networks-study-guide/",
     blurb: "Nielsen's book, day by day, with progress tracking.",
