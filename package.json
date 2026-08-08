@@ -7,10 +7,12 @@
     "static": "python3 -m http.server 8000",
     "deploy": "wrangler pages deploy .",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "lock": "node scripts/aide-lock.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",
+    "js-yaml": "^5.2.3",
     "wrangler": "^3"
   }
 }

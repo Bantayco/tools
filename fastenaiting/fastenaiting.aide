@@ -392,7 +392,7 @@ entities:
   inv_label_aspect_matches_tape:
     parent: invariants
     props:
-      statement: The label canvas aspect ratio is exactly 12mm : selected-length-mm, within ±1 pixel.
+      statement: "The label canvas aspect ratio is exactly 12mm : selected-length-mm, within ±1 pixel."
       category: export_fidelity
       threat_signal: A downloaded label's dimensions don't match the announced tape geometry.
       done: true
@@ -505,7 +505,7 @@ entities:
   con_camera_facing_environment:
     parent: constraints
     props:
-      text: getUserMedia is called with facingMode { ideal: "environment" } on first use; the flip button toggles to "user". Enumeration of devices happens after permission grant.
+      text: 'getUserMedia is called with facingMode { ideal: "environment" } on first use; the flip button toggles to "user". Enumeration of devices happens after permission grant.'
       domain: ux
       rationale: On phones the rear camera is almost always what the user wants for a fastener photo. Requesting the ideal facing avoids a device chooser prompt.
 
@@ -561,7 +561,7 @@ entities:
   con_root_domain_redirect:
     parent: constraints
     props:
-      text: _redirects sends https://fastenaiting.com/ and https://www.fastenaiting.com/ to /fastenaiting/ with a 302.
+      text: "_redirects sends https://fastenaiting.com/ and https://www.fastenaiting.com/ to /fastenaiting/ with a 302."
       domain: platform
       rationale: The domain sits on the shared Pages project. A 302 keeps the tool at its canonical path without breaking relative URLs.
 
