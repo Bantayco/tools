@@ -1,0 +1,738 @@
+# fastenaiting.aide — behavioral spec for the fastenAIting tool.
+# Authored per the Bantay skill. Rebuild the tool from this file; the code is
+# disposable, the aide is the product.
+
+entities:
+  fastenaiting:
+    display: page
+    props:
+      title: fastenAIting
+      description: "Snap any screw, bolt, or nut. Get a printable 12mm label and buy links."
+      version: "0.1"
+      surface: static Cloudflare Pages tool with an optional Pages Function for AI
+      domains:
+        - fastenaiting.com
+        - tools.bantay.co/fastenaiting/
+
+  cujs:
+    parent: fastenaiting
+    display: table
+    props: { title: Critical User Journeys, _pattern: roster, _group_by: area, _sort_by: tier }
+
+  invariants:
+    parent: fastenaiting
+    display: checklist
+    props: { title: Invariants, _pattern: roster, _group_by: category }
+
+  constraints:
+    parent: fastenaiting
+    display: list
+    props: { title: Architectural Constraints, _pattern: flat_list, _group_by: domain }
+
+  foundations:
+    parent: fastenaiting
+    display: list
+    props: { title: Design Foundations, _pattern: flat_list }
+
+  wisdom:
+    parent: fastenaiting
+    display: list
+    props: { title: Project Wisdom, _pattern: flat_list }
+
+  # ============================================================
+  # CUJs
+  # ============================================================
+
+  cuj_identify_from_camera:
+    parent: cujs
+    props: { feature: A user identifies a fastener using their device camera, tier: primary, area: capture }
+
+  sc_camera_happy:
+    parent: cuj_identify_from_camera
+    props:
+      name: Snap and identify (happy path)
+      given: User is on the tool with a working camera-capable device
+      when: User grants camera permission, frames the fastener, taps the shutter, and taps "Identify with AI"
+      then:
+        - Rear camera stream appears within 2 seconds of permission grant
+        - The snap freezes the current frame as the working photo
+        - The spec form populates with category, sub-type, head, drive, size, length, material, finish (best-effort)
+        - The label preview redraws to reflect the populated spec
+
+  sc_camera_permission_denied:
+    parent: cuj_identify_from_camera
+    props:
+      name: User denies camera permission
+      given: The tool has requested camera access
+      when: The user denies permission (or the OS blocks getUserMedia)
+      then:
+        - A clear error is shown in the status line
+        - The camera placeholder remains visible
+        - The Upload and Manual tabs remain available as alternatives
+        - No further getUserMedia call fires without a new user gesture
+
+  sc_camera_switch_facing:
+    parent: cuj_identify_from_camera
+    props:
+      name: User flips between front and rear camera
+      given: The camera stream is running and more than one video device is available
+      when: The user taps the flip button
+      then:
+        - The previous stream's tracks are stopped (no camera light left on)
+        - A new stream starts with the opposite facingMode
+        - The video element updates without a page reload
+
+  sc_camera_stop:
+    parent: cuj_identify_from_camera
+    props:
+      name: User stops the camera
+      given: The camera stream is running
+      when: The user taps stop, resets the tool, or leaves the page
+      then:
+        - Every MediaStreamTrack.stop() completes
+        - The OS camera indicator turns off
+        - Restarting the stream requires a new user gesture
+
+  cuj_identify_from_upload:
+    parent: cujs
+    props: { feature: A user identifies a fastener by uploading or dropping a photo, tier: primary, area: capture }
+
+  sc_upload_pick:
+    parent: cuj_identify_from_upload
+    props:
+      name: Tap-to-pick from device library
+      given: User is on the Upload tab
+      when: User taps the dropzone and selects an image file
+      then:
+        - The image renders in the photo slot
+        - Identify becomes enabled
+        - Non-image selections are rejected with a clear error and no upload attempted
+
+  sc_upload_drop:
+    parent: cuj_identify_from_upload
+    props:
+      name: Drag-and-drop from desktop
+      given: The user is on a desktop pointer device with the Upload tab active
+      when: The user drops an image file onto the dropzone
+      then:
+        - The dropzone shows a hover state during the drag
+        - The image loads on drop, exactly as in the tap-to-pick flow
+
+  sc_upload_heic_iphone:
+    parent: cuj_identify_from_upload
+    props:
+      name: iPhone HEIC upload
+      given: User is on iOS Safari and selects a HEIC photo from Photos
+      when: The picker returns the file
+      then:
+        - The image renders in the photo slot with correct orientation
+        - Identify succeeds on the underlying pixels without requiring a HEIC library
+
+  cuj_identify_from_text:
+    parent: cujs
+    props: { feature: A user identifies a fastener by describing it in words, tier: secondary, area: capture }
+
+  sc_manual_text_analyze:
+    parent: cuj_identify_from_text
+    props:
+      name: Text description analyzed by AI
+      given: User has no photo but knows what they have
+      when: User types a description and taps "Analyze description"
+      then:
+        - The spec form populates with best-effort inferred fields
+        - The label preview reflects the new spec
+        - Empty descriptions are rejected with a clear error
+
+  cuj_enter_spec_manually:
+    parent: cujs
+    props: { feature: A user records a fastener spec by filling the form directly, tier: secondary, area: entry }
+
+  sc_manual_form_only:
+    parent: cuj_enter_spec_manually
+    props:
+      name: Fill the spec form without ever calling AI
+      given: User is offline or does not want AI
+      when: User selects category, size, length, and any other known fields
+      then:
+        - The label preview redraws on every field change
+        - The isometric drawing reflects the selected head/drive/thread/color
+        - The buy links become clickable once the query has any signal (size, length, subtype, or category)
+
+  cuj_edit_ai_result:
+    parent: cujs
+    props: { feature: A user corrects an AI-identified spec, tier: primary, area: entry }
+
+  sc_edit_after_identify:
+    parent: cuj_edit_ai_result
+    props:
+      name: AI got the drive wrong; user fixes it
+      given: The AI has populated the form
+      when: The user changes a select or types over an input
+      then:
+        - The change is accepted without prompting
+        - The label and buy links update immediately
+        - No prior AI response overrides the user's edit later
+
+  cuj_generate_label:
+    parent: cujs
+    props: { feature: A user gets a printable 12mm label reflecting the current spec, tier: primary, area: label }
+
+  sc_label_live_preview:
+    parent: cuj_generate_label
+    props:
+      name: Live label preview reflects every spec change
+      given: A spec is (partially) filled
+      when: Any field changes, or the label style / length is switched
+      then:
+        - The canvas redraws within one animation frame
+        - The isometric on the label matches the selected fastener family
+        - The primary line, sub-line, finish line, and wordmark all fit within the 12mm × N mm area
+
+  sc_label_pixel_size:
+    parent: cuj_generate_label
+    props:
+      name: Label is exact 12mm × N mm at print resolution
+      given: The user selects Style + Length
+      when: The canvas is (re)drawn
+      then:
+        - The canvas aspect ratio matches height 12mm : width Nmm within 1 pixel
+        - The canvas resolution is 360dpi (12mm ≈ 170 px tall)
+        - Text and isometric never overflow the safe inner rectangle
+
+  cuj_download_label:
+    parent: cujs
+    props: { feature: A user downloads the label as a PNG ready for a Brother P-touch printer, tier: primary, area: label }
+
+  sc_download_png:
+    parent: cuj_download_label
+    props:
+      name: Download PNG
+      given: The label preview is populated
+      when: The user taps "Download PNG"
+      then:
+        - A PNG named after the fastener spec is saved
+        - The file opens as a plain PNG in Brother P-touch software and any image viewer
+        - No metadata contains the user's photo or API key
+
+  sc_print_from_browser:
+    parent: cuj_download_label
+    props:
+      name: Print the label directly from the browser
+      given: A rendered label preview
+      when: The user taps "Print"
+      then:
+        - A print window opens with only the label image sized to 12mm high
+        - The user's browser print dialog appears
+        - Closing the dialog leaves the main tool untouched
+
+  cuj_buy_more:
+    parent: cujs
+    props: { feature: A user opens a search at a major retailer for the identified fastener, tier: secondary, area: commerce }
+
+  sc_buy_search_link:
+    parent: cuj_buy_more
+    props:
+      name: Home Depot / Lowe's / Amazon search
+      given: A spec is filled enough to produce a query
+      when: The user taps one of the three retailer links
+      then:
+        - A new tab opens on the retailer's own search page with the composed query
+        - The user's configured affiliate tag is attached if set
+        - Every outbound link carries rel="noopener sponsored"
+        - If the spec is empty, links stay disabled and unclickable
+
+  cuj_install_pwa:
+    parent: cujs
+    props: { feature: A user installs the tool as a standalone app on their device, tier: secondary, area: platform }
+
+  sc_install_prompt:
+    parent: cuj_install_pwa
+    props:
+      name: Install button on a supporting browser
+      given: The browser has fired beforeinstallprompt
+      when: The user taps Install
+      then:
+        - The browser's native install dialog appears
+        - On accept, the app is installed and the button disappears
+        - On dismiss, the button hides but re-appears on the next eligible visit
+
+  sc_install_ios_share:
+    parent: cuj_install_pwa
+    props:
+      name: iOS Safari home-screen add
+      given: The user is on iOS Safari (no beforeinstallprompt)
+      when: The user chooses "Add to Home Screen" from the share sheet
+      then:
+        - The app launches standalone with the fastenAIting icon
+        - The status bar respects theme_color
+        - The camera continues to work in the standalone context
+
+  cuj_offline_use:
+    parent: cujs
+    props: { feature: A user opens the installed app with no network, tier: secondary, area: platform }
+
+  sc_offline_shell:
+    parent: cuj_offline_use
+    props:
+      name: App shell loads offline
+      given: The user has visited the app at least once and is now offline
+      when: The user opens the app
+      then:
+        - The UI loads from the service worker cache
+        - Manual entry, label preview, and download all work
+        - An offline pill appears explaining the AI needs the network
+        - The Identify button surfaces a clear network error if used
+
+  cuj_configure_ai_key:
+    parent: cujs
+    props: { feature: A user brings their own Anthropic API key, tier: tertiary, area: settings }
+
+  sc_byok:
+    parent: cuj_configure_ai_key
+    props:
+      name: Paste an Anthropic key in Settings
+      given: The user opens Settings
+      when: The user pastes a key and saves
+      then:
+        - The key is stored only in this browser's localStorage
+        - It is sent only to /api/fastenaiting/identify as x-user-api-key
+        - It is never included in labels, downloads, links, or logs
+        - Clearing the key in Settings removes it from localStorage
+
+  cuj_configure_affiliate:
+    parent: cujs
+    props: { feature: A user attaches their own affiliate tags to outbound retailer links, tier: tertiary, area: settings }
+
+  sc_configure_amazon_tag:
+    parent: cuj_configure_affiliate
+    props:
+      name: Amazon associate tag
+      given: The user has an Amazon Associates tag
+      when: The user saves it in Settings
+      then:
+        - All Amazon outbound links include tag=<the tag>
+        - The stored tag never leaves the browser
+        - Clearing the field removes the tag from future links
+
+  cuj_custom_domain:
+    parent: cujs
+    props: { feature: A visitor lands on fastenaiting.com and is served the tool, tier: primary, area: platform }
+
+  sc_root_redirect:
+    parent: cuj_custom_domain
+    props:
+      name: Bare fastenaiting.com opens the tool
+      given: A visitor types fastenaiting.com in the address bar
+      when: The DNS resolves to Cloudflare Pages
+      then:
+        - The root path 302-redirects to /fastenaiting/
+        - Camera permission prompt scopes to fastenaiting.com origin
+        - All PWA install metadata resolves within the same origin
+
+  # ============================================================
+  # Invariants
+  # ============================================================
+
+  inv_camera_always_stops:
+    parent: invariants
+    props:
+      statement: Every MediaStream started by the app is fully stopped before the app releases the user (stop, reset, tab hidden, unload).
+      category: privacy
+      threat_signal: OS camera indicator remains on after user leaves camera tab or unloads the page.
+      done: true
+
+  inv_gesture_gated_camera:
+    parent: invariants
+    props:
+      statement: getUserMedia is only invoked as a direct result of a user gesture.
+      category: privacy
+      threat_signal: getUserMedia call in a stack trace with no preceding pointer/keyboard event.
+      done: true
+
+  inv_photo_never_persists_server:
+    parent: invariants
+    props:
+      statement: The captured photo is never stored on any server. It is transmitted once to the identify endpoint per user request, then forgotten.
+      category: privacy
+      threat_signal: An identify request logs, echoes, or persists the image bytes.
+      done: true
+
+  inv_key_never_leaks:
+    parent: invariants
+    props:
+      statement: A user-supplied API key is sent only in the x-user-api-key header of /api/fastenaiting/identify, and never appears in labels, downloads, filenames, URLs, storage other than localStorage, or console output.
+      category: security
+      threat_signal: An API key value found anywhere other than the localStorage settings blob and the identify request header.
+      done: true
+
+  inv_identify_response_validated:
+    parent: invariants
+    props:
+      statement: Only whitelisted fastener fields from the identify response ever populate the form. Additional keys are ignored.
+      category: data_integrity
+      threat_signal: A form field with a name not in the declared schema was written to by the identify response.
+      done: true
+
+  inv_json_only_from_model:
+    parent: invariants
+    props:
+      statement: The identify endpoint returns valid JSON matching the fastener schema, or an error — never partially parsed prose.
+      category: data_integrity
+      threat_signal: A 200 response body that fails JSON.parse or fails the field whitelist.
+      done: true
+
+  inv_label_deterministic:
+    parent: invariants
+    props:
+      statement: The label rendered for a given spec + label-style + label-length is byte-identical on any load (same fonts, same DPI, same layout math).
+      category: export_fidelity
+      threat_signal: Two consecutive downloads of an unchanged label produce different PNG hashes.
+      done: false
+
+  inv_label_aspect_matches_tape:
+    parent: invariants
+    props:
+      statement: The label canvas aspect ratio is exactly 12mm : selected-length-mm, within ±1 pixel.
+      category: export_fidelity
+      threat_signal: A downloaded label's dimensions don't match the announced tape geometry.
+      done: true
+
+  inv_no_content_overflow:
+    parent: invariants
+    props:
+      statement: All label text and the isometric fit inside the printable safe area — no clipping at the edges.
+      category: export_fidelity
+      threat_signal: Text truncation without an ellipsis, or isometric extending past its allocated icon rectangle.
+      done: true
+
+  inv_sw_never_caches_identify:
+    parent: invariants
+    props:
+      statement: The service worker never serves /api/fastenaiting/identify from cache and never stores its responses.
+      category: availability
+      threat_signal: An identify response served with a `from-service-worker` marker, or a cache entry matching /api/fastenaiting/*.
+      done: true
+
+  inv_sw_cache_versioned:
+    parent: invariants
+    props:
+      statement: The service worker cache name embeds a version tag; activation purges every prior version.
+      category: availability
+      threat_signal: caches.keys() contains more than one fastenaiting-* cache after activate.
+      done: true
+
+  inv_public_api_scope:
+    parent: invariants
+    props:
+      statement: /api/fastenaiting/* is the only public API path; every other /api route requires Cloudflare Access.
+      category: security
+      threat_signal: A 200 from any non-fastenaiting /api endpoint with no Cf-Access-Jwt-Assertion header.
+      done: true
+
+  inv_outbound_link_hygiene:
+    parent: invariants
+    props:
+      statement: Every outbound retailer link carries rel="noopener sponsored" and target="_blank".
+      category: security
+      threat_signal: A rendered .buy link missing either attribute.
+      done: true
+
+  inv_offline_functional:
+    parent: invariants
+    props:
+      statement: With no network, the app shell loads, manual entry works, the label renders, and Download PNG succeeds. Only Identify fails, with a clear message.
+      category: availability
+      threat_signal: A user-visible error other than the identify network error, or a blank UI, when offline.
+      done: true
+
+  inv_tap_target_size:
+    parent: invariants
+    props:
+      statement: Every interactive control has a hit area of at least 44 × 44 CSS pixels.
+      category: accessibility
+      threat_signal: A pointer target measured below 44 px in either dimension.
+      done: true
+
+  inv_no_ios_zoom_on_focus:
+    parent: invariants
+    props:
+      statement: iOS Safari does not zoom the viewport when any input or select receives focus.
+      category: accessibility
+      threat_signal: A form field with computed font-size below 16px.
+      done: true
+
+  inv_pwa_installable:
+    parent: invariants
+    props:
+      statement: The manifest, HTTPS, icons, and service worker jointly satisfy the browser's installability criteria whenever the app is served over its production origin.
+      category: platform
+      threat_signal: Lighthouse PWA installability audit failing on a production URL.
+      done: true
+
+  inv_no_pii_persisted:
+    parent: invariants
+    props:
+      statement: Server-side storage never contains user photos, API keys, IP addresses, or any field derived from user identity.
+      category: privacy
+      threat_signal: Any server log or D1 row referencing user identity from a fastenaiting request.
+      done: true
+
+  # ============================================================
+  # Constraints
+  # ============================================================
+
+  con_ai_via_pages_function:
+    parent: constraints
+    props:
+      text: All Anthropic calls originate from the Pages Function at /api/fastenaiting/identify. The browser never calls Anthropic directly.
+      domain: security
+      rationale: Anthropic's API does not permit browser CORS by default, and shipping keys client-side is unsafe. BYOK still routes through the function via x-user-api-key so a single code path handles both modes.
+
+  con_json_only_prompt:
+    parent: constraints
+    props:
+      text: The system prompt to the vision model requires a single JSON object with the whitelisted keys, no prose, no code fences. The server strips fences defensively and rejects non-parsing responses.
+      domain: data_design
+      rationale: Free-form model output would force fragile client-side parsing. Rejecting non-JSON at the boundary keeps the client trust surface small.
+
+  con_field_whitelist_on_apply:
+    parent: constraints
+    props:
+      text: applySpec iterates the form's own inputs by name and only writes fields that exist on the form. Unknown keys are dropped.
+      domain: security
+      rationale: A hostile or hallucinated response cannot inject unexpected DOM attributes or trigger unexpected downstream behavior.
+
+  con_camera_facing_environment:
+    parent: constraints
+    props:
+      text: getUserMedia is called with facingMode { ideal: "environment" } on first use; the flip button toggles to "user". Enumeration of devices happens after permission grant.
+      domain: ux
+      rationale: On phones the rear camera is almost always what the user wants for a fastener photo. Requesting the ideal facing avoids a device chooser prompt.
+
+  con_shutter_start_and_snap:
+    parent: constraints
+    props:
+      text: The single circular shutter button starts the camera on first press when no stream exists, and snaps a frame on every press thereafter.
+      domain: ux
+      rationale: One thumb-reachable primary control is easier to teach than a start/snap toggle. Also reduces layout on small screens.
+
+  con_label_360dpi_canvas:
+    parent: constraints
+    props:
+      text: The label is drawn on an HTMLCanvasElement sized to 12mm × selected-length at 360dpi, downloaded via toDataURL("image/png").
+      domain: export_fidelity
+      rationale: 360dpi matches high-end P-touch printer resolution. Brother's own software rescales any image to tape, so a slightly-too-high resolution is safer than too low.
+
+  con_parametric_isometric_svg:
+    parent: constraints
+    props:
+      text: Isometric drawings are generated as SVG strings by fasteners.js from spec fields; no bitmap asset library is checked in.
+      domain: data_design
+      rationale: Every new head/drive combination would otherwise require a hand-drawn asset. Parametric drawing scales to combinations we haven't foreseen.
+
+  con_sw_shell_cache_first:
+    parent: constraints
+    props:
+      text: The service worker is cache-first for the app shell + shared tokens, network-only for /api/fastenaiting/*, and falls back to a 503 when both fail.
+      domain: performance
+      rationale: The shell rarely changes; the identify call is per-photo and offline-nonsensical. Two strategies keep code simple and correctness obvious.
+
+  con_sw_versioned_cache_name:
+    parent: constraints
+    props:
+      text: The cache name embeds a version constant (fastenaiting-v1-shell); activate() deletes any cache whose name starts with the prefix and doesn't match the current version.
+      domain: performance
+      rationale: A single mutable cache is impossible to invalidate atomically. A version bump is the clearest deploy signal.
+
+  con_pwa_scope:
+    parent: constraints
+    props:
+      text: The manifest scope and service worker registration scope are both exactly /fastenaiting/. The SW never handles requests outside this scope other than /_shared/.
+      domain: security
+      rationale: Other tools on tools.bantay.co must not be affected by this SW; a stray scope would silently cache foreign HTML.
+
+  con_public_middleware_whitelist:
+    parent: constraints
+    props:
+      text: /api/fastenaiting/* is opted out of Cloudflare Access via a PUBLIC_PREFIXES list in functions/api/_middleware.js.
+      domain: security
+      rationale: Adding a per-route auth bypass is error-prone. A single list at the middleware boundary is auditable and reviewable in one place.
+
+  con_root_domain_redirect:
+    parent: constraints
+    props:
+      text: _redirects sends https://fastenaiting.com/ and https://www.fastenaiting.com/ to /fastenaiting/ with a 302.
+      domain: platform
+      rationale: The domain sits on the shared Pages project. A 302 keeps the tool at its canonical path without breaking relative URLs.
+
+  con_buy_search_urls:
+    parent: constraints
+    props:
+      text: Buy links are search URLs built by affiliate.js from spec fields. No retailer scraping, no server-side product lookup.
+      domain: compliance
+      rationale: Search URLs are always allowed. Deep product URLs would break as SKUs rotate and could violate ToS.
+
+  con_affiliate_tags_client_only:
+    parent: constraints
+    props:
+      text: Affiliate tags are stored in localStorage only and read at link-render time.
+      domain: privacy
+      rationale: The tags belong to the person visiting; storing them server-side would be a data-protection liability and an operational burden.
+
+  con_mobile_first_layout:
+    parent: constraints
+    props:
+      text: CSS base styles target mobile; media queries at 520/640/720/760px progressively enhance. All inputs are 16px+, tap targets 44px+, layout uses env(safe-area-inset-*).
+      domain: ux
+      rationale: The primary use is one-handed in a hardware store. Mobile-first eliminates the retrofit tax and avoids iOS zoom traps.
+
+  con_no_bantay_signin_dependency:
+    parent: constraints
+    props:
+      text: Nothing in fastenAIting reads or writes Bantay Tools' D1 database or requires signin.
+      domain: security
+      rationale: The tool must work at fastenaiting.com without any Bantay account. Any coupling would tie a public product to a private auth system.
+
+  con_haptic_snap_optional:
+    parent: constraints
+    props:
+      text: navigator.vibrate(20) fires on snap only if the API exists. No polyfill, no fallback UI.
+      domain: ux
+      rationale: A missing haptic is invisible on non-Android devices. Faking it (audio, visual flash) would be worse than nothing.
+
+  con_manual_always_available:
+    parent: constraints
+    props:
+      text: Every AI-invoking path also has a fully manual equivalent that produces the same downstream artefacts (label, buy links).
+      domain: ux
+      rationale: The AI is a shortcut, not a gate. Offline, over-budget, or misidentified fasteners must not block the deliverable.
+
+  # ============================================================
+  # Foundations
+  # ============================================================
+
+  f_deliverable_is_the_label:
+    parent: foundations
+    props:
+      text: The label is the deliverable, not the identification. Everything else is scaffolding to make the label right.
+
+  f_photo_stays_local:
+    parent: foundations
+    props:
+      text: The user's photo is not our asset. It leaves the device only to be identified, once, and is never persisted.
+
+  f_manual_override_always:
+    parent: foundations
+    props:
+      text: AI is a shortcut. Every field it fills is editable, every step it takes is skippable.
+
+  f_thumb_reach:
+    parent: foundations
+    props:
+      text: On phones, the "next thing to do" is always one thumb away.
+
+  f_static_first:
+    parent: foundations
+    props:
+      text: The tool ships as a static site plus one Pages Function. No build step, no framework, no client-side router.
+
+  # ============================================================
+  # Wisdom
+  # ============================================================
+
+  w_anthropic_no_cors:
+    parent: wisdom
+    props: { text: "Anthropic's API rejects browser CORS by default. Always route through a server-side function; don't try to fetch from the client." }
+
+  w_ios_no_beforeinstallprompt:
+    parent: wisdom
+    props: { text: "iOS Safari never fires beforeinstallprompt. Detect standalone via matchMedia('(display-mode: standalone)') and coach the user to Share > Add to Home Screen." }
+
+  w_brother_scales_anything:
+    parent: wisdom
+    props: { text: "Brother P-touch software rescales any image to tape; matching aspect ratio matters more than exact pixel count. Do not micro-optimize the PNG width." }
+
+  w_gauge_to_mm_approx:
+    parent: wisdom
+    props: { text: "US screw gauges convert to metric roughly as diameter_mm ≈ 1.524 + gauge × 0.815. Good enough for scaling the isometric; wrong to use for engineering." }
+
+  w_heic_free:
+    parent: wisdom
+    props: { text: "HEIC support is free via <input type=file accept='image/*'>. Browsers hand back decoded RGB via FileReader; do not add a HEIC library." }
+
+  w_12mm_legibility:
+    parent: wisdom
+    props: { text: "At 12mm tape height, sub-line text under ~14px stops being readable. Use size + type + finish as the visible hierarchy; move minor detail into filename or PDF." }
+
+  w_retailer_affiliate_deep_links:
+    parent: wisdom
+    props: { text: "Home Depot and Lowe's have no clean affiliate URL format. Store opaque partner tokens today; upgrade to CJ/Impact deep-link tools later without touching schema." }
+
+  w_camera_indicator:
+    parent: wisdom
+    props: { text: "The OS camera indicator is the user's trust signal. If it stays on after they think they're done, they will not come back. Test with pagehide, visibilitychange, and tab reload." }
+
+  w_face_the_light:
+    parent: wisdom
+    props: { text: "Identification quality collapses when the fastener is backlit against a white surface. The tagline copy — 'fill the frame, add a coin or ruler' — is doing more work than any prompt tweak." }
+
+relationships:
+  # Scenarios enforced by invariants
+  - { from: sc_camera_switch_facing, to: inv_camera_always_stops, type: enforced_by }
+  - { from: sc_camera_stop,          to: inv_camera_always_stops, type: enforced_by }
+  - { from: sc_camera_happy,         to: inv_gesture_gated_camera, type: enforced_by }
+  - { from: sc_camera_permission_denied, to: inv_gesture_gated_camera, type: enforced_by }
+  - { from: sc_camera_happy,         to: inv_photo_never_persists_server, type: enforced_by }
+  - { from: sc_upload_pick,          to: inv_photo_never_persists_server, type: enforced_by }
+  - { from: sc_upload_drop,          to: inv_photo_never_persists_server, type: enforced_by }
+  - { from: sc_upload_pick,          to: inv_identify_response_validated, type: enforced_by }
+  - { from: sc_camera_happy,         to: inv_identify_response_validated, type: enforced_by }
+  - { from: sc_manual_text_analyze,  to: inv_json_only_from_model, type: enforced_by }
+  - { from: sc_label_live_preview,   to: inv_label_deterministic, type: enforced_by }
+  - { from: sc_label_pixel_size,     to: inv_label_aspect_matches_tape, type: enforced_by }
+  - { from: sc_label_live_preview,   to: inv_no_content_overflow, type: enforced_by }
+  - { from: sc_download_png,         to: inv_key_never_leaks, type: enforced_by }
+  - { from: sc_offline_shell,        to: inv_offline_functional, type: enforced_by }
+  - { from: sc_offline_shell,        to: inv_sw_cache_versioned, type: enforced_by }
+  - { from: sc_offline_shell,        to: inv_sw_never_caches_identify, type: enforced_by }
+  - { from: sc_byok,                 to: inv_key_never_leaks, type: enforced_by }
+  - { from: sc_configure_amazon_tag, to: inv_outbound_link_hygiene, type: enforced_by }
+  - { from: sc_buy_search_link,      to: inv_outbound_link_hygiene, type: enforced_by }
+  - { from: sc_install_prompt,       to: inv_pwa_installable, type: enforced_by }
+  - { from: sc_install_ios_share,    to: inv_pwa_installable, type: enforced_by }
+  - { from: sc_root_redirect,        to: inv_public_api_scope, type: enforced_by }
+
+  # Constraints that implement invariants
+  - { from: con_ai_via_pages_function,        to: inv_key_never_leaks,             type: implements }
+  - { from: con_ai_via_pages_function,        to: inv_photo_never_persists_server, type: implements }
+  - { from: con_json_only_prompt,             to: inv_json_only_from_model,        type: implements }
+  - { from: con_field_whitelist_on_apply,     to: inv_identify_response_validated, type: implements }
+  - { from: con_field_whitelist_on_apply,     to: inv_json_only_from_model,        type: implements }
+  - { from: con_camera_facing_environment,    to: inv_gesture_gated_camera,        type: implements }
+  - { from: con_shutter_start_and_snap,       to: inv_gesture_gated_camera,        type: implements }
+  - { from: con_label_360dpi_canvas,          to: inv_label_aspect_matches_tape,   type: implements }
+  - { from: con_label_360dpi_canvas,          to: inv_label_deterministic,         type: implements }
+  - { from: con_parametric_isometric_svg,     to: inv_no_content_overflow,         type: implements }
+  - { from: con_sw_shell_cache_first,         to: inv_offline_functional,          type: implements }
+  - { from: con_sw_shell_cache_first,         to: inv_sw_never_caches_identify,    type: implements }
+  - { from: con_sw_versioned_cache_name,      to: inv_sw_cache_versioned,          type: implements }
+  - { from: con_pwa_scope,                    to: inv_pwa_installable,             type: implements }
+  - { from: con_public_middleware_whitelist,  to: inv_public_api_scope,            type: implements }
+  - { from: con_root_domain_redirect,         to: inv_public_api_scope,            type: implements }
+  - { from: con_buy_search_urls,              to: inv_outbound_link_hygiene,       type: implements }
+  - { from: con_affiliate_tags_client_only,   to: inv_no_pii_persisted,            type: implements }
+  - { from: con_ai_via_pages_function,        to: inv_no_pii_persisted,            type: implements }
+  - { from: con_mobile_first_layout,          to: inv_tap_target_size,             type: implements }
+  - { from: con_mobile_first_layout,          to: inv_no_ios_zoom_on_focus,        type: implements }
+  - { from: con_manual_always_available,      to: inv_offline_functional,          type: implements }
+  - { from: con_no_bantay_signin_dependency,  to: inv_public_api_scope,            type: implements }
+
+  # CUJ dependencies
+  - { from: cuj_generate_label,      to: cuj_enter_spec_manually,      type: depends_on }
+  - { from: cuj_download_label,      to: cuj_generate_label,           type: depends_on }
+  - { from: cuj_buy_more,            to: cuj_enter_spec_manually,      type: depends_on }
+  - { from: cuj_edit_ai_result,      to: cuj_enter_spec_manually,      type: depends_on }
+  - { from: cuj_offline_use,         to: cuj_install_pwa,              type: depends_on }
+
+  # The AI vision call is a black box that owns its own quality metrics.
+  - { from: sc_camera_happy,         to: cuj_identify_from_camera,     type: delegates_to }
