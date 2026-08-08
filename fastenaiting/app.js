@@ -1,8 +1,19 @@
 // fastenAIting main app — capture, identify, label, buy.
 // Vanilla ESM, no build.
 
-import { draw as drawFastener } from "./fasteners.js";
-import { buildLinks } from "./affiliate.js";
+import { draw as drawFastener } from "/fastenaiting/fasteners.js";
+import { buildLinks } from "/fastenaiting/affiliate.js";
+
+// ---- service worker ----------------------------------------------------
+// Registered lazily so it never blocks first paint. `file://` and non-HTTPS
+// dev servers are skipped so DevTools stays clean.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/fastenaiting/sw.js", { scope: "/fastenaiting/" })
+      .catch(() => { /* offline caching is a nice-to-have; failure is fine */ });
+  });
+}
 
 // ---- persisted settings ------------------------------------------------
 const SETTINGS_KEY = "fastenaiting:settings:v1";
@@ -28,9 +39,8 @@ const $ = (id) => document.getElementById(id);
 const statusEl = $("status");
 const video = $("video");
 const cameraPlaceholder = $("cameraPlaceholder");
-const startCamBtn = $("startCam");
+const startCamBtn = $("startCam");     // doubles as shutter when stream is live
 const switchCamBtn = $("switchCam");
-const snapBtn = $("snap");
 const stopCamBtn = $("stopCam");
 const drop = $("drop");
 const fileInput = $("fileInput");
@@ -50,6 +60,9 @@ const buyLinks = $("buyLinks");
 const settingsBtn = $("settingsBtn");
 const resetBtn = $("resetBtn");
 const settingsDialog = $("settings");
+const installBtn = $("installBtn");
+const ctaBtn = $("ctaBtn");
+const offlinePill = $("offlinePill");
 
 // ---- state -------------------------------------------------------------
 let currentImageDataUrl = null;   // last captured/uploaded image
@@ -57,6 +70,9 @@ let currentImageMime = "image/jpeg";
 let stream = null;
 let facingMode = "environment";
 let devicesChecked = false;
+let identifiedOnce = false;       // has the AI (or manual) filled anything?
+let activeTab = "camera";
+let deferredInstall = null;       // beforeinstallprompt event, if fired
 
 // ---- status ------------------------------------------------------------
 function setStatus(msg, kind = "") {
@@ -74,6 +90,8 @@ document.querySelectorAll(".tab").forEach((btn) => {
     });
     document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("on"));
     document.getElementById("tab-" + btn.dataset.tab).classList.add("on");
+    activeTab = btn.dataset.tab;
+    updateCta();
   });
 });
 
@@ -91,16 +109,16 @@ async function startCamera() {
     video.srcObject = stream;
     video.dataset.active = "1";
     cameraPlaceholder.style.display = "none";
-    startCamBtn.disabled = true;
     stopCamBtn.disabled = false;
-    snapBtn.disabled = false;
     if (!devicesChecked) {
       const devs = await navigator.mediaDevices.enumerateDevices();
       const cams = devs.filter((d) => d.kind === "videoinput");
       if (cams.length > 1) switchCamBtn.disabled = false;
       devicesChecked = true;
     }
-    setStatus("Camera ready — line up the fastener.", "ok");
+    setStatus("Camera ready — tap the shutter.", "ok");
+    refreshShutter();
+    updateCta();
   } catch (err) {
     setStatus("Camera error: " + (err.message || err), "error");
   }
@@ -113,10 +131,10 @@ function stopCamera() {
   video.srcObject = null;
   delete video.dataset.active;
   cameraPlaceholder.style.display = "";
-  startCamBtn.disabled = false;
-  snapBtn.disabled = true;
   stopCamBtn.disabled = true;
   switchCamBtn.disabled = true;
+  refreshShutter();
+  updateCta();
 }
 async function switchCamera() {
   facingMode = facingMode === "environment" ? "user" : "environment";
@@ -133,12 +151,22 @@ function snap() {
   const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
   setImage(dataUrl, "image/jpeg");
   setStatus("Snapped. Hit “Identify with AI”.", "ok");
+  if ("vibrate" in navigator) navigator.vibrate(20);
 }
 
-startCamBtn.addEventListener("click", startCamera);
+// The shutter button doubles as start-camera when the stream is off, and
+// snap-photo when it's live — one big thumb-friendly button.
+startCamBtn.addEventListener("click", () => {
+  if (stream) snap();
+  else startCamera();
+});
 stopCamBtn.addEventListener("click", stopCamera);
 switchCamBtn.addEventListener("click", switchCamera);
-snapBtn.addEventListener("click", snap);
+function refreshShutter() {
+  startCamBtn.textContent = stream ? "●" : "▶︎";
+  startCamBtn.title = stream ? "Take photo" : "Start camera";
+  startCamBtn.setAttribute("aria-label", stream ? "Take photo" : "Start camera");
+}
 
 // ---- upload / drop -----------------------------------------------------
 drop.addEventListener("click", () => fileInput.click());
@@ -183,6 +211,8 @@ function setImage(dataUrl, mime) {
   photo.hidden = false;
   photoEmpty.style.display = "none";
   identifyBtn.disabled = false;
+  identifiedOnce = false;
+  updateCta();
 }
 
 // ---- manual analyze (text only) ----------------------------------------
@@ -262,7 +292,9 @@ function applySpec(spec) {
     if (!el.name) continue;
     if (spec[el.name] != null && spec[el.name] !== "") el.value = spec[el.name];
   }
+  identifiedOnce = true;
   renderAll();
+  updateCta();
 }
 
 specForm.addEventListener("input", renderAll);
@@ -485,8 +517,10 @@ resetBtn.addEventListener("click", () => {
   photoEmpty.style.display = "";
   currentImageDataUrl = null;
   identifyBtn.disabled = true;
+  identifiedOnce = false;
   manualText.value = "";
   renderAll();
+  updateCta();
   setStatus("Cleared. Show me another one.");
 });
 
@@ -519,5 +553,93 @@ settingsDialog.addEventListener("close", () => {
   }
 });
 
+// ---- install prompt (PWA) ---------------------------------------------
+// Chrome/Edge/Android fire beforeinstallprompt when the app is installable.
+// We stash it, reveal the button, and call prompt() on click. iOS Safari
+// doesn't fire this event — installation there is "Share > Add to Home
+// Screen"; we surface a hint in Settings for those users.
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstall = e;
+  installBtn.hidden = false;
+});
+installBtn.addEventListener("click", async () => {
+  if (!deferredInstall) return;
+  installBtn.disabled = true;
+  try {
+    deferredInstall.prompt();
+    const { outcome } = await deferredInstall.userChoice;
+    setStatus(outcome === "accepted" ? "Installed — check your home screen." : "Install skipped.", "ok");
+  } finally {
+    deferredInstall = null;
+    installBtn.hidden = true;
+    installBtn.disabled = false;
+  }
+});
+window.addEventListener("appinstalled", () => {
+  installBtn.hidden = true;
+  setStatus("Installed. Look for the fastenAIting icon.", "ok");
+});
+
+// ---- offline indicator -------------------------------------------------
+function reflectOnline() {
+  const on = navigator.onLine;
+  offlinePill.hidden = on;
+  if (!on) offlinePill.textContent = "Offline — the identifier needs the network";
+}
+window.addEventListener("online", reflectOnline);
+window.addEventListener("offline", reflectOnline);
+reflectOnline();
+
+// ---- contextual CTA (sticky bottom bar, mobile only) -------------------
+// The bar shows the single "next thing to do" so the user's thumb is always
+// near the right button. States, in order:
+//   1. Camera tab, no stream           -> Take a photo   (starts camera)
+//   2. Camera tab, stream, no image    -> Snap           (snaps)
+//   3. Image loaded, no ID yet         -> Identify       (calls AI)
+//   4. Form has meaningful data        -> Download label (downloads PNG)
+function updateCta() {
+  if (!ctaBtn) return;
+  const hasImage = !!currentImageDataUrl;
+  const hasSpec = formHasSpec();
+
+  let label, action;
+  if (activeTab === "camera" && !hasImage && !stream) {
+    label = "Take a photo";
+    action = () => startCamera();
+  } else if (activeTab === "camera" && !hasImage && stream) {
+    label = "Snap ●";
+    action = () => snap();
+  } else if (hasImage && !identifiedOnce) {
+    label = "Identify with AI";
+    action = () => identifyBtn.click();
+  } else if (hasSpec) {
+    label = "⬇ Download label";
+    action = () => downloadBtn.click();
+  } else if (activeTab === "manual") {
+    label = "Analyze description";
+    action = () => manualAnalyze.click();
+  } else if (activeTab === "upload") {
+    label = "Pick a photo";
+    action = () => fileInput.click();
+  } else {
+    label = "Take a photo";
+    action = () => startCamera();
+  }
+  ctaBtn.textContent = label;
+  ctaBtn.onclick = action;
+}
+function formHasSpec() {
+  const s = readSpec();
+  return !!(s.size || s.length || s.subtype || s.category);
+}
+
+// Recompute CTA whenever the form changes so "Download label" appears at
+// the right moment.
+specForm.addEventListener("input", updateCta);
+specForm.addEventListener("change", updateCta);
+
 // initial paint
 renderAll();
+refreshShutter();
+updateCta();

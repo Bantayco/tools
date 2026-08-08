@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="fastenAIting icon">
+  <defs>
+    <radialGradient id="bg" cx="0.35" cy="0.30" r="0.9">
+      <stop offset="0" stop-color="#14a09a"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </radialGradient>
+    <radialGradient id="metal" cx="0.35" cy="0.30" r="0.9">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#d8dbde"/>
+      <stop offset="1" stop-color="#8b9096"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- Screw head (top view) -->
+  <circle cx="256" cy="256" r="170" fill="url(#metal)" stroke="#5b6067" stroke-width="4"/>
+  <!-- Phillips cross recess -->
+  <g fill="#1e293b">
+    <rect x="238" y="120" width="36" height="272" rx="8"/>
+    <rect x="120" y="238" width="272" height="36" rx="8"/>
+    <!-- Center depth cue -->
+    <circle cx="256" cy="256" r="12" fill="#0b1220"/>
+  </g>
+  <!-- Highlight on head -->
+  <ellipse cx="200" cy="180" rx="70" ry="26" fill="#ffffff" opacity="0.35" transform="rotate(-30 200 180)"/>
+</svg>

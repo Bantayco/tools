@@ -2,27 +2,52 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
     <title>fastenAIting — identify any fastener</title>
     <meta name="description" content="Snap or upload a photo of a screw, bolt, nut, or washer — we identify it, generate a printable 12mm label, and link you to buy more.">
+
+    <!-- PWA -->
+    <link rel="manifest" href="/fastenaiting/manifest.webmanifest">
+    <meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
+    <link rel="icon" type="image/svg+xml" href="/fastenaiting/icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/fastenaiting/favicon-32.png">
+    <link rel="apple-touch-icon" href="/fastenaiting/apple-touch-icon.png">
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="fastenAIting">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- Social / Open Graph -->
+    <meta property="og:title" content="fastenAIting">
+    <meta property="og:description" content="Point. Shoot. Print a 12mm label. Buy more.">
+    <meta property="og:image" content="/fastenaiting/icon-512.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+
     <script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 
     <link rel="stylesheet" href="/_shared/tokens.css">
     <link rel="stylesheet" href="/_shared/tokens-extended.css">
     <link rel="stylesheet" href="/_shared/base.css">
     <link rel="stylesheet" href="/_shared/dark.css">
-    <link rel="stylesheet" href="./styles.css?v=1">
+    <link rel="stylesheet" href="/fastenaiting/styles.css?v=2">
   </head>
   <body>
     <main class="app">
       <header class="topbar">
         <div class="brand">
           <h1><span class="brand-mark">fasten<b>AI</b>ting</span></h1>
-          <p class="tagline">Point. Shoot. Print a label. Buy more.</p>
+          <p class="tagline">Point. Shoot. Print. Buy.</p>
         </div>
         <div class="top-actions">
-          <button id="settingsBtn" type="button" class="ghost" title="Settings">⚙︎ Settings</button>
-          <button id="resetBtn" type="button" class="ghost" title="Start over">↺ Reset</button>
+          <button id="installBtn" type="button" hidden title="Install as an app">⤓ Install</button>
+          <button id="settingsBtn" type="button" title="Settings" aria-label="Settings">⚙︎</button>
+          <button id="resetBtn" type="button" title="Start over" aria-label="Reset">↺</button>
         </div>
       </header>
 
@@ -41,32 +66,30 @@
             <video id="video" playsinline muted autoplay></video>
             <div id="cameraPlaceholder" class="placeholder">
               <p>Camera not started.</p>
-              <p class="small">On phones, the rear camera will be used.</p>
+              <p class="small">Tap the shutter after granting permission. Rear camera is used by default on phones.</p>
             </div>
           </div>
-          <div class="row wrap">
-            <button id="startCam" type="button" class="primary">Start camera</button>
-            <button id="switchCam" type="button" disabled title="Switch camera">↻ Flip</button>
-            <button id="snap" type="button" disabled class="primary">Snap →</button>
-            <button id="stopCam" type="button" disabled>Stop</button>
-            <span class="grow"></span>
-            <label class="hint">Fill the frame. Include a coin or ruler if you can.</label>
+          <div class="cam-row">
+            <button id="switchCam" type="button" class="icon-only" disabled title="Flip camera" aria-label="Flip camera">↻</button>
+            <button id="startCam" type="button" class="shutter" title="Start camera">▶︎</button>
+            <button id="stopCam" type="button" class="icon-only" disabled title="Stop camera" aria-label="Stop camera">■</button>
           </div>
+          <p class="hint" style="text-align:center;margin-top:-2px">Frame the fastener. A coin or ruler helps size estimates.</p>
         </div>
 
         <div id="tab-upload" class="tab-panel">
           <label id="drop" for="fileInput" class="drop">
-            <input id="fileInput" type="file" accept="image/*" hidden>
+            <input id="fileInput" type="file" accept="image/*" capture="environment" hidden>
             <div>
-              <b>Drop a photo</b> or click to pick a file.
+              <b>Tap to pick a photo</b> — or drop one here.
               <p class="small">JPG / PNG / HEIC / WebP up to ~10&nbsp;MB</p>
             </div>
           </label>
         </div>
 
         <div id="tab-manual" class="tab-panel">
-          <p class="small">Skip the photo — just describe it, then hit <b>Analyze</b> or fill the fields below directly.</p>
-          <textarea id="manualText" rows="3" placeholder="e.g. #8 pan-head Phillips wood screw, 1 1/4&quot;, zinc plated"></textarea>
+          <p class="hint">Skip the photo — describe it in a few words.</p>
+          <textarea id="manualText" rows="3" placeholder='e.g. #8 pan-head Phillips wood screw, 1 1/4", zinc plated'></textarea>
           <div class="row">
             <button id="manualAnalyze" type="button" class="primary">Analyze description</button>
           </div>
@@ -78,12 +101,12 @@
         <div class="photo-wrap">
           <img id="photo" alt="" hidden>
           <div id="photoEmpty" class="placeholder">
-            <p>No photo yet.</p>
+            <p>No photo yet — snap or upload.</p>
           </div>
-          <div class="row">
-            <button id="identifyBtn" type="button" class="primary" disabled>🔍 Identify with AI</button>
-            <span id="aiStatus" class="hint"></span>
-          </div>
+          <button id="identifyBtn" type="button" class="primary" disabled>
+            🔍 Identify with AI
+          </button>
+          <span id="aiStatus" class="hint" style="text-align:center"></span>
         </div>
 
         <form id="specForm" class="specs" autocomplete="off">
@@ -102,9 +125,9 @@
               </select>
             </label>
             <label>Sub-type
-              <input name="subtype" placeholder="e.g. Wood, Hex, Lock…">
+              <input name="subtype" placeholder="Wood, Hex…">
             </label>
-            <label>Head shape
+            <label>Head
               <select name="head">
                 <option value="">—</option>
                 <option>Pan</option>
@@ -148,18 +171,18 @@
             <label>Standard
               <select name="standard">
                 <option value="">—</option>
-                <option value="sae">SAE (imperial)</option>
+                <option value="sae">SAE</option>
                 <option value="metric">Metric</option>
               </select>
             </label>
             <label>Size / gauge
-              <input name="size" placeholder='e.g. #8, 1/4", M6'>
+              <input name="size" inputmode="text" placeholder='#8, 1/4", M6'>
             </label>
             <label>Length
-              <input name="length" placeholder='e.g. 1", 25mm'>
+              <input name="length" inputmode="text" placeholder='1", 25mm'>
             </label>
-            <label>Thread pitch / TPI
-              <input name="pitch" placeholder="e.g. 1.0, 20 tpi">
+            <label>Pitch / TPI
+              <input name="pitch" inputmode="text" placeholder="1.0, 20 tpi">
             </label>
             <label>Material
               <select name="material">
@@ -186,27 +209,27 @@
               </select>
             </label>
             <label>Color
-              <input name="color" placeholder="e.g. silver, black">
+              <input name="color" placeholder="silver, black">
             </label>
           </div>
-          <label class="notes">Notes / description
+          <label class="notes">Notes
             <input name="notes" placeholder="Anything else worth remembering">
           </label>
         </form>
       </section>
 
       <!-- ============ 3. LABEL + BUY ============ -->
-      <section class="card" aria-label="Label &amp; buy">
+      <section class="card" aria-label="Label and buy">
         <div class="label-head">
           <div>
             <h2>Label preview</h2>
-            <p class="hint">12&nbsp;mm tape · Brother-compatible · 180&nbsp;dpi PNG</p>
+            <p class="hint">12&nbsp;mm tape · Brother-compatible · 360&nbsp;dpi PNG</p>
           </div>
-          <div class="row">
+          <div class="label-controls">
             <label class="inline">Style
               <select id="labelStyle">
-                <option value="strip">Strip (long)</option>
-                <option value="square">Square (2×)</option>
+                <option value="strip">Strip</option>
+                <option value="square">Square</option>
               </select>
             </label>
             <label class="inline">Length
@@ -217,8 +240,6 @@
                 <option value="100">100 mm</option>
               </select>
             </label>
-            <button id="downloadLabel" type="button" class="primary">⬇ Download PNG</button>
-            <button id="printLabel" type="button">🖨 Print</button>
           </div>
         </div>
 
@@ -226,7 +247,12 @@
           <canvas id="labelCanvas"></canvas>
         </div>
 
-        <h2 class="buy-h">Buy more</h2>
+        <div class="label-actions">
+          <button id="downloadLabel" type="button" class="primary">⬇ Download PNG</button>
+          <button id="printLabel" type="button">🖨 Print</button>
+        </div>
+
+        <h3 class="buy-h">Buy more</h3>
         <div id="buyLinks" class="buy-links">
           <a class="buy home-depot" target="_blank" rel="noopener sponsored">
             <span class="mark">Home Depot</span><span class="chev">↗</span>
@@ -246,6 +272,15 @@
       </footer>
     </main>
 
+    <!-- Sticky bottom action (mobile only) — the "next thing to do" -->
+    <div id="actionBar" class="action-bar" role="toolbar" aria-label="Primary action">
+      <div class="bar-row">
+        <button id="ctaBtn" type="button" class="primary">Take a photo</button>
+      </div>
+    </div>
+
+    <div id="offlinePill" class="offline-pill" role="status" hidden>Offline</div>
+
     <!-- ============ SETTINGS DIALOG ============ -->
     <dialog id="settings" class="settings">
       <form method="dialog">
@@ -253,7 +288,7 @@
 
         <fieldset>
           <legend>AI provider</legend>
-          <p class="small">By default we use the server-side identifier. To skip the server and use your own Anthropic key, paste it here — it's stored only in this browser's localStorage.</p>
+          <p class="hint">By default the identifier uses a server-side key. Paste your own Anthropic key to skip the server — it's kept in this browser's localStorage only.</p>
           <label>Anthropic API key (optional)
             <input id="setApiKey" type="password" autocomplete="off" placeholder="sk-ant-…">
           </label>
@@ -264,31 +299,31 @@
           <label>Amazon associate tag
             <input id="setAmazonTag" placeholder="yourtag-20">
           </label>
-          <label>Home Depot CJ / Impact ID (optional)
-            <input id="setHomeDepotTag" placeholder="AID/PID or partner id">
+          <label>Home Depot partner ID (optional)
+            <input id="setHomeDepotTag" placeholder="opaque token">
           </label>
-          <label>Lowe's CJ / Impact ID (optional)
-            <input id="setLowesTag" placeholder="AID/PID or partner id">
+          <label>Lowe's partner ID (optional)
+            <input id="setLowesTag" placeholder="opaque token">
           </label>
         </fieldset>
 
         <fieldset>
           <legend>Label defaults</legend>
-          <label class="row inline">
+          <label class="inline">
             <input type="checkbox" id="setShowIso" checked> Include isometric drawing
           </label>
-          <label class="row inline">
+          <label class="inline">
             <input type="checkbox" id="setShowBrand" checked> Include "fastenAIting" wordmark
           </label>
         </fieldset>
 
-        <div class="row" style="justify-content:flex-end;gap:8px">
+        <div class="dialog-actions">
           <button value="cancel">Cancel</button>
           <button id="saveSettings" value="save" class="primary">Save</button>
         </div>
       </form>
     </dialog>
 
-    <script type="module" src="./app.js?v=1"></script>
+    <script type="module" src="/fastenaiting/app.js?v=2"></script>
   </body>
 </html>

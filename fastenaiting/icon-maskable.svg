@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="fastenAIting maskable icon">
+  <defs>
+    <radialGradient id="bg" cx="0.35" cy="0.30" r="0.9">
+      <stop offset="0" stop-color="#14a09a"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </radialGradient>
+    <radialGradient id="metal" cx="0.35" cy="0.30" r="0.9">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#d8dbde"/>
+      <stop offset="1" stop-color="#8b9096"/>
+    </radialGradient>
+  </defs>
+  <!-- Full-bleed teal so mask can crop anywhere. -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- Screw sized to fit the 80% safe zone (r ≤ 205). -->
+  <circle cx="256" cy="256" r="128" fill="url(#metal)" stroke="#5b6067" stroke-width="3"/>
+  <g fill="#1e293b">
+    <rect x="243" y="154" width="26" height="204" rx="6"/>
+    <rect x="154" y="243" width="204" height="26" rx="6"/>
+    <circle cx="256" cy="256" r="9" fill="#0b1220"/>
+  </g>
+  <ellipse cx="215" cy="200" rx="50" ry="18" fill="#ffffff" opacity="0.35" transform="rotate(-30 215 200)"/>
+</svg>
