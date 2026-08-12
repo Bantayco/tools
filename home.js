@@ -28,6 +28,11 @@ const APPS = [
     href: "/typewriter/",
     blurb: "Folder-aware text & code editor — tabs, markdown, Python linting.",
   },
+  {
+    label: "The Playground",
+    href: "/playground/",
+    blurb: "A vision board for the playground of our dreams.",
+  },
 ];
 
 const newTools = document.querySelector("#newTools");

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Playground — A Vision</title>
+    <script>try{var t=localStorage.getItem('bantay-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+    <link rel="stylesheet" href="/_shared/tokens.css">
+    <link rel="stylesheet" href="/_shared/base.css">
+    <link rel="stylesheet" href="/_shared/dark.css">
+    <style>
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 22px 96px; }
+
+      header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 40px; }
+      header a.home { color: var(--bantay-muted); text-decoration: none; font-size: 13px; }
+      header a.home:hover { color: var(--bantay-primary); }
+
+      .kicker {
+        font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--bantay-primary); margin-bottom: 10px;
+      }
+      h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.01em; }
+      .lede {
+        margin-top: 14px; max-width: 620px; color: var(--bantay-muted);
+        font-size: 15px; line-height: 1.6;
+      }
+
+      .disclaimer {
+        margin-top: 22px; display: inline-block;
+        padding: 8px 12px; border-radius: var(--bantay-radius);
+        background: color-mix(in srgb, var(--bantay-primary) 8%, var(--bantay-surface));
+        border: 1px dashed color-mix(in srgb, var(--bantay-primary) 32%, transparent);
+        color: var(--bantay-muted); font-size: 12px;
+      }
+      .disclaimer strong { color: var(--bantay-ink); }
+
+      h2.section {
+        margin: 56px 0 20px; font-size: 13px;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--bantay-muted); font-family: var(--bantay-body-font); font-weight: 600;
+      }
+
+      .grid {
+        display: grid; gap: 22px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+
+      .card {
+        background: var(--bantay-surface);
+        border: 1px solid color-mix(in srgb, var(--bantay-muted) 20%, transparent);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+        transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: color-mix(in srgb, var(--bantay-primary) 45%, transparent);
+        box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--bantay-ink) 18%, transparent);
+      }
+
+      .photo {
+        position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+        background: linear-gradient(135deg,
+          color-mix(in srgb, var(--bantay-primary) 18%, var(--bantay-surface)),
+          color-mix(in srgb, var(--bantay-accent) 20%, var(--bantay-surface)));
+      }
+      .photo img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        transition: transform 400ms ease;
+      }
+      .card:hover .photo img { transform: scale(1.03); }
+
+      .photo .placeholder {
+        position: absolute; inset: 0;
+        display: none; flex-direction: column;
+        align-items: center; justify-content: center; gap: 8px;
+        color: var(--bantay-surface);
+        text-align: center; padding: 16px;
+        background: linear-gradient(135deg,
+          color-mix(in srgb, var(--bantay-primary) 92%, black),
+          color-mix(in srgb, var(--bantay-accent) 82%, black));
+      }
+      .photo .placeholder svg { width: 56px; height: 56px; opacity: 0.9; }
+      .photo .placeholder .ph-label { font-size: 13px; opacity: 0.85; }
+      .photo[data-fallback="on"] img { display: none; }
+      .photo[data-fallback="on"] .placeholder { display: flex; }
+
+      .badge {
+        position: absolute; top: 12px; left: 12px; z-index: 1;
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 10px; border-radius: 999px;
+        background: color-mix(in srgb, var(--bantay-ink) 78%, transparent);
+        color: white; font-size: 11px; letter-spacing: 0.05em;
+        text-transform: uppercase; backdrop-filter: blur(4px);
+      }
+      .badge .dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--bantay-primary);
+      }
+
+      .body { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+      .body h3 { font-size: 22px; }
+      .body p { color: var(--bantay-muted); font-size: 14px; line-height: 1.55; }
+      .body .credit {
+        margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--bantay-muted);
+        border-top: 1px dashed color-mix(in srgb, var(--bantay-muted) 22%, transparent);
+      }
+      .body .credit a { color: var(--bantay-muted); text-decoration: none; }
+      .body .credit a:hover { color: var(--bantay-primary); text-decoration: underline; }
+
+      footer {
+        margin-top: 72px; padding-top: 24px;
+        border-top: 1px solid color-mix(in srgb, var(--bantay-muted) 20%, transparent);
+        color: var(--bantay-muted); font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <div class="kicker">A Vision · Not a Design</div>
+          <h1>The Playground.</h1>
+        </div>
+        <a class="home" href="/">← Back to tools</a>
+      </header>
+
+      <p class="lede">
+        A mood board for the playground of our dreams — six ingredients, one
+        adrenaline supply. This page collects the vibe of each feature so we
+        can point at photos instead of arguing about words. Layout, safety,
+        siting, and the actual playground plan come later.
+      </p>
+
+      <div class="disclaimer">
+        <strong>Vision only.</strong> Photos are reference from real
+        installations elsewhere — not renderings, not designs.
+      </div>
+
+      <h2 class="section">The Six Ingredients</h2>
+
+      <div class="grid" id="grid"></div>
+
+      <footer>
+        Reference photography via Flickr keyword search with Unsplash CDN
+        fallback. If a photo doesn't load in your region, the branded card
+        stands in — the vibe is what matters.
+      </footer>
+    </div>
+
+    <script>
+      // Each feature: keyword string for Flickr lookup, a curated Unsplash CDN
+      // fallback, and a final SVG placeholder if both fail. All photos load
+      // in the viewer's browser, not from the build server.
+      const FEATURES = [
+        {
+          key: "trampoline-foam-pit",
+          badge: "Airtime",
+          title: "Foam Pit with Trampoline",
+          blurb: "A gymnastics-grade trampoline that launches you into a fluffy pool of foam blocks. Missed landings become part of the fun.",
+          flickrTags: "trampoline,foam,pit",
+          unsplashUrl: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=1200&q=80&auto=format&fit=crop",
+          icon: "trampoline",
+          seed: 3
+        },
+        {
+          key: "zipline",
+          badge: "Flight",
+          title: "Zipline into the Foam Pit",
+          blurb: "A long cable from a tower down into that same foam pit. Let go at the end and belly-flop into the cubes.",
+          flickrTags: "zipline,forest",
+          unsplashUrl: "https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=1200&q=80&auto=format&fit=crop",
+          icon: "zipline",
+          seed: 7
+        },
+        {
+          key: "big-swing",
+          badge: "Pendulum",
+          title: "Big Swing into the Foam Pit",
+          blurb: "A giant rope swing on a high anchor — build up speed, arc out over the pit, release, and land soft.",
+          flickrTags: "rope,swing,forest",
+          unsplashUrl: "https://images.unsplash.com/photo-1502085671122-2d218cd434e6?w=1200&q=80&auto=format&fit=crop",
+          icon: "swing",
+          seed: 11
+        },
+        {
+          key: "rock-wall",
+          badge: "Vertical",
+          title: "Rock Wall",
+          blurb: "A colorful outdoor climbing wall with routes for every level, from four-year-olds to grown-ups avoiding email.",
+          flickrTags: "climbing,wall,bouldering",
+          unsplashUrl: "https://images.unsplash.com/photo-1522898467493-49726bf28798?w=1200&q=80&auto=format&fit=crop",
+          icon: "wall",
+          seed: 17
+        },
+        {
+          key: "long-slide",
+          badge: "Descent",
+          title: "Super Long Slide",
+          blurb: "The kind of tube slide you enter at the top of a hill and exit in a totally different mood. Bonus points for a spiral.",
+          flickrTags: "long,tube,slide,playground",
+          unsplashUrl: "https://images.unsplash.com/photo-1597262975002-c5c3b14bbd62?w=1200&q=80&auto=format&fit=crop",
+          icon: "slide",
+          seed: 23
+        },
+        {
+          key: "ropes-course",
+          badge: "Traverse",
+          title: "Ropes Course",
+          blurb: "Suspended platforms, wobbly bridges, cargo nets — a treetop obstacle course you clip into and pick your line through.",
+          flickrTags: "ropes,course,adventure,park",
+          unsplashUrl: "https://images.unsplash.com/photo-1533029013343-97fadb0d2eeb?w=1200&q=80&auto=format&fit=crop",
+          icon: "ropes",
+          seed: 29
+        }
+      ];
+
+      const ICONS = {
+        trampoline: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="16" rx="9" ry="2.5"/><path d="M3 16v3M21 16v3M8 16v3M16 16v3"/><path d="M9 8l3-3 3 3M12 5v9"/></svg>`,
+        zipline: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l18 4"/><path d="M11 8v3l-2 4h4l-2-4"/><circle cx="11" cy="8" r="1.5" fill="currentColor"/></svg>`,
+        swing: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18"/><path d="M8 4l3 10M16 4l-3 10"/><rect x="9" y="14" width="6" height="1.5" rx="0.5"/></svg>`,
+        wall: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8" cy="7" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/><circle cx="10" cy="14" r="1" fill="currentColor"/><circle cx="17" cy="17" r="1" fill="currentColor"/><circle cx="7" cy="18" r="1" fill="currentColor"/></svg>`,
+        slide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5v6c0 3 2 5 5 5h4c3 0 5 2 5 5"/><path d="M4 5h4M17 20h4"/></svg>`,
+        ropes: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 6v12M16 6v12"/></svg>`
+      };
+
+      function makeCard(f) {
+        const flickrUrl = `https://loremflickr.com/1200/900/${encodeURIComponent(f.flickrTags)}?lock=${f.seed}`;
+        return `
+          <article class="card">
+            <div class="photo" data-key="${f.key}">
+              <span class="badge"><span class="dot"></span>${f.badge}</span>
+              <img
+                alt="${f.title}"
+                loading="lazy"
+                data-primary="${flickrUrl}"
+                data-fallback="${f.unsplashUrl}"
+                src="${flickrUrl}">
+              <div class="placeholder">
+                ${ICONS[f.icon]}
+                <div class="ph-label">${f.title}</div>
+              </div>
+            </div>
+            <div class="body">
+              <h3>${f.title}</h3>
+              <p>${f.blurb}</p>
+              <div class="credit">
+                Reference photo via
+                <a href="https://loremflickr.com/1200/900/${encodeURIComponent(f.flickrTags)}?lock=${f.seed}" target="_blank" rel="noopener">Flickr keyword: ${f.flickrTags.replace(/,/g, ", ")}</a>
+              </div>
+            </div>
+          </article>`;
+      }
+
+      document.getElementById("grid").innerHTML = FEATURES.map(makeCard).join("");
+
+      // If the primary image fails, try the Unsplash fallback; if that fails
+      // too, mark the photo container so the branded placeholder shows.
+      document.querySelectorAll(".photo img").forEach((img) => {
+        let tried = 0;
+        img.addEventListener("error", () => {
+          tried += 1;
+          if (tried === 1 && img.dataset.fallback) {
+            img.src = img.dataset.fallback;
+          } else {
+            img.closest(".photo").setAttribute("data-fallback", "on");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
