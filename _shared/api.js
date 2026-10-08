@@ -49,3 +49,25 @@ export async function saveAsset(tool, slug, data) {
 export async function deleteAsset(tool, slug) {
   await req(`/api/assets/${enc(tool)}/${enc(slug)}`, { method: "DELETE" });
 }
+
+// --- Publish -----------------------------------------------------------------
+// Returns `{ publishedAt, publicUrl }` if the asset is currently published,
+// `null` if the asset exists but isn't published, or throws if unknown/unauthed.
+export async function getPublishState(tool, slug) {
+  const res = await req(`/api/assets/${enc(tool)}/${enc(slug)}/publish`);
+  return res.json();
+}
+
+// Snapshots the current asset into its published columns. Returns
+// `{ publishedAt, publicUrl }`.
+export async function publishAsset(tool, slug) {
+  const res = await req(`/api/assets/${enc(tool)}/${enc(slug)}/publish`, {
+    method: "POST",
+  });
+  return res.json();
+}
+
+// Clears the published snapshot. Idempotent.
+export async function unpublishAsset(tool, slug) {
+  await req(`/api/assets/${enc(tool)}/${enc(slug)}/publish`, { method: "DELETE" });
+}

@@ -8,7 +8,16 @@
     <link rel="stylesheet" href="/_shared/tokens.css">
     <link rel="stylesheet" href="/_shared/base.css">
     <link rel="stylesheet" href="/_shared/dark.css">
-    <link rel="stylesheet" href="./styles.css">
+    <script>
+      // Dev-only cache buster: forces fresh fetches on localhost so edits don't get
+      // stuck behind Python http.server's Last-Modified cache. Prod is untouched
+      // (Cloudflare's ETag validation via the zone-level Transform Rule handles it).
+      (function () {
+        var dev = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+        var v = dev ? "?v=" + Date.now() : "";
+        document.write('<link rel="stylesheet" href="./styles.css' + v + '">');
+      })();
+    </script>
   </head>
   <body>
     <main class="app">
@@ -22,9 +31,18 @@
           <select id="myDiagrams" aria-label="My saved diagrams" title="My saved diagrams">
             <option value="">My diagrams…</option>
           </select>
+          <select id="lookSelect" aria-label="Diagram look" title="Diagram look">
+            <option value="classic">Look: Classic</option>
+            <option value="handDrawn">Look: Hand-drawn</option>
+          </select>
+          <select id="layoutSelect" aria-label="Layout engine" title="Layout engine">
+            <option value="dagre">Layout: Default</option>
+            <option value="elk">Layout: ELK</option>
+          </select>
           <button id="copySource" type="button" title="Copy Mermaid source">Copy</button>
           <button id="downloadMmd" type="button" title="Download .mmd">.mmd</button>
           <button id="exportSvg" type="button" class="primary" title="Export rendered SVG">SVG</button>
+          <span id="publishMount" class="publish"></span>
         </div>
       </header>
 
@@ -42,11 +60,26 @@
           </div>
           <div class="preview-wrap">
             <div id="preview" class="preview"></div>
+            <div class="zoom-controls" role="group" aria-label="Zoom controls">
+              <button id="zoomOut" type="button" title="Zoom out">−</button>
+              <span id="zoomLevel" class="zoom-level" aria-live="polite">100%</span>
+              <button id="zoomIn" type="button" title="Zoom in">+</button>
+              <button id="zoomFit" type="button" title="Fit to screen">Fit</button>
+            </div>
           </div>
         </section>
       </section>
     </main>
 
-    <script type="module" src="./app.js"></script>
+    <script>
+      (function () {
+        var dev = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+        var v = dev ? "?v=" + Date.now() : "";
+        var s = document.createElement("script");
+        s.type = "module";
+        s.src = "./app.js" + v;
+        document.body.appendChild(s);
+      })();
+    </script>
   </body>
 </html>

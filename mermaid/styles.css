@@ -96,17 +96,63 @@
 }
 
 .preview-wrap {
-  display: grid;
-  place-items: center;
+  position: relative;
   min-height: 0;
-  overflow: auto;
-  padding: 20px;
+  overflow: hidden;
   background: var(--bantay-background);
+  cursor: grab;
+  touch-action: none;
+}
+
+.preview-wrap.panning {
+  cursor: grabbing;
+}
+
+.preview-wrap.panning * {
+  user-select: none;
+}
+
+.preview {
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
 .preview svg {
-  max-width: 100%;
+  display: block;
   height: auto;
+}
+
+.zoom-controls {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bantay-surface) 92%, transparent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+  cursor: default;
+}
+
+.zoom-controls button {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.zoom-level {
+  min-width: 44px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--bantay-muted);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
 }
 
 .error {
@@ -119,6 +165,79 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Publish component — mounted into the topbar's #publishMount span.
+   The .publish container itself is a flex row; when published, the linkbox
+   reveals a link + copy + unpublish button. */
+.publish {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.publish-toggle.is-published {
+  border-color: color-mix(in srgb, var(--bantay-ink) 30%, transparent);
+  background: color-mix(in srgb, var(--bantay-muted) 8%, var(--panel));
+}
+
+.publish-linkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bantay-muted) 6%, var(--panel));
+  max-width: 340px;
+}
+
+.publish-linkbox[hidden] {
+  display: none;
+}
+
+.publish-link {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: var(--bantay-ink);
+  text-decoration: none;
+}
+
+.publish-link:hover {
+  text-decoration: underline;
+}
+
+.publish-copy,
+.publish-unpublish {
+  font-size: 12px;
+  padding: 3px 8px;
+}
+
+/* Public read-only viewer: /mermaid/?p=<slug>. Hides all editing chrome; the
+   diagram fills the viewport and zoom/pan still work. */
+body.viewer .topbar,
+body.viewer .pane[aria-label="Mermaid source editor"] {
+  display: none;
+}
+
+body.viewer .workspace {
+  grid-template-columns: 1fr;
+  padding: 0;
+  gap: 0;
+}
+
+body.viewer .pane {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.viewer .pane-head {
+  display: none;
 }
 
 @media (max-width: 860px) {

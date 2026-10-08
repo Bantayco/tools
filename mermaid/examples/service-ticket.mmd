@@ -1,0 +1,19 @@
+stateDiagram-v2
+    state "Under Review" as UnderReview
+    state "Waiting User Response" as WaitingUser
+    state "Awaiting Internal Response" as AwaitingInternal
+    state "Closed — Won't Fix" as WontFix
+
+    [*] --> New
+    New --> UnderReview: submitted
+    UnderReview --> Open: accept
+    UnderReview --> WontFix: reject at triage
+    Open --> WaitingUser: ask user
+    WaitingUser --> Open: user replied
+    Open --> AwaitingInternal: escalate
+    AwaitingInternal --> Open: reply received
+    Open --> Resolved: fix delivered
+    Open --> WontFix: declined
+    Resolved --> Open: reopened
+    Resolved --> [*]
+    WontFix --> [*]
