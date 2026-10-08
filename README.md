@@ -30,6 +30,9 @@ helpers/
 ├── neural-networks-study-guide/  # standalone tool; themed off tokens.css,
 │                                 # progress in localStorage (see MISSING-TOKENS.md)
 ├── signin/               # the ONLY Access-protected path (sets the cookie)
+├── artifact-server/      # SEPARATE Worker + Durable Objects (not served by Pages):
+│                         # UUID-addressed live pages, passcodes, E2E sync, MCP.
+│                         # See artifact-server/README.md
 ├── _headers              # Cloudflare cache/security headers
 └── _redirects            # Cloudflare routing (clean URLs are automatic)
 ```

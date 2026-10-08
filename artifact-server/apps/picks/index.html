@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Picks Pool</title>
+<!--
+  Football picks pool — first tenant of the Bantay Artifact Server.
+  Publish:  node scripts/publish.mjs picks apps/picks/index.html --promote
+
+  Data channels:
+    state  season setup (players, weeks, games, winners) — commissioner edits
+    log    "pick" entries {player, game, team, at}; the latest pick per
+           player+game made before kickoff counts
+    doc    Yjs array "chat" for trash talk (merges, never conflicts)
+-->
+<script type="application/json" id="bantay-schema">
+{
+  "encryption": "e2e",
+  "state": {
+    "title":   { "type": "string", "default": "Picks Pool" },
+    "season":  { "type": "string", "default": "" },
+    "players": { "type": "array",  "default": [] },
+    "weeks":   { "type": "array",  "default": [] }
+  },
+  "log": {
+    "pick": { "fields": {
+      "player": { "type": "string", "default": "" },
+      "game":   { "type": "string", "default": "" },
+      "team":   { "type": "string", "default": "" },
+      "at":     { "type": "number", "default": 0 }
+    } }
+  }
+}
+</script>
+<style>
+  :root { --bg: #f6f4ee; --fg: #1d1c1a; --muted: #6c685f; --line: #dcd6c9; --card: #fff; --accent: #2f5d50; --win: #d9efe3; --loss: #f6dcd9; --pick: #2f5d50; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #131210; --fg: #eeeae1; --muted: #a39e93; --line: #33302a; --card: #1c1b18; --accent: #86c4ad; --win: #1f3a2e; --loss: #45231f; --pick: #86c4ad; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 96px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 900px) { main { grid-template-columns: minmax(0, 1fr) 300px; } }
+  header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; }
+  h1 { font-size: 24px; margin: 0; } .season { color: var(--muted); }
+  h2 { font-size: 15px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  select, input { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); font: inherit; min-width: 0; }
+  button { cursor: pointer; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; background: var(--bg); color: var(--fg); font: inherit; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+  button:disabled { cursor: default; opacity: .55; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+  .matchup { display: flex; gap: 6px; align-items: center; }
+  .team { min-width: 52px; text-align: center; }
+  .team.mine { background: var(--pick); color: var(--bg); border-color: var(--pick); font-weight: 600; }
+  .team.won { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .cell.win { background: var(--win); } .cell.loss { background: var(--loss); }
+  .kick { color: var(--muted); font-size: 12px; }
+  .muted { color: var(--muted); }
+  .standings td:last-child, .standings th:last-child { text-align: right; }
+  .chat { display: flex; flex-direction: column; gap: 8px; }
+  .msgs { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; }
+  .msg b { margin-right: 6px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .row > input { flex: 1 1 120px; }
+  .admin { grid-column: 1 / -1; }
+  .admin .grid { display: grid; gap: 16px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .empty { color: var(--muted); padding: 24px 0; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="title">Picks Pool</h1>
+    <span class="season" id="season"></span>
+  </header>
+
+  <section class="card">
+    <div class="toolbar">
+      <label>Week <select id="week" aria-label="Week"></select></label>
+      <label>I am <select id="me" aria-label="Player"></select></label>
+    </div>
+    <div class="scroll"><table id="board"></table></div>
+    <div id="boardEmpty" class="empty" hidden></div>
+  </section>
+
+  <aside style="display:grid; gap:16px; align-content:start; min-width:0">
+    <section class="card">
+      <h2>Standings</h2>
+      <table class="standings" id="standings"></table>
+    </section>
+    <section class="card chat">
+      <h2>Trash talk</h2>
+      <div class="msgs" id="msgs"></div>
+      <form class="row" id="chatForm"><input id="chatText" placeholder="Say something" maxlength="300" aria-label="Message"><button class="primary">Send</button></form>
+    </section>
+  </aside>
+
+  <section class="card admin" id="admin" hidden>
+    <h2>Commissioner</h2>
+    <div class="grid">
+      <form id="setupForm">
+        <div class="row"><input id="titleIn" placeholder="Pool name" aria-label="Pool name"><input id="seasonIn" placeholder="Season" aria-label="Season"></div>
+        <div class="row" style="margin-top:6px"><button>Save names</button></div>
+      </form>
+      <form id="playerForm" class="row"><input id="playerIn" placeholder="Add player" aria-label="Player name"><button>Add</button></form>
+      <form id="weekForm" class="row"><input id="weekIn" placeholder="Week label (e.g. Week 1)" aria-label="Week label"><button>Add week</button></form>
+      <form id="gameForm">
+        <div class="row"><input id="awayIn" placeholder="Away" aria-label="Away team" size="5"><input id="homeIn" placeholder="Home" aria-label="Home team" size="5"></div>
+        <div class="row" style="margin-top:6px"><input id="kickIn" type="datetime-local" aria-label="Kickoff"><button>Add game</button></div>
+      </form>
+    </div>
+  </section>
+</main>
+<script type="module">
+import { bantay } from "/_bantay/client.js";
+
+const $ = (s) => document.querySelector(s);
+const uid = () => crypto.randomUUID().slice(0, 8);
+const ui = { week: null, me: null };
+try { ui.me = localStorage.getItem("picks-me"); } catch {}
+
+const el = (tag, props = {}, ...kids) => {
+  const n = Object.assign(document.createElement(tag), props);
+  for (const k of kids) n.append(k);
+  return n;
+};
+
+/** Effective picks: latest entry per player+game made before kickoff. */
+function picks() {
+  const games = new Map();
+  for (const w of bantay.state.weeks) for (const g of w.games) games.set(g.id, g);
+  const out = new Map();
+  for (const e of bantay.log) {
+    if (e.type !== "pick") continue;
+    const g = games.get(e.data.game);
+    if (!g || (g.kickoff && e.data.at >= Date.parse(g.kickoff))) continue;
+    out.set(e.data.player + "|" + e.data.game, e.data.team);
+  }
+  return out;
+}
+
+const locked = (g) => !!g.kickoff && Date.now() >= Date.parse(g.kickoff);
+
+function render() {
+  const s = bantay.state;
+  $("#title").textContent = s.title;
+  document.title = s.title;
+  $("#season").textContent = s.season;
+  $("#admin").hidden = !bantay.canWrite;
+  $("#chatForm").hidden = !bantay.canWrite;
+
+  // week + player selectors
+  if (!s.weeks.some((w) => w.id === ui.week)) ui.week = s.weeks.at(-1)?.id ?? null;
+  $("#week").replaceChildren(...s.weeks.map((w) => el("option", { value: w.id, textContent: w.label, selected: w.id === ui.week })));
+  $("#me").replaceChildren(el("option", { value: "", textContent: "—" }), ...s.players.map((p) => el("option", { value: p, textContent: p, selected: p === ui.me })));
+
+  const p = picks();
+  const week = s.weeks.find((w) => w.id === ui.week);
+  const board = $("#board");
+  const empty = $("#boardEmpty");
+  if (!week || !s.players.length) {
+    board.replaceChildren();
+    empty.hidden = false;
+    empty.textContent = bantay.canWrite ? "Add players and a week below to get started." : "Nothing here yet.";
+  } else {
+    empty.hidden = true;
+    const head = el("tr", {}, el("th", { textContent: "Game" }), ...s.players.map((pl) => el("th", { textContent: pl })));
+    const rows = week.games.map((g) => {
+      const mine = ui.me && p.get(ui.me + "|" + g.id);
+      const canPick = bantay.canWrite && ui.me && !locked(g) && !g.winner;
+      const teamBtn = (t) => {
+        const b = el("button", { className: "team" + (mine === t ? " mine" : "") + (g.winner === t ? " won" : ""), textContent: t, disabled: !canPick });
+        b.onclick = () => bantay.append("pick", { player: ui.me, game: g.id, team: t, at: Date.now() });
+        return b;
+      };
+      const kick = g.kickoff ? new Date(g.kickoff).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" }) : "";
+      const first = el("td", {}, el("div", { className: "matchup" }, teamBtn(g.away), el("span", { className: "muted", textContent: "@" }), teamBtn(g.home)), el("div", { className: "kick", textContent: kick + (locked(g) ? " · locked" : "") }));
+      if (bantay.canWrite) {
+        const win = el("select", { ariaLabel: "Winner" }, el("option", { value: "", textContent: "winner…" }), ...[g.away, g.home].map((t) => el("option", { value: t, textContent: t, selected: g.winner === t })));
+        win.onchange = () => setWinner(g.id, win.value || null);
+        first.append(win);
+      }
+      return el("tr", {}, first, ...s.players.map((pl) => {
+        const pick = p.get(pl + "|" + g.id);
+        // Hide others' picks until kickoff so nobody copies.
+        const show = pick && (pl === ui.me || locked(g) || g.winner);
+        return el("td", { className: "cell" + (g.winner && pick ? (pick === g.winner ? " win" : " loss") : ""), textContent: show ? pick : pick ? "✓" : "" });
+      }));
+    });
+    board.replaceChildren(el("thead", {}, head), el("tbody", {}, ...rows));
+  }
+
+  // standings: one point per correct pick, all weeks
+  const score = Object.fromEntries(s.players.map((pl) => [pl, 0]));
+  for (const w of s.weeks) for (const g of w.games) if (g.winner) for (const pl of s.players) if (p.get(pl + "|" + g.id) === g.winner) score[pl]++;
+  const ranked = Object.entries(score).sort((a, b) => b[1] - a[1]);
+  $("#standings").replaceChildren(...ranked.map(([pl, n], i) => el("tr", {}, el("td", { textContent: `${i + 1}. ${pl}` }), el("td", { textContent: n }))));
+}
+
+const update = (fn) => bantay.save((s) => { fn(s); return s; }).catch((e) => alert(e.message));
+function setWinner(gameId, team) {
+  update((s) => { for (const w of s.weeks) for (const g of w.games) if (g.id === gameId) g.winner = team; });
+}
+
+$("#week").onchange = (e) => { ui.week = e.target.value; render(); };
+$("#me").onchange = (e) => { ui.me = e.target.value || null; try { localStorage.setItem("picks-me", ui.me || ""); } catch {} render(); };
+
+$("#setupForm").onsubmit = (e) => {
+  e.preventDefault();
+  const title = $("#titleIn").value.trim();
+  const season = $("#seasonIn").value.trim();
+  update((s) => { if (title) s.title = title; if (season) s.season = season; });
+};
+$("#playerForm").onsubmit = (e) => {
+  e.preventDefault();
+  const name = $("#playerIn").value.trim();
+  if (!name) return;
+  $("#playerIn").value = "";
+  update((s) => { if (!s.players.includes(name)) s.players.push(name); });
+};
+$("#weekForm").onsubmit = (e) => {
+  e.preventDefault();
+  const label = $("#weekIn").value.trim() || `Week ${bantay.state.weeks.length + 1}`;
+  $("#weekIn").value = "";
+  const id = uid();
+  ui.week = id;
+  update((s) => { s.weeks.push({ id, label, games: [] }); });
+};
+$("#gameForm").onsubmit = (e) => {
+  e.preventDefault();
+  const away = $("#awayIn").value.trim().toUpperCase();
+  const home = $("#homeIn").value.trim().toUpperCase();
+  const kick = $("#kickIn").value;
+  if (!away || !home || !ui.week) return;
+  $("#awayIn").value = $("#homeIn").value = "";
+  const weekId = ui.week;
+  update((s) => {
+    const w = s.weeks.find((x) => x.id === weekId);
+    if (w) w.games.push({ id: uid(), away, home, kickoff: kick ? new Date(kick).toISOString() : null, winner: null });
+  });
+};
+
+// chat (Yjs)
+const ydoc = await bantay.doc();
+const chat = ydoc.getArray("chat");
+const renderChat = () => {
+  const box = $("#msgs");
+  box.replaceChildren(...chat.toArray().slice(-100).map((m) => el("div", { className: "msg" }, el("b", { textContent: m.who }), m.text)));
+  box.scrollTop = box.scrollHeight;
+};
+chat.observe(renderChat);
+$("#chatForm").onsubmit = (e) => {
+  e.preventDefault();
+  const text = $("#chatText").value.trim();
+  if (!text) return;
+  $("#chatText").value = "";
+  chat.push([{ who: ui.me || "anon", text, at: Date.now() }]);
+};
+
+bantay.on("state", render);
+bantay.on("log", render);
+bantay.on("role", render);
+await bantay.ready;
+render();
+renderChat();
+setInterval(render, 60_000); // kickoff locks
+</script>
+</body>
+</html>

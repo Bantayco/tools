@@ -26,3 +26,26 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  artifact-server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifact-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: artifact-server/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: artifact-server-report
+          path: artifact-server/test-results/
+          retention-days: 7

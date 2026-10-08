@@ -1,0 +1,33 @@
+# Bantay Artifact Server — a standalone Worker (NOT part of the Pages site).
+# Deploy from this folder:  npx wrangler deploy
+# Secrets (set once):       npx wrangler secret put PUBLISH_KEY
+#                           npx wrangler secret put ADMIN_KEY
+name = "bantay-artifacts"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# Serve on its own origin so its cookies never mix with tools.bantay.co.
+# routes = [{ pattern = "artifacts.bantay.co", custom_domain = true }]
+
+# Static files: the browser client, admin page, vendored libs.
+# run_worker_first lets the Worker add security headers to every response.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+html_handling = "none"
+not_found_handling = "none"
+
+# One SessionDO per page UUID (state, passcode hashes, tokens, live sockets).
+# One RegistryDO ("global") for published page versions and the session index.
+[[durable_objects.bindings]]
+name = "SESSION"
+class_name = "SessionDO"
+
+[[durable_objects.bindings]]
+name = "REGISTRY"
+class_name = "RegistryDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SessionDO", "RegistryDO"]

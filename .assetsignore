@@ -7,3 +7,6 @@ package-lock.json
 .claude
 .dev.vars
 .assetsignore
+
+# The artifact server is a separate Worker, deployed from its own folder.
+artifact-server

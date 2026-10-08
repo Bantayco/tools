@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Artifact Admin</title>
+<style>
+  :root { --bg: #f7f5f0; --fg: #1c1b19; --muted: #6b675e; --line: #ddd8cc; --card: #fff; --accent: #2f5d50; --bad: #b3261e; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141311; --fg: #eeeae1; --muted: #a29d92; --line: #34312b; --card: #1d1c19; --accent: #7fbfa8; --bad: #ff8a80; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; } h2 { font-size: 16px; margin: 28px 0 8px; }
+  p.sub { color: var(--muted); margin: 0 0 20px; }
+  .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  input, textarea, select { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); font: inherit; }
+  textarea { min-height: 140px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  button { cursor: pointer; border: 0; border-radius: 8px; padding: 7px 12px; background: var(--accent); color: var(--bg); font-weight: 600; font: inherit; }
+  button.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+  .scroll { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; }
+  .pill.cur { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .msg { white-space: pre-wrap; font-size: 13px; margin-top: 8px; }
+  .msg.bad { color: var(--bad); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Artifact Admin</h1>
+  <p class="sub">Apps, versions and sessions. Keys stay in this tab only (sessionStorage).</p>
+
+  <section class="keys">
+    <div><label for="adminKey">Admin key</label><input id="adminKey" type="password" autocomplete="off"></div>
+    <div><label for="publishKey">Publish key (to publish, promote, roll back)</label><input id="publishKey" type="password" autocomplete="off"></div>
+    <div class="row" style="align-self:end"><button id="load">Load</button></div>
+  </section>
+  <div id="err" class="msg bad"></div>
+
+  <h2>Apps</h2>
+  <div class="scroll"><table id="apps"><thead><tr><th>App</th><th>Current</th><th>Versions</th><th>Sessions</th><th>Updated</th><th></th></tr></thead><tbody></tbody></table></div>
+
+  <section id="versionsBox" hidden>
+    <h2 id="versionsTitle">Versions</h2>
+    <div class="scroll"><table id="versions"><thead><tr><th>#</th><th>Hash</th><th>Note</th><th>Size</th><th>Encryption</th><th>Created</th><th></th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <h2>Publish a version</h2>
+  <div class="card">
+    <div class="row" style="margin-top:0">
+      <div style="flex:1 1 160px"><label for="pubApp">App</label><input id="pubApp" placeholder="picks"></div>
+      <div style="flex:3 1 260px"><label for="pubNote">Note</label><input id="pubNote" placeholder="What changed"></div>
+    </div>
+    <div style="margin-top:8px"><label for="pubFile">HTML file</label><input id="pubFile" type="file" accept=".html,text/html"></div>
+    <div class="row"><label style="display:flex;gap:6px;align-items:center;font-weight:400;margin:0"><input id="pubPromote" type="checkbox" style="width:auto" checked> Promote now</label><button id="publish">Publish</button></div>
+    <div id="pubMsg" class="msg"></div>
+  </div>
+
+  <h2>Sessions</h2>
+  <div class="row" style="margin:0 0 8px"><select id="sessApp" style="max-width:220px"><option value="">All apps</option></select></div>
+  <div class="scroll"><table id="sessions"><thead><tr><th>UUID</th><th>App</th><th>Enc</th><th>Created</th><th>Last active</th><th></th></tr></thead><tbody></tbody></table></div>
+  <div id="detail" class="card" style="margin-top:12px" hidden><pre></pre></div>
+</main>
+<script type="module">
+const $ = (s) => document.querySelector(s);
+const keys = { admin: $("#adminKey"), publish: $("#publishKey") };
+for (const [k, el] of Object.entries(keys)) {
+  try { el.value = sessionStorage.getItem("bantay-" + k) || ""; } catch {}
+  el.addEventListener("change", () => { try { sessionStorage.setItem("bantay-" + k, el.value); } catch {} });
+}
+const when = (t) => (t ? new Date(t).toLocaleString() : "—");
+const short = (h) => (h ? h.slice(0, 12) : "—");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+async function call(kind, path, body) {
+  const key = keys[kind].value.trim();
+  const res = await fetch(path, {
+    method: body ? "POST" : "GET",
+    headers: { authorization: "Bearer " + key, ...(body ? { "content-type": "application/json" } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((data.error || res.statusText) + (data.errors ? "\n" + data.errors.join("\n") : ""));
+  return data;
+}
+
+async function loadApps() {
+  const apps = await call("admin", "/api/admin/apps");
+  $("#apps tbody").innerHTML = apps.map((a) => `<tr>
+    <td><a href="/${esc(a.name)}" target="_blank" rel="noreferrer">${esc(a.name)}</a></td>
+    <td class="mono">${short(a.current)}</td><td>${a.versions}</td><td>${a.sessions}</td><td>${when(a.updated)}</td>
+    <td><button class="ghost" data-versions="${esc(a.name)}">Versions</button></td></tr>`).join("") || `<tr><td colspan="6">No apps yet.</td></tr>`;
+  const sel = $("#sessApp");
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">All apps</option>` + apps.map((a) => `<option>${esc(a.name)}</option>`).join("");
+  sel.value = cur;
+}
+
+async function loadVersions(app) {
+  const versions = await call("publish", `/api/apps/${app}/versions`);
+  $("#versionsBox").hidden = false;
+  $("#versionsTitle").textContent = `Versions of ${app}`;
+  $("#versions tbody").innerHTML = versions.map((v) => `<tr>
+    <td>${v.seq}</td><td class="mono">${short(v.hash)} ${v.current ? `<span class="pill cur">current</span>` : ""}</td>
+    <td>${esc(v.note)}</td><td>${(v.size / 1024).toFixed(1)} KB</td><td>${esc(v.schema.encryption)}</td><td>${when(v.created)}</td>
+    <td>${v.current ? "" : `<button class="ghost" data-promote="${esc(app)}" data-hash="${v.hash}">${v.seq < versions.find((x) => x.current)?.seq ? "Roll back" : "Promote"}</button>`}
+      <a href="/${esc(app)}/v/${v.hash}" target="_blank" rel="noreferrer">open</a></td></tr>`).join("");
+}
+
+async function loadSessions() {
+  const app = $("#sessApp").value;
+  const rows = await call("admin", "/api/admin/sessions" + (app ? "?app=" + encodeURIComponent(app) : ""));
+  $("#sessions tbody").innerHTML = rows.map((s) => `<tr>
+    <td class="mono"><a href="/${esc(s.app)}?id=${s.id}" target="_blank" rel="noreferrer">${s.id}</a></td>
+    <td>${esc(s.app)}</td><td>${esc(s.enc)}</td><td>${when(s.created)}</td><td>${when(s.last_active)}</td>
+    <td><button class="ghost" data-info="${s.id}">Info</button> <button class="ghost" data-claim="${s.id}">Mint owner link</button></td></tr>`).join("")
+    || `<tr><td colspan="6">No sessions.</td></tr>`;
+}
+
+async function load() {
+  $("#err").textContent = "";
+  try { await loadApps(); await loadSessions(); } catch (e) { $("#err").textContent = e.message; }
+}
+
+$("#load").onclick = load;
+$("#sessApp").onchange = () => loadSessions().catch((e) => ($("#err").textContent = e.message));
+
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  try {
+    if (t.dataset.versions) await loadVersions(t.dataset.versions);
+    if (t.dataset.promote) {
+      if (!confirm(`Point ${t.dataset.promote} at ${short(t.dataset.hash)}? Open pages will reload.`)) return;
+      await call("publish", `/api/apps/${t.dataset.promote}/promote`, { version: t.dataset.hash });
+      await loadApps(); await loadVersions(t.dataset.promote);
+    }
+    if (t.dataset.info) {
+      const info = await call("admin", `/api/admin/s/${t.dataset.info}`);
+      $("#detail").hidden = false;
+      $("#detail pre").textContent = JSON.stringify(info, (k, v) => (["created", "last_seen", "lockedUntil"].includes(k) && v ? new Date(v).toISOString() : v), 2);
+    }
+    if (t.dataset.claim) {
+      if (!confirm("Mint a single-use owner link (valid 24h) for this session?")) return;
+      const r = await call("admin", `/api/admin/s/${t.dataset.claim}/claim`, {});
+      $("#detail").hidden = false;
+      $("#detail pre").textContent = "Single-use owner link (open on the device, then tap Claim):\n\n" + r.url +
+        "\n\nEncrypted pages still need a passcode on that device to decrypt.";
+    }
+  } catch (err) {
+    $("#err").textContent = err.message;
+  }
+});
+
+$("#publish").onclick = async () => {
+  const msg = $("#pubMsg");
+  msg.className = "msg";
+  msg.textContent = "";
+  try {
+    const app = $("#pubApp").value.trim();
+    const file = $("#pubFile").files[0];
+    if (!app || !file) throw new Error("App name and HTML file are required.");
+    const r = await call("publish", `/api/apps/${app}/versions`, { html: await file.text(), note: $("#pubNote").value, promote: $("#pubPromote").checked });
+    msg.textContent = `${r.created ? "Published" : "Already published"} ${short(r.hash)}${r.promoted ? " and promoted." : "."}`;
+    await loadApps(); await loadVersions(app);
+  } catch (e) {
+    msg.className = "msg bad";
+    msg.textContent = e.message;
+  }
+};
+
+if (keys.admin.value) load();
+</script>
+</body>
+</html>
